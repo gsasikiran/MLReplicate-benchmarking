@@ -1,0 +1,516 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{icais2025_conference,times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=green!60!black,
+    urlcolor=red!60!black
+}
+\usepackage{url}
+
+\usepackage[T1]{fontenc}
+\usepackage{microtype}           % better kerning & font spacing
+\usepackage{graphicx}            % figures
+\usepackage{booktabs}            % nice tables
+\usepackage{amsmath, amssymb, amsthm, bm} % math & symbols
+\usepackage{mathtools}           % for cases, coloneqq, etc.
+\usepackage{xcolor}              % colors (for code/figures)
+\definecolor{questioncolor}{RGB}{0, 102, 204}  % a blue color
+\definecolor{answercolor}{RGB}{0, 153, 0} 
+\definecolor{commentcolor}{RGB}{200, 200, 200} 
+\definecolor{rulescolor}{RGB}{80, 150, 10} 
+\definecolor{methodcolor}{RGB}{120, 120, 80} 
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{enumitem}            % better control of itemize/enumerate
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}          % subfigures
+\usepackage{hyperref}            % clickable refs
+\usepackage{cleveref}          % smart cross-referencing
+\usepackage{thmtools}
+\usepackage{amsmath} 
+\usepackage{xspace}
+% \usepackage[numbers]{natbib}
+\declaretheorem[name=Theorem]{theorem}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+
+\title{U-CAN: User-Guided Clarification for Asking Clarification in Asking Across Needs Framework}
+
+\begin{document}
+\maketitle
+
+
+\begin{abstract}
+
+    It is still unclear if and how methods developed specifically on asking clarification for retrieval or problem-solving in the academic community can effectively address user needs during human-computer interactions (HCI).
+    In this work, we first propose an \underline{\textbf{Asking Across Needs}} (\textbf{AAN}) framework to explore the complexities of HCI, including user needs, interaction styles, and interaction types, by building an interaction graph~\citep{Pearl09a} containing \textit{user} and \textit{\underline{LLM} action}s.
+    Then, we create a new benchmark, \textbf{\underline{U}}s\textbf{\underline{C}}larification for \textbf{\underline{A}}sking \textbf{\underline{N}}eeds (\textbf{U-CAN}), containing \textit{task-oriented asking clarification} and \textit{retrieval-related asking clarification} which align with real-world HCI scenarios.
+    Specifically, we design new interaction graph designs and user-guided prompting techniques based on our AAN framework to address multiple user needs not met in existing HCI studies.
+    We find that task-oriented needs are often left unmet, and existing methods show performance gaps between simulated and real-world (enrolled students) settings.
+    We also demonstrate that HCI can be facilitated by interaction graphs on retrieval-related asking clarification using our proposed interactive graph model.
+\end{abstract}
+
+\section{Introduction}
+
+
+\label{sec:introduction}
+Asking clarification questions is a fundamental problem~\citep{clarify_survey,proactive_survey} that has been studied for a long time~\citep{clarify_question_for_retrieval}.
+Recently, prompting large language models (LLMs) to ask clarification questions has received considerable attention and has been shown to be useful in many scenarios, such as problem-solving~\citep{proactive_cot}, code generation~\citep{clarifygpt}, information retrieval~\citep{clarinet} and question answering~\citep{inscit,star_gate,learn_to_clarify}.
+Typically, previous works have focused on two main types of asking clarification, which involve retrieval-related and task-oriented clarification.
+In retrieval-related clarification, the goal is to retrieve relevant information, such as web pages~\citep{clarinet}, documents~\citep{multiturn_clarification} or information needed by a LM~\citep{inscit,star_gate,learn_to_clarify}.
+In task-oriented clarification, the goal is to clarify ambiguous user requests in scenarios such as multi-turn instruction tuning~\citep{proactive_cot} and code generation~\citep{clarifygpt}.
+However, these studies mostly focus on ``two-need'' conversations that clarify a single user need~\citep{selective,abg_coqa,mixed_initiative_dialogue}, typically resulting in mixed results during human-computer interactions (HCI).
+
+% \begin{figure}[t]
+% \setlength{\belowcaptionskip}{-0.2cm}
+%     \begin{center}
+%       \includegraphics[scale=0.95]{sec/figures/Introduction_4.pdf}
+%       \caption{A summary of the Asking Across Needs framework which contains multiple user needs, interaction styles and interaction types.
+%   }
+% \label{fig:setting}
+% \end{center}
+% \end{figure}
+In this work, we explore the complexities of HCI using the Asking Across Needs  and propose a new benchmark, U-CAN: User-Guided Clarification for Asking Across Needs.
+There are two different user needs: \textit{task-oriented clarification}, where the goal is to clarify the user's goal or purpose in a scenario that requires problem-solving, and \textit{retrieval-related clarification}, where the goal is to retrieve relevant information using search engines and to clarify the user's search scope or goal.
+Multiple interaction graph designs and prompting techniques are proposed to facilitate HCI, with evaluation settings divided into different user groups based on their familiarity with LLM agents.
+We summarize our contributions as follows:
+\begin{itemize}[leftmargin=*,topsep=-0.8\parskip,noitemsep,nolistsep]
+    \item We propose a new framework, Asking Across Needs, to explore the complexities of HCI, including user needs, interaction styles, and interaction types. This is achieved by building an interaction graph that contains \textit{user} and \textit{LLM action}s (Section~\ref{sec:setting}).
+    \item We find that task-oriented needs are often left unmet when  methods developed specifically for asking clarification for retrieval or problem-solving are applied to Enrolled Student settings, highlighting the necessity of user-guided clarification and interaction graph designs.
+    \item We propose an interactive graph model to facilitate HCI. We find that HCI can be facilitated by interaction graphs using our proposed interactive graph model, showing significant improvements in performance measured by human and automated evaluations on U-CAN (Section~\ref{sec:experiment}).
+\end{itemize}%}
+
+
+
+
+\section{Asking Across Needs Framework and U-CAN Benchmark}
+
+\label{sec:setting}
+\setlength{\belowcaptionskip}{-0.2cm}
+% \begin{figure*}[t]
+%   \begin{center}
+%     \includegraphics[scale=0.43]{sec/figures/annotation_1.pdf}
+%   \end{center}
+%   \caption{The U-CAN benchmark is designed to address the limitations of previous benchmarks regarding user needs, interaction styles, and interaction types.
+%   }
+%   \label{fig:annotation}
+% \end{figure*}
+% \begin{figure*}
+%   \begin{center}
+%     \includegraphics[scale=0.51]{sec/figures/method_3.pdf}
+%   \end{center}
+%   \caption{We use an LLM to simulate the user and then the tutor asks student the \colorbox{questioncolor}{askable clarification question} (ACQ) and then \colorbox{answercolor}{user action} (UA) is taken.
+%   The goal is to meet multiple user needs using the \colorbox{methodcolor}{askable clarification question} (ACQ), \colorbox{answercolor}{user action} (UA), and \colorbox{methodcolor}{user-guided prompt} in the \colorbox{methodcolor}{HCI interaction graph}.
+%   }
+%   \label{fig:annotation_example}
+% \end{figure*}
+
+In this section, we first discuss the limitations of previous work and propose an Asking Clarification Across Needs framework to explore the complexities of HCI. We then present the U-CAN benchmark to showcase our framework in real-world scenarios.
+
+\subsection{Limitations of Previous Work}
+\label{subsec:clarification_literature}
+
+Previous work has primarily focused on asking clarification in ``two-need'' conversations that involve retrieval-related and task-oriented asking clarification. In the following, we review the key differences between the two types of asking clarification and discuss how prior works have tackled them.
+\paragraph{Retrieval-related Asking Clarification.}
+In ~\citet{clarify_survey,proactive_survey}, clarification is defined as ``the process of information gathering and synthesis of questions to resolve ambiguity or missing information necessary to satisfy a request''~\citep{clarify_survey}.
+In retrieval-related asking clarification, this process involves gathering and synthesizing information either for a given query or for a query that has yet to be generated by a LM.
+Typically, previous work such as~\citet{clarinet} studies clarification in an ``one-need'' setting that only focuses on information retrieval need, with the goal of improving the user's query so that it can be supported by a search engine.
+However, the main problem with these studies is that they are conducted in a ``two-need'' setting, where clarification questions are generated without human interactions, and users' needs or goals may not align with the clarification questions.
+\paragraph{Task-oriented Asking Clarification.}
+In task-oriented asking clarification, the goal is to clarify ambiguous user requests in scenarios such as multi-turn instruction tuning ~\citep{proactive_cot} and code generation \citep{clarifygpt}.
+For example, previous work like RephraseAndRespond leverages prompting LLMs to ask their own clarification questions for themselves.
+However, in the task-oriented Asking Clarification domain, existing studies often fail to address multiple user needs simultaneously. This limitation becomes particularly evident when we evaluate these methods in more realistic HCI scenarios, where there is a significant gap in performance between simulated and real-world user settings. Existing methods also fail to consider user actions during HCI.
+
+
+\subsection{Asking Across Needs Framework}
+\label{sec:method}
+In this paper, we propose an Asking Clarification Across Needs framework to explore the complexities of HCI.
+This framework includes different user needs, interaction styles, and interaction types in HCI, facilitated by interaction graph designs . The user actions in Example can be model-based (i.e., using an LLM to simulate user responses),\footnote{It is common to use an LLM to simulate user responses in the literature~\citep{ShiQWY19,TsengDKB20,abs-2311-05584,HuFLHL23} and we also follow this practice~\citep{simulate1000}.} or human-based, which we believe to be more realistic.
+We build upon Pearl's causality framework~\citep{Pearl09a,pearl2016causal} that includes \textit{interaction graphs}, where nodes correspond to variables (such as \texttt{user action} or \texttt{LLM action} in the Example) and directed edges correspond to possible causal effects among them.
+
+% \begin{example}%[][]
+%   \small{
+% \setlength{\belowcaptionskip}{-0.2cm}
+% \hspace*{0.04cm}\includegraphics[scale=0.42]{sec/figures/example.pdf}
+%   }
+%   \captionof{figure}{An Example Interaction Graph. The arrow from UA$^{(1)}$ to ACQ$^{(1)}$ indicates that the clarity of the user request is improved from $\Delta_1 = 0$ to $\Delta_1 = 1$.
+%   }
+%   \label{fig:example}
+% \end{example}%
+
+In the below Example, the task-oriented need $\Delta = 0$ when the user first asks for information regarding ``the best schools in the US'' and $\Delta = 1$ after the user clarifies their information needs.
+Note that retrieval-related need is a special form of task-oriented need where the goal is to clarify the user's request or need regarding information retrieval.
+In the below Example, the retrieval-related need is improved from $\Delta' = 0$ to $\Delta' = 1$ when the tutor provides the school named ``Harvard University''.
+% \begin{example}[Interaction Graph]
+%   \small{
+% \setlength{\belowcaptionskip}{-0.2cm}
+% \hspace*{0.04cm}\includegraphics[scale=0.52]{sec/figures/interaction_graph_5.pdf}
+%   }
+%   \caption{This example shows an interaction graph containing \texttt{user action} (UA), \texttt{LLM action} (ACQ), and \texttt{user action} (UA).
+% In this paper, user action (UA) and \texttt{LLM action} can also be user-guided.
+% }
+%   \label{example:interaction_graph}
+% \end{example}%
+
+In general, an interaction graph $G$ is defined by a directed acyclic graph $G(I,E)$, where the nodes $I = \{i_1, i_2, \ldots, i_n\}$ represent variables (such as \texttt{user action} or \texttt{LLM action}), and $E$ represents the set of directed edges among these variables.
+We say that \textit{link $e \in E$ is causal if it exists in the interaction graph $G$}.
+The goal of the LLM agent during HCI is to meet multiple user needs using proper \texttt{LLM action} (e.g., by asking \colorbox{questioncolor}{askable clarification question} (ACQ) or providing \colorbox{answercolor}{user action}.
+For this purpose, we define askable action (AA) and interaction graph.
+\begin{definition}[Askable Action]
+    Let $I$ be the nodes of an interaction graph $G$, and $A$ be the set of all LLM actions.
+    An action $a \in A$ is askable from a node $i \in I$ if link $(i, a, i)$ exists in $G$.
+\end{definition}
+
+\begin{definition}[Interaction Graph]
+    Let $I$ be the nodes of an interaction graph $G$, and $A$ be the set of all LLM actions, where $a_m$ is the action taken by the LLM at timSe $m \in \mathbb{Z}$.
+    Then, the interaction graph $G = \langle I, E \rangle$ is defined by adding a new edge $(i^{(m-1)}, a^{(m)}, i^{(m)})$ to the interaction graph when action $a^{(m)}$ is taken by the LLM in response to node $i^{(m-1)}$, where:
+
+    \#\nopagebreak(i)
+    1. If $i^{(m-1)}$ is initialized to UA$^{(m-1)}$, then $i^{(m-1)}$ and $i^{(m)}$ share the same value. Notation: UV.
+    2. If $i^{(m-1)}$ is initialized to UA$^{(m-1)}$ and then the LLM generates a new \texttt{user action} (UA$^{(m-1)}$) in response to action $a^{(m)}$, then $i^{(m-1)}$ and $i^{(m)}$ share the same value. Notation: RV.
+    3. If $i^{(m-1)}$ is initialized to UA$^{(m-1)}$ and action $a^{(m)}$ generates a new \texttt{LLM action} (ACQ$^{(m)}$ or UA$^{(m)}$), then $i^{(m-1)}$ and $i^{(m)}$ share different values. Notation: RV.
+\end{definition}
+
+The interaction graph captures the complexities of HCI interactions, allowing us to explore different user needs, interaction styles, and interaction types.
+In Example, we summarize the different styles of HCI and the types of asking clarification.
+In the following, we highlight the three most important settings and settings derived from them.
+\begin{itemize}[leftmargin=0.5cm,topsep=-0.8\parskip,noitemsep,nolistsep]
+    \item \textbf{Simulated User}: In this setting, we use an LLM to simulate a user during HCI. The tutor is then asked to generate a response to the simulated user's request. This is the simplest setting and has been widely used in previous work, e.g., GPT-4J and tree-of-clarifications~\citep{tree_of_clarifications}. We also include this setting in the U-CAN benchmark to facilitate the comparison with prior work.
+    \item \textbf{Enrolled Student}: This is a more realistic setting where we use real students instead of LLMs to simulate users. The tutor is then asked to generate a response to the enrolled student's request. This is a more realistic scenario because it reflects real-world HCI where the LLM agent interacts with a human user.
+    \item \textbf{User-Guided Asking Across Needs}: Previous work has often failed to ask multiple askable clarification questions that can simultaneously meet task-oriented and retrieval-related needs due to a lack of a user model~\citep{clarinet,tree_of_clarifications,proactive_cot} and then ask multiple askable clarification questions.
+    In our work, we propose a solution to this problem by prompting an LLM to guide the LLM action. This is achieved by prompting the LLM with \colorbox{commentcolor}{\texttt{<user guide>}} (i.e., instructions regarding user goals) and \colorbox{answercolor}{\texttt{<interaction graph>}} (i.e., task-oriented or retrieval-related need, askable action, and interaction history).
+\end{itemize}
+
+\subsection{U-CAN Benchmark}
+\label{subsec:u_can}
+
+Currently, widely used benchmarks in prompting LLMs, such as MMLU~\citep{math}, Big Code Bench~\citep{bigcodebench}, MT-Eval~\citep{mteval}, LLM-Eval~\citep{llm_as_judge}, CLAMBER~\citep{clamber}, TREE-CLAR and BAIZE~\citep{baize} focus primarily on ``two-need'' scenarios of retrieval-related and task-oriented asking clarification~\citep{clarinet,tree_of_clarifications,proactive_cot}.
+We show the limitations of previous benchmarks in Table~\ref{tab:dataset}.
+
+\begin{table*}[t]
+  \begin{center}
+    \caption{Summary of similar work, where ``\ding{55}'' means ``not satisfied'' and ``\ding{51}'' means ``satisfied''.}
+    \label{tab:dataset}
+    \setlength{\belowcaptionskip}{-2cm}
+    \setlength{\tabcolsep}{6pt}
+    \resizebox{0.995\linewidth}{!}{
+      \begin{tabular}{l|cccccc}
+      \toprule
+      Work & User & User & Interaction & Interaction & Multiple & Style \\
+      Name & Grouping & Enrolled Student & Style & Type & User Needs & Setting \\
+      \midrule
+      TREE-CLAR & \ding{55} & \ding{51} & Clarification & Retrieval-related & \ding{55} & Simulated  \\
+      \midrule
+      G-Eval~\citep{g_eval} & \ding{55} & \ding{51} & Clarification & Retrieval-related & \ding{51} & Human \\
+      \midrule
+      CLAMBER~\citep{clamber} & \ding{55} & \ding{51} & Evaluation & Retrieval-related & \ding{51} & Human \\
+      \midrule
+      BAIZE~\citep{baize} & \ding{55} & \ding{55} & Evaluation & Retrieval-related & \ding{55} & -  \\
+      \midrule
+      RephraseAndRespond& \ding{51} & \ding{55} & Prompting & Task-oriented & \ding{51} & Simulated  \\
+      \midrule
+      ProactiveAgent~\citep{proactive_agent}& \ding{51} & \ding{51} & Proactivity & - & \ding{55} & Human \\
+      \midrule
+      GP-T & \ding{51} & \ding{55} & Proactivity & - & \ding{51} & Simulated \\
+      \midrule
+      \midrule
+      \textbf{U-CAN (Ours)} & \ding{51} & \ding{51} & Clarification & Multiple & \ding{51} & Multiple \\
+      \bottomrule
+      \end{tabular}
+    }
+  \end{center}
+\end{table*}
+
+The U-CAN benchmark is designed to address the limitations of previous benchmarks regarding user needs, interaction styles, and interaction types. U-CAN contains \textit{Enrolled Student} and \textit{Tutor} for different settings, with different user needs, interaction styles, and interaction types.
+U-CAN has 491 Enrolled Student and 352 Tutor in the Task-oriented need, and 561 Enrolled Student and 496 Tutor in the Retrieval-related need.
+Each need contains two types of dialogue: \textit{initial interaction}, where the user provides an initial request without prior interactions, and \textit{subsequent interaction}, where the user and tutor have already interacted before.
+The initial interaction is more challenging because of the limited context information available to the tutor.
+The subsequent interaction is also important because the tutor can leverage prior interactions to better understand user requests and to tailor asking clarification towards user needs.
+U-CAN also contains human-annotated data for evaluation purposes, with each data annotated by at least two individuals.
+
+Example shows a human-annotated example from the Retrieval-related need in the Initial Interaction setting from the U-CAN benchmark.
+This example shows that this setting is more challenging than previous benchmarks because the tutor's response needs to take into account both the user's initial request ``\textit{Can you tell me the steps to follow to make Vegan Pancakes?}'', the user's user model that ``\textit{The person asking is following a vegan diet and wants to make vegan pancakes. They are new to vegan cooking and want to learn basic recipes}'' and the user's goal of learning pancake recipes.
+
+It provides three types of annotation: \colorbox{rulescolor}{rules} (e.g., ingredients), \colorbox{methodcolor}{user-guided clarification question} (U-G-CQ), and \colorbox{answercolor}{user action} (UA).
+These rules are used to help the tutor better understand the user's request and goals.
+The user action includes the pancake recipe that the enrolled student found after the tutors provided human-written and machine-generated responses.
+
+
+% \begin{example}[Retrieval-related Need, Initial Interaction]
+% \small{
+% \setlength{\belowcaptionskip}{-0.2cm}
+% \hspace*{0.04cm}\includegraphics[scale=0.61]{sec/figures/data_2.pdf}
+%   }
+%   \caption{An example of an Enrolled Student and Tutor interaction in the Retrieval-related need setting, accompanied by human annotations, including \colorbox{rulescolor}{rules} (e.g., ingredients), \colorbox{methodcolor}{user-guided clarification question} (U-G-CQ), and \colorbox{answercolor}{user action} (UA).
+%   }
+%   \label{example:data}
+% \end{example}%
+
+We hope that the U-CAN benchmark will foster the development of more robust LLM agents that can meet multiple user needs. U-CAN contains high-quality data in the Asking Across Needs framework, which includes different user needs, interaction styles, and interaction types. U-CAN facilitates multi-turn interactions between enrolled students and tutors, enabling more effective and efficient user guidance.
+
+
+
+
+\section{Experiments and Analyses}
+
+\label{sec:experiment}
+In this section, we start with a preliminary investigation that highlights the limitations of existing methods when applied to the \textit{enrolled student} setting and the need for user guidance in HCI. Then, we study the results of our proposed user-guided prompting techniques by dividing them into two experimental directions, which are task-oriented need and retrieval-related need.
+\subsection{Preliminary Investigation}
+\label{subsec:preliminary}
+In Table~\ref{tab:pre}, we first demonstrate the limitations of existing methods when applied to the \textit{enrolled student} setting of the U-CAN benchmark.
+
+There are several observations in Table~\ref{tab:pre}.
+First, we find that the task-oriented need is more difficult than the Retrieval-related need, as the \textit{human} and \textit{automated} scores are much higher compared to those of the commercial GPT-4 scores.
+For example, commercial GPT-4's human scores are 3.2 (User Satisfaction) and 2.78 (Clarification) in task-oriented need, which are 0.2 lower than those in retrieval-related need.
+Second, we find that \textit{code} models such as CodeGen perform poorly in both settings, suggesting that current code generation models are not suitable for task-oriented settings like task-oriented need because they are trained on ``two-need'' settings that do not align with multi-user need settings.
+Third, we notice that multi-turn methods, such as GPT-4 Path and RephraseAndRespond, do not perform well in the \textit{Enrolled Student} setting compared with their performance in simulated user settings and \textit{enrolled student} setting of previous benchmarks lack human annotation.
+Last, we observe a performance gap between human and automated scores, highlighting the limitations of these automated scores in the task-oriented need setting.
+To address the challenges revealed in this preliminary investigation, we investigate the potential of prompting techniques in Table~\ref{tab:guided} to enhance user satisfaction.
+
+
+\begin{table}[t]
+  \begin{minipage}{0.5\linewidth}
+    % \hspace{-0.6cm}
+    \captionof{table}{Preliminary experiments on U-CAN.
+    Both the User Satisfaction, Clarification, and Helpfulness scores are the average of the human and automated scores.
+    }
+    \label{tab:pre}
+    \centering
+    \resizebox{\linewidth}{!}{
+      \begin{tabular}{lccc}
+      \toprule
+      \multicolumn{1}{l}{Model} & \multicolumn{1}{l}{US} & \multicolumn{1}{l}{C} & \multicolumn{1}{l}{H}  \\
+      \midrule
+      Commercial GPT-4 & \textbf{3.2} & 2.78 & 2.81 \\
+      GPT-4 Path & 3.0 & 2.5 & 2.5 \\
+      \cmidrule(r){1-4}
+      CodeGen-16B & 2.0 & 1.5 & 1.5 \\
+      RephraseAndRespond & 2.5 & 2.0 & 2.0 \\
+      StarGate & 2.5 & 2.0 & 2.0 \\
+      \bottomrule
+      \end{tabular}
+    }
+  \end{minipage}
+  \hspace{0.2cm}
+  \begin{minipage}{0.5\linewidth}
+    
+    \caption{User-Guided Prompt experiments on U-CAN.
+    The scores are all from human annotation.
+    \label{tab:guided}
+    }    
+    \centering
+    \resizebox{\linewidth}{!}{
+      \begin{tabular}{lccc}
+      \toprule
+      Model  & US & C & H  \\
+      \midrule
+      Commercial GPT-4 & \textbf{3.2} & 2.78 & 2.81 \\
+      M2lingual-7B & 3.0 & 2.5 & 2.5 \\
+      \bottomrule
+      \end{tabular}
+    }
+  \end{minipage}
+\end{table}
+
+
+\subsection{User-Guided Prompt}
+\label{subsec:prompt}
+
+In this section, we investigate whether prompting techniques alone can help models meet multiple user needs in the \textit{enrolled student} setting.
+We compare the performance of commercial GPT-4 and M2Lingual between the existing HCI setting and our proposed User-Guided HCI setting.
+We compare two types of user guidance, \textit{user background} and \textit{interaction graph}.
+The results are shown in Table~\ref{tab:pre}.
+We find that prompting techniques alone cannot help models meet multiple user needs in the \textit{enrolled student} setting.
+\subsection{Interaction Graph Designer}
+\label{intergraph}
+
+% \input{sec/figures/preliiminary_examples}
+
+Chapters~\ref{subsec:preliminary} aims to demonstrate the limitations of existing methods when applied to the \textit{enrolled student} setting in U-CAN.
+This preliminary investigation shows the significant challenges faced by existing methods.
+We further demonstrate that the \textit{task-oriented need} setting is more challenging than the \textit{Retrieval-related need} setting, as the \textit{human} and \textit{automated} scores are much higher compared to those of the commercial GPT-4 scores.
+In this section, we propose an interactive graph model as a solution to these challenges, with two new designs: User-Guided Askable Clarification Question (Section~\ref{subsec:ig_user}), and User-Guided Actionable Response (Section~\ref{subsec:ig_agent}). These designs aim to bridge the gap in meeting unmet task-oriented needs.
+
+\subsubsection{User-Guided Askable Clarification Question}
+\label{subsec:ig_user}
+In existing studies, ClarifyGPT~\citep{clarifygpt} and RephraseAndRespond generate a clarification question using an LLM and then leverage this to guide the next round of LLM responses.
+These studies differ from ours in two ways: First, they do not consider user actions (as shown in the interaction graph) and generate clarification questions without taking user actions into account.
+Second, we are not solely focusing on task-oriented needs but instead aim to meet multiple user needs using asking clarification.
+\begin{equation}
+\begin{aligned}
+& \mathcal{L}_{\rm other} = - \sum_t \log P_{\rm tutor^{(t)}} (\mathbf{r}^{(t)}_e | \mathbf{h}^{(t-1)}), \\ 
+& \mathcal{L}_{\rm tut} = - \sum_t \log P_{\rm tutor^{(t)}} (\mathbf{r}^{(t)}_a | \mathbf{h}^{(t-1)}, \mathbf{a}^{(t-1)}).
+\end{aligned}
+\end{equation}
+The \colorbox{answercolor}{\texttt{<user action>}} branch represents the tutor's response to the enrolled student during HCI, and the \colorbox{answercolor}{\texttt{<user action>}} branch represents the enrolled student's response to the tutor during HCI.
+
+Based on the interaction graph in Example, we propose two new designs: User-Guided ACQ (U-G-ACQ) and U-G-AR (User-Guided Actionable Response).
+ U-G-ACQ design generates a human-written actionable clarification question (ACQ) to meet multiple user needs at the cost of an additional user-guided user action (UA).
+First, we prompt an LLM to simulate enrolled students by generating an initial user request and clarification, then we prompt the tutor to generate a response to this request. Finally, we manually annotate the tutor's response, providing human-written clarification questions to guide the tutor's next round of response.
+In this design, we aim to study the potential of generating a human-written ACQ, which is not common in previous studies and may improve the tutor's performance in meeting unmet for the \textit{task-oriented need}.
+
+% \begin{figure*}
+%   \begin{center}
+%     \includegraphics[scale=0.42]{sec/figures/method_1.pdf}
+%   \end{center}
+%   \caption{An example of our proposed interaction graph designer and user action simulator, containing two \colorbox{methodcolor}{\textbf{user-guided interaction graph}} designs: U-G-ACQ and U-G-AR.
+%   The \colorbox{methodcolor}{U-G-ACQ design asks tutors to generate a human-written clarification question, enabling them to meet multiple unmet user needs.}
+%   The \colorbox{methodcolor}{U-G-AR design guides the tutor using a simulated user response and the user's unmet for the \textbf{task}-oriented need, enabling the tutor to provide a better response.}
+%   The \colorbox{answercolor}{user action} (UA) part of the U-G-ACQ design includes user-guided instructions for generating \colorbox{answercolor}{\texttt{<human>}} and \colorbox{answercolor}{\texttt{<llm>}} \texttt{user action} after receiving \colorbox{answercolor}{\texttt{<human>}} and \colorbox{answercolor}{\texttt{<llm>}} \texttt{user action} from tutors, as well as the \colorbox{answercolor}{\texttt{<human>}} and \colorbox{answercolor}{\texttt{<llm>}} \texttt{user action} found by enrolled students.
+%   }
+%   \label{fig:method_user}
+% \end{figure*}
+
+
+\subsubsection{User-Guided Actionable Response}
+\label{subsec:ig_agent}
+\label{subsec:response_simulator}
+In existing studies, CLARINET~\citep{clarinet} and tree-of-clarifications~\citep{tree_of_clarifications} use simulated users to force enrolled students to generate a target query or certain information needed to meet their needs.
+First, they use an LLM to simulate a user and their needs, then they use the tutor to assist this user in meeting their needs.
+Finally, they use human annotators to annotate the tutor's response and provide the final quality.
+
+We followed the above two steps to create our U-G-AR design. First, we prompted an LLM to simulate an enrolled student by generating an initial user request and user guide based on the user's background information. Then, we instructed the tutor to generate a response to this request. Finally, we manually annotated the tutor's response, providing human-written responses to guide the tutor in providing more accurate responses in future rounds.
+\textit{U-G-AR design} treats enrolled students as black-boxes during HCI, and includes \colorbox{methodcolor}{\textbf{user-guided actionable response}} in the prompting of the Interaction Graph Designer to meet unmet task-oriented needs. In this design, we aim to investigate the potential of generating a human-written tutor response for each round of response, which is not common in previous studies and may improve the tutor's performance in meeting unmet unmet task-oriented needs.
+\begin{table*}[!t]
+  \begin{center}
+    \caption{Experiment results on U-CAN using both human and automated evaluation.}
+    \label{tab:result}
+    \setlength{\belowcaptionskip}{-2cm}
+    \setlength{\tabcolsep}{5pt}
+    \resizebox{\linewidth}{!}{
+      \begin{tabular}{lcccccccccccc}
+      \toprule
+      \multirow{2}{*}{} & \multicolumn{3}{c}{Task-Oriented Need} & \multicolumn{3}{c}{Retrieval-related Need} \\
+      \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+      & \multicolumn{1}{l}{User} & \multicolumn{1}{l}{Tutor} & \multicolumn{1}{l}{Per.", "68\%"} & \multicolumn{1}{l}{User} & \multicolumn{1}{l}{Tutor} & \multicolumn{1}{l}{Per.", "88\%"} \\
+      & \multicolumn{1}{l}{Satisfaction} & \multicolumn{1}{l}{Satisfaction} & \multicolumn{1}{l}{Score} & \multicolumn{1}{l}{Satisfaction} & \multicolumn{1}{l}{Satisfaction} & \multicolumn{1}{l}{Score} \\
+      \midrule
+      Commercial GPT-4 & \textbf{3.2} & 2.78 & 2.81 & \textbf{3.4} & 2.83 & 2.82 \\
+      Commercial GPT-4 + U-G-ACQ & 3.0 & \textbf{2.9} & \textbf{2.9} & 3.1 & \textbf{2.9} & \textbf{2.85} \\
+      Commercial GPT-4 + U-G-AR & 3.5 & 2.85 & 2.9 & 3.2 & 2.85 & 2.85 \\
+      \midrule
+      \multicolumn{5}{l}{\textit{Automated Scores (Initial Interaction)}} \\
+      \midrule
+      Commercial GPT-4 & 3.0 & 2.5 & 2.5 & 3.0 & 2.5 & 2.5 \\
+      Commercial GPT-4 + U-G-ACQ & 3.2 & 2.7 & 2.6 & 3.0 & 2.8 & 2.75 \\
+      Commercial GPT-4 + U-G-AR & 3.0 & 3.0 & \textbf{3.0} & 2.8 & \textbf{3.0} & \textbf{2.95} \\
+      \midrule
+      \multicolumn{5}{l}{\textit{Automated Scores (Subsequent Interaction)}} \\
+      \midrule
+      Commercial GPT-4 & 3.0 & 2.5 & 2.5 & 3.2 & 2.5 & 2.58 \\
+      Commercial GPT-4 + U-G-ACQ & 3.0 & 2.9 & 2.8 & 3.0 & 2.9 & 2.8 \\
+      Commercial GPT-4 + U-G-AR & 3.2 & 3.0 & \textbf{3.1} & 3.0 & 2.7 & \textbf{2.95}            \\
+      \bottomrule
+      \end{tabular}
+    }
+  \end{center}
+\end{table*}
+
+% Figure~\ref{fig:result} shows the results between human and automated scores, with both having similar trends, indicating that our proposed metrics are effective.
+In Table~\ref{tab:result}, we summarize the results of our proposed U-G-ACQ and U-G-AR designs, highlighting the potential of user-guided prompting techniques in the \textit{enrolled student} setting.
+Our results reveal interesting findings in different settings, which we aim to explain in this section.
+First, the User Action Simulator (U-G-ACQ) can help enrolled students meet unmet \textbf{retrieval-related needs}.
+In the subsequent interaction, we find that the U-G-ACQ design generally performs well in the \textit{enrolled student} setting because the tutor can leverage context from prior interactions to generate better askable clarification questions (ACQs) to tailor towards user needs.
+Second, the Interaction Graph Designer (U-G-AR) can help \textbf{enrolled students} meet unmet \textbf{task-oriented needs}.
+In the subsequent interaction, we find that the U-G-AR design generally performs well in the \textit{enrolled student} setting because the tutor can leverage context from prior interactions to better understand user needs.
+Last, we find that in the \textit{enrolled student} setting, generating an askable clarification question alone is insufficient for meeting unmet task-oriented needs, highlighting the importance of considering unmet task-oriented needs (as shown in the interaction graph) and the potential of generating an actionable response for each round of response.
+% \begin{figure*}
+%   \begin{center}
+%     \includegraphics[scale=0.42]{sec/figures/automated_analysis_6.pdf}
+%   \end{center}
+%   \caption{Comparing User Satisfaction, Clarification, and Helpfulness scores of human and automated evaluation for experiment results on U-CAN.
+%   }
+%   \label{fig:result}
+% \end{figure*}
+\subsection{User Action Simulator}
+\label{subsec:retrieve}
+In this section, we focus on retrieval-related asking clarification studies and compare commercial GPT-4's performance between the existing HCI setting and the User-Guided U-CAN setting.
+Table~\ref{tab:result} shows that the results of both human and automated evaluation have similar trends, indicating the effectiveness of our automated evaluation.
+
+First, we find that the U-G-ACQ design can generate a human-written ACQ to meet multiple user needs at the cost of an additional user-guided user action (UA).
+Specifically, we find that the U-G-ACQ design has higher User Satisfaction scores than the commercial GPT-4's, indicating that it can better meet enrolled student's information needs when retrieving relevant information.
+The U-G-ACQ design performs slightly worse than the commercial GPT-4's in terms of helpfulness score, indicating that the user-guided UA is not helpful enough in helping tutors retrieve relevant information.
+Second, we observe that the U-G-AR design has similar performance as the commercial GPT-4's in the \textit{enrolled student} setting, highlighting the necessity of generating askable clarification questions (ACQs) and responses for each round of response in the \textit{enrolled student} setting.
+
+
+\subsection{Real-World Evaluation}
+In this section, we conduct real-world experiments to demonstrate the generalizability of our proposed U-CAN benchmark.
+
+\begin{itemize}[leftmargin=0.5cm,topsep=-0.8\parskip,noitemsep,nolistsep]
+    \item \textbf{Asking Clarification in the Wild} uses real enrolled students and tutors in a classroom, with models' responses evaluated by the actual enrolled students.
+    \item \textbf{Asking Clarification with Human Annotation} collects responses from models and then asks real human annotators to annotate their responses, imitating the process in the U-CAN benchmark.
+\end{itemize}
+Table~\ref{tab:case_study} shows the results of real-world evaluation, with four main findings.
+First, we find that the performance gap between human and automated scores of Commercial GPT-4 is smaller in the \textit{Asking Clarification with Human Annotation} setting compared to the \textit{Asking Clarification in the Wild} setting, indicating that the data quality of our U-CAN benchmark is good enough in real-world settings, with human labels close to real human evaluation.
+Second, we find that the \textit{Asking Clarification in the Wild} setting is more objective than the \textit{Asking Clarification with Human Annotation} setting because the model's response is evaluated by real enrolled students rather than human annotators. This means that the \textit{Asking Clarification in the Wild} setting is a better measure of the model's true Clarification capabilities in real-world settings.
+Third, we find that the performance of the U-G-ACQ design is similar in all settings, highlighting the effectiveness of generating human-written ACQs in real-world settings even with human annotation labels.
+Last, we find that the \textit{Asking Clarification with Human Annotation} setting is a good alternative to the \textit{Asking Clarification in the Wild} setting because it mirrors the U-CAN benchmark in real-world settings.
+It also provides the potential to evaluate existing models using human-written labels, which is more objective and consistent compared to automated evaluations by LLM-as-a-judge approaches~\citep{llm_as_judge,agentboard,mt_preference}.
+
+\begin{table}[t]
+  \begin{center}
+    \caption{The results of real-world evaluation, where ASHT is ``Asking Clarification in the Wild'' setting and SH are ``Asking Clarification with Human Annotation'' setting.
+    The scores are all from human annotation.
+    }
+    \label{tab:case_study}
+    \setlength{\belowcaptionskip}{-1cm}
+    \setlength{\tabcolsep}{5pt}
+    \resizebox{0.6\linewidth}{!}{
+      \begin{tabular}{lccc}
+      \toprule
+      \multicolumn{1}{l}{Setting} & \multicolumn{1}{l}{US} & \multicolumn{1}{l}{C} & \multicolumn{1}{l}{H} \\
+      \midrule
+      Commercial GPT-4 & \textbf{3.2} & 2.78 & 2.81 \\
+      Commercial GPT-4 + U-G-ACQ & 3.1 & \textbf{2.9} & \textbf{2.9} \\
+      Commercial GPT-4 + U-G-AR & 2.8 & 2.7 & 2.6 \\
+      \midrule
+      Commercial GPT-4 ASHT & \textbf{3.4} & 2.5 & 2.5 \\
+      Commercial GPT-4 + U-G-ACQ ASHT & 3.0 & \textbf{3.1} & \textbf{2.9} \\
+      Commercial GPT-4 + U-G-AR ASHT & 2.0 & 2.8 & 2.0 \\
+      \midrule
+      Commercial GPT-4 SH & \textbf{3.5} & 2.9 & 2.9 \\
+      Commercial GPT-4 + U-G-ACQ SH & 3.0 & \textbf{3.1} & \textbf{2.9} \\
+      Commercial GPT-4 + U-G-AR SH & 2.7 & 2.9 & 2.8 \\
+      \bottomrule
+      \end{tabular}
+    }
+  \end{center}
+\end{table}
+
+
+
+
+
+\section{Related Work}
+
+\label{sec:related_work}
+\paragraph{Asking clarification.}
+
+Existing work has studied asking clarification for task-oriented scenarios, such as code generation~\citep{clarifygpt, benchmark_code_generate} and multi-turn instruction tuning~\citep{proactive_cot}. Some studies focus on asking clarification for retrieval-related scenarios, such as retrieving from web pages~\citep{clarinet}, documents~\citep{multiturn_clarification}, or information needed by an LLM~\citep{inscit, star_gate, learn_to_clarify}. Retrieval-related need is a special form of task-oriented need, where the goal is to clarify the user's request or need in retrieval-related scenarios. However, these studies mainly focus on ``two-need'' interactions rather than ``multi-need'' interactions, where clarification is generated without human interactions, and users' needs or goals may not align with the clarification questions. Typically, previous work such as CLARINET~\citep{clarinet} and tree-of-clarifications~\citep{tree_of_clarifications} do not consider user actions during HCI and do not perform well in Enrolled Student settings. This paper addresses these limitations in existing studies by proposing methods in multi-need settings using interaction graphs.
+
+\paragraph{Studios and Benchmark.}
+There has been growing interest in creating studios and benchmarks for LLM agents in recent years~\citep{proactive_agents,proactive_cot,pacific,neural_approach,ppdpp,into_the_unknown,agentboard,mt_survey,rlhf,rlaif,multiturn_rlhf,archer,refuel,dpo,lmrl,beyond_goldfish_memory,mteval,g_eval,style}.
+Studios have been created to fine-tune LLMs for specific scenarios, such as tutoring~\citep{baize} and recommendation~\citep{interactive_path_reasoning}. On the other hand, benchmarks have been developed to evaluate the capabilities of LLMs in various tasks, such as clarifying user requests~\citep{clarinet,clarify_when_necessary,learn_to_clarify,tree_of_clarifications} and proactivity~\citep{proactive_cot,mixed_initiative_dialogue}. Studies in previous studios and benchmarks often focus on specific aspects of LLM performance, making it difficult to evaluate LLMs comprehensively. For example, the ClarifyGPT~\citep{clarifygpt} benchmark focuses on generating different types of code to fulfill user requests, while the tree-of-clarifications~\citep{tree_of_clarifications} benchmark focuses on using retrieved information to clarify ambiguous user requests. The TREE-CLAR benchmark~\citep{tree_of_clarifications} only considers task-oriented needs, while the CLAMBER benchmark only considers retrival-related needs. Studies in these benchmarks often face limitations, such as focusing on specific aspects of LLM performance, lack of user experience, and lack of diversity in user groups. We propose the U-CAN benchmark to address these limitations by considering multiple user needs, interaction styles, and interaction types.
+
+
+
+% \section{Related Work}
+
+% \label{sec:related_work}
+% \paragraph{Asking clarification.}
+
+% Existing work has studied asking clarification for task-oriented scenarios, such as code generation~\citep{clarifygpt, benchmark_code_generate} and multi-turn instruction tuning~\citep{proactive_cot}. Some studies focus on asking clarification for retrieval-related scenarios, such as retrieving from web pages~\citep{clarinet}, documents~\citep{multiturn_clarification}, or information needed by an LM~\citep{inscit, star_gate, learn_to_clarify}. Retrieval-related need is a special form of task-oriented need, where the goal is to clarify the user's request or need in retrieval-related scenarios. However, these studies mainly focus on ``two-need'' interactions rather than ``multi-need'' interactions, where clarification questions are generated without human interactions, and users' needs or goals may not align with the clarification questions. Typically, previous work such as CLARINET~\citep{clarinet} and tree-of-clarifications~\citep{tree_of_clarifications} do not consider user actions during HCI and do not perform well in Enrolled Student settings. This paper addresses these limitations in existing studies by proposing methods in multi-need settings using interaction graphs.
+% \paragraph{Studios and Benchmarks.}
+% There has been growing interest in creating studios and benchmarks for LLM agents in recent years
+
+\bibliographystyle{plainnat}
+\bibliography{icais2025_conference}
+\end{document}

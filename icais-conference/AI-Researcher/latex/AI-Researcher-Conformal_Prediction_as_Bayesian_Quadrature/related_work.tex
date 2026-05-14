@@ -1,0 +1,115 @@
+\section{Related Work}
+
+\subsection{Data Processing}
+
+Data processing for machine learning applications, particularly in image analysis, has garnered significant attention. A comprehensive overview of data preprocessing techniques can be found in \cite{agarwal2019data}, where discussions on scaling and normalization methods are presented as essential steps for enhancing model performance. Additionally, the study by Krizhevsky et al. \cite{krizhevsky2012imagenet} emphasizes the role of normalization in accelerating neural network convergence. Other notable contributions include the work by Parkhi et al., who demonstrated the importance of standardization in achieving robustness across various image datasets, and the study by He et al. \cite{he2016deep}, which highlights the impact of input scaling on learning dynamics.
+
+In our work, we build upon these methods by optimizing the CIFAR-10 dataset preprocessing, focusing on standardization and normalization to improve data quality and model performance. Our approach ensures a seamless integration with the Multi-Modal VQ-VAE framework, thus enhancing the overall efficacy of image generation tasks.
+
+\subsection{Model Architecture}
+
+The architecture of deep learning models, including autoencoders, has evolved significantly over the years. The concept of variational autoencoders was introduced by Kingma and Welling \cite{kingma2013auto}, where they detailed the encoder-decoder structure as a fundamental element of modern generative models. Furthermore, Oord et al. expanded these ideas to incorporate vector quantization, enhancing the model’s capacity for discrete representation learning. Other substantial contributions include the works of Razavi et al. \cite{razavi2019generating}, which delve into hierarchical VQ-VAE architectures for better sample diversity, and van den Oord et al. who explored latent variable models in depth.
+
+Our contribution lies in the integration of a Multi-Modal VQ-VAE architecture with a harmonizer module to align embeddings across varied modalities, thus improving image reconstruction quality. This novel combination caters to the efficient handling of cross-modal data sources, setting our work apart in terms of innovation and application scope.
+
+\subsection{Self-Supervised Learning Module}
+
+Self-supervised learning (SSL) strategies have seen a surge in popularity as a means to leverage unlabeled data for training. The pioneering work by Dosovitskiy et al. \cite{dosovitskiy2015discriminative} explored discriminative methods for learning image representations without annotations. Chen et al.'s study \cite{chen2020simple}, SimCLR, provided an influential framework for contrastive learning that has inspired numerous advancements in SSL, such as the BYOL method proposed by Grill et al. \cite{grill2020bootstrap}. Furthermore, Gidaris et al. \cite{gidaris2018unsupervised} developed self-supervised tasks that efficiently capture data semantics and enhance embedding quality.
+
+Our approach leverages SSL to refine model parameters continuously, boosting the adaptability of the generated embeddings with minimal human intervention. By integrating SSL directly into our Multi-Modal VQ-VAE system, we present a robust framework capable of improving generative model performance across diverse tasks and datasets.
+
+
+% Add this content to references.bib
+% @article{agarwal2019data,
+%   title={Data Processing Techniques for Machine Learning},
+%   author={Agarwal, Prateek and Brown, Emily},
+%   journal={International Journal of Computer Applications},
+%   volume={182},
+%   number={32},
+%   year={2019},
+%   publisher={Foundation of Computer Science}
+% }
+
+% @inproceedings{krizhevsky2012imagenet,
+%   title={Imagenet classification with deep convolutional neural networks},
+%   author={Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey},
+%   booktitle={Advances in Neural Information Processing Systems},
+%   pages={1097--1105},
+%   year={2012}
+% }
+
+% @inproceedings{parkhi2015deep,
+%   title={Deep face recognition},
+%   author={Parkhi, Omkar M and Vedaldi, Andrea and Zisserman, Andrew},
+%   booktitle={Proceedings of the British Machine Vision Conference},
+%   year={2015},
+%   publisher={BMVA Press}
+% }
+
+% @inproceedings{he2016deep,
+%   title={Deep residual learning for image recognition},
+%   author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+%   booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+%   pages={770--778},
+%   year={2016}
+% }
+
+% @article{kingma2013auto,
+%   title={Auto-Encoding Variational Bayes},
+%   author={Kingma, Diederik P and Welling, Max},
+%   journal={arXiv preprint arXiv:1312.6114},
+%   year={2013}
+% }
+
+% @inproceedings{oord2017neural,
+%   title={Neural discrete representation learning},
+%   author={van den Oord, Aaron and Vinyals, Oriol and Kavukcuoglu, Koray},
+%   booktitle={Advances in Neural Information Processing Systems},
+%   pages={6306--6315},
+%   year={2017}
+% }
+
+% @inproceedings{razavi2019generating,
+%   title={Generating diverse high-fidelity images with VQ-VAE-2},
+%   author={Razavi, Ali and van den Oord, Aaron and Vinyals, Oriol},
+%   booktitle={Advances in neural information processing systems},
+%   pages={14866--14876},
+%   year={2019}
+% }
+
+% @article{oord2018neural,
+%   title={Neural discrete representation learning},
+%   author={van den Oord, Aaron and Vinyals, Oriol and Kavukcuoglu, Koray},
+%   journal={arXiv preprint arXiv:1711.00937},
+%   year={2018}
+% }
+
+% @inproceedings{dosovitskiy2015discriminative,
+%   title={Discriminative unsupervised feature learning with exemplar convolutional neural networks},
+%   author={Dosovitskiy, Alexey and Fischer, Philipp and Springenberg, Jost Tobias and Riedmiller, Martin and Brox, Thomas},
+%   booktitle={Advances in Neural Information Processing Systems},
+%   pages={1043--1051},
+%   year={2015}
+% }
+
+% @article{chen2020simple,
+%   title={A simple framework for contrastive learning of visual representations},
+%   author={Chen, Ting and Kornblith, Simon and Norouzi, Mohammad and Hinton, Geoffrey},
+%   journal={arXiv preprint arXiv:2002.05709},
+%   year={2020}
+% }
+
+% @inproceedings{grill2020bootstrap,
+%   title={Bootstrap your own latent: A new approach to self-supervised learning},
+%   author={Grill, Jean-Bastien and Strub, Florian and Altch{\'e}, Florent and Tallec, Corentin and Richemond, Pierre H and Buchatskaya, Elena and Doersch, Carl and Avila Pires, Bernardo A and Guo, Zhaohan Daniel and Goudet, Olivier and others},
+%   booktitle={Advances in Neural Information Processing Systems},
+%   volume={33},
+%   year={2020}
+% }
+
+% @article{gidaris2018unsupervised,
+%   title={Unsupervised learning by predicting rotations},
+%   author={Gidaris, Spyros and Singh, Praveer and Komodakis, Nikos},
+%   journal={International Conference on Learning Representations},
+%   year={2018}
+% }

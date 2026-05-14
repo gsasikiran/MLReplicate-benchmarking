@@ -1,0 +1,19 @@
+\section{Related Work}
+
+\subsection{Graph Neural Networks in Recommendation Systems}
+Graph Neural Networks (GNNs) have received significant attention for their ability to model user-item interactions effectively in recommendation systems. Methods such as Graph Convolutional Networks (GCN) have shown promise in capturing local connectivity structures within user-item graphs, enhancing recommendation performance \cite{kipf2017semi, berg2018graph, wu2019neural}. Additionally, approaches incorporating Graph Attention Networks (GAT) have further refined performance by selectively focusing on informative nodes through learned attention mechanisms \cite{velickovic2018graph, wang2019inductive}. Despite these advancements, existing models often overlook the incorporation of trust dynamics, which can provide additional meaningful insights into user preferences and interactions.
+
+In this context, our work contributes by embedding trust metrics directly into the GNN framework, augmenting the structural knowledge with trust-based assessments. This integration not only enhances the predictive accuracy of the recommendation models but also improves interpretability by explicitly considering trust dynamics, a novel approach among graph-based recommendation methodologies.
+
+\subsection{Trust Mechanisms in Recommendation Systems}
+Trust mechanisms have been extensively used to enhance recommendation systems, particularly in mitigating the influence of unreliable data and improving transparency. Earlier works have explored various ways to integrate trust, ranging from matrix factorization techniques incorporating trust scores \cite{guo2017trust, massa2007trust, lathia2008trust} to models leveraging social network graphs to model trust relations \cite{konstas2009social, ma2011recommender}. These approaches effectively utilize trust scores but often do not leverage the structural advantages provided by GNNs for recommendation tasks.
+
+Our approach addresses this gap by integrating trust metrics into a GNN-based framework, allowing for a more seamless combination of trust and structural interaction data. This not only improves recommendation accuracy but also provides a pathway for explainability, making users more likely to trust and understand the recommendation outputs.
+
+\subsection{Explainability in Recommendation Systems}
+The need for explainable recommendation systems has grown considerably, with various strategies developed to ensure transparency in recommendation processes. Some methods focus on explaining recommendations through dominant feature analysis \cite{zhang2014explicit, tan2016cross, zhang2018visual}, while others employ path-based models to elucidate recommendation rationales \cite{he2015trirank, yu2013cubinet}. These models emphasize the necessity of incorporating explanations to build user trust and facilitate acceptance of automated recommendations.
+
+Building upon these ideas, our model integrates graph-based pathways to provide context-rich explanations. By leveraging the structural insights of GNNs and incorporating trust metrics, we ensure that each recommendation is fortified with a clear, interpretable path, highlighting the decision-making rationale and thereby enhancing user confidence and satisfaction.
+
+
+% BibTeX references

@@ -1,0 +1,49 @@
+{
+  "Experiment_description": "The experiments implement a baseline model for pro-worker governance frameworks in AI, using synthetic data to simulate job displacement and economic justice impacts. Neural networks predict a governance impact score based on these features.",
+  "Significance": "These experiments are important as they establish a foundation for evaluating AI's impact on the workforce, providing insights into governance frameworks that promote economic justice. The findings highlight the potential of using synthetic data for preliminary assessments and the necessity of robust validation processes.",
+  "Description": "Nodes implemented neural networks to predict governance impact scores using synthetic datasets. Various metrics were tracked to evaluate model performance, including accuracy and loss, with a focus on generalization and overfitting. Visualization of results helped in understanding the model's learning process.",
+  "List_of_included_plots": [
+    {
+      "path": "experiments/2025-10-26_15-25-31_pro_worker_ai_governance_attempt_0/logs/0-run/experiment_results/experiment_3a60fbc9185c4d7e85c75e6cc7a77b09_proc_2531091/pro_worker_loss_plot.png",
+      "description": "This plot shows the training and validation loss curves for a machine learning model trained on the Pro-Worker dataset.",
+      "analysis": "The losses decrease and plateau, indicating effective learning and convergence without overfitting, suggesting a robust training process."
+    },
+    {
+      "path": "experiments/2025-10-26_15-25-31_pro_worker_ai_governance_attempt_0/logs/0-run/experiment_results/experiment_cae42f8d72d146b69c0f783f9d9b614d_proc_2531092/synthetic_data_losses.png",
+      "description": "The plot shows the training and validation losses over 50 epochs.",
+      "analysis": "The steady decrease in losses indicates effective learning, but the persistent gap suggests potential for optimization to improve validation performance."
+    },
+    {
+      "path": "experiments/2025-10-26_15-25-31_pro_worker_ai_governance_attempt_0/logs/0-run/experiment_results/experiment_f2a94b0a4b93439d98a3fc08c6852a83_proc_2531089/synthetic_data_losses.png",
+      "description": "This plot shows the training and validation losses over 50 epochs.",
+      "analysis": "The validation loss being lower than the training loss suggests good generalization, but further checks for data leakage or underfitting are needed."
+    },
+    {
+      "path": "experiments/2025-10-26_15-25-31_pro_worker_ai_governance_attempt_0/logs/0-run/experiment_results/experiment_3fc0bebe3cff4b67ace6ad117a5d23cf_proc_2531091/synthetic_data_losses.png",
+      "description": "The plot shows the loss values for both training and validation datasets over 50 epochs.",
+      "analysis": "The close alignment of training and validation losses indicates effective learning and generalization, with no overfitting detected."
+    }
+  ],
+  "Key_numerical_results": [
+    {
+      "result": 1.0,
+      "description": "Pro-Worker Governance Impact Score in Node 3a60fbc9185c4d7e85c75e6cc7a77b09.",
+      "analysis": "Perfect score suggests overfitting on synthetic data, highlighting the need for real-world validation."
+    },
+    {
+      "result": 0.71,
+      "description": "Validation accuracy in Node cae42f8d72d146b69c0f783f9d9b614d.",
+      "analysis": "Moderate accuracy indicates potential for further model optimization to improve validation performance."
+    },
+    {
+      "result": 0.815,
+      "description": "Validation accuracy in Node f2a94b0a4b93439d98a3fc08c6852a83.",
+      "analysis": "Higher validation accuracy suggests improvements in generalization, though unusual behavior warrants further investigation."
+    },
+    {
+      "result": 0.77,
+      "description": "Validation accuracy in Node 3fc0bebe3cff4b67ace6ad117a5d23cf.",
+      "analysis": "Consistent accuracy indicates effective learning and generalization, supporting the model's suitability for the task."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "run_1": {
+    "accuracy": 0.541,
+    "bias_detection_score": 0.0
+  },
+  "run_2": {
+    "accuracy": 0.827,
+    "bias_detection_score": 0.0
+  },
+  "run_3": {
+    "accuracy": 0.834,
+    "bias_detection_score": 0.0
+  }
+}

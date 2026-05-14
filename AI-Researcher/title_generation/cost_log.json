@@ -1,0 +1,65 @@
+[
+  {
+    "timestamp": "2025-10-24T12:53:31.669647",
+    "pdf_file": "token_counting.pdf",
+    "generated_title": "Reinforced Adaptive Diffusion Networks for Enhanced Image Synthesis",
+    "input_tokens": 3377,
+    "output_tokens": 12,
+    "total_tokens": 3389,
+    "total_cost_usd": 0.008562
+  },
+  {
+    "timestamp": "2025-10-24T12:54:11.381352",
+    "pdf_file": "score_matching.pdf",
+    "generated_title": "Unified Generative Framework: Enhancing Class-Conditional Image Synthesis with Dynamic Adaptation",
+    "input_tokens": 3353,
+    "output_tokens": 17,
+    "total_tokens": 3370,
+    "total_cost_usd": 0.008553
+  },
+  {
+    "timestamp": "2025-10-24T12:54:57.870789",
+    "pdf_file": "next_token_prediction.pdf",
+    "generated_title": "Adaptive Diffusion-Latent Flow Model: Enhancing Image Synthesis Fidelity and Stability",
+    "input_tokens": 3438,
+    "output_tokens": 19,
+    "total_tokens": 3457,
+    "total_cost_usd": 0.008785
+  },
+  {
+    "timestamp": "2025-10-24T12:55:10.339072",
+    "pdf_file": "collabllm.pdf",
+    "generated_title": "Causal-Informed Adaptive Learning for Contextual Personalization in Recommendation Systems",
+    "input_tokens": 3238,
+    "output_tokens": 14,
+    "total_tokens": 3252,
+    "total_cost_usd": 0.008235
+  },
+  {
+    "timestamp": "2025-10-24T12:55:26.951482",
+    "pdf_file": "bayesian_quadrature.pdf",
+    "generated_title": "Enhancing Image Generation with Multi-Modal VQ-VAE and Self-Supervised Learning",
+    "input_tokens": 3440,
+    "output_tokens": 20,
+    "total_tokens": 3460,
+    "total_cost_usd": 0.0088
+  },
+  {
+    "timestamp": "2025-10-24T12:55:41.288412",
+    "pdf_file": "ai_safety.pdf",
+    "generated_title": "Adaptive and Fair Cross-Domain Recommendations with Meta-Reinforcement Learning",
+    "input_tokens": 3260,
+    "output_tokens": 13,
+    "total_tokens": 3273,
+    "total_cost_usd": 0.00828
+  },
+  {
+    "timestamp": "2025-10-24T13:07:15.461836",
+    "pdf_file": "value_prediction.pdf",
+    "generated_title": "Trust-Enhanced Graph Neural Networks for Transparent Recommendations",
+    "input_tokens": 3493,
+    "output_tokens": 11,
+    "total_tokens": 3504,
+    "total_cost_usd": 0.008843
+  }
+]

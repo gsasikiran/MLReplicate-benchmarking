@@ -1,0 +1,303 @@
+{
+  "best node": {
+    "overall_plan": "Hyperparam tuning name: momentum.\nThe proposed solution involves adding a hyperparameter tuning section for the momentum parameter used in the optimizer. We will loop through a range of momentum values and train the model using each value. The performance will be recorded for the training and validation losses, allowing us to later analyze which momentum value yielded the best results. Finally, we will save all the relevant experiment data, including losses and metrics, in the specified structure.",
+    "analysis": "The training script executed successfully without any runtime errors or bugs. The model was trained with three different momentum values, and the training and validation losses were logged for each epoch. The losses decreased steadily, indicating proper learning. A reliability measure was also calculated and stored. Overall, the script worked as intended, and the results can be used for further analysis or experimentation.",
+    "metric": {
+      "value": {
+        "metric_names": [
+          {
+            "metric_name": "train loss",
+            "lower_is_better": true,
+            "description": "Final training loss of the model",
+            "data": [
+              {
+                "dataset_name": "synthetic_data",
+                "final_value": 0.2748,
+                "best_value": 0.2748
+              }
+            ]
+          },
+          {
+            "metric_name": "validation loss",
+            "lower_is_better": true,
+            "description": "Final validation loss of the model",
+            "data": [
+              {
+                "dataset_name": "synthetic_data",
+                "final_value": 0.2427,
+                "best_value": 0.2427
+              }
+            ]
+          },
+          {
+            "metric_name": "validation reliability",
+            "lower_is_better": true,
+            "description": "Final reliability score on validation data",
+            "data": [
+              {
+                "dataset_name": "synthetic_data",
+                "final_value": 0.09,
+                "best_value": 0.09
+              }
+            ]
+          }
+        ]
+      },
+      "maximize": null,
+      "name": null,
+      "description": null
+    },
+    "code": "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nfrom sklearn.model_selection import train_test_split\n\n# Create working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n# Define device\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n# Generate synthetic data\nnp.random.seed(42)\nX = np.random.rand(1000, 1)\ny = 3 * X.squeeze() + np.random.normal(0, 0.5, X.shape[0])\n\n# Split the data\nX_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)\nX_train_tensor = torch.tensor(X_train, dtype=torch.float32).to(device)\ny_train_tensor = torch.tensor(y_train, dtype=torch.float32).to(device)\nX_val_tensor = torch.tensor(X_val, dtype=torch.float32).to(device)\ny_val_tensor = torch.tensor(y_val, dtype=torch.float32).to(device)\n\n\n# Define a simple Bayesian linear regression model\nclass BayesianLinearRegression(nn.Module):\n    def __init__(self):\n        super(BayesianLinearRegression, self).__init__()\n        self.linear = nn.Linear(1, 1)\n\n    def forward(self, x):\n        return self.linear(x)\n\n\n# Experiment data\nexperiment_data = {\n    \"hyperparam_tuning_momentum\": {\n        \"synthetic_data\": {\n            \"metrics\": {\"train\": [], \"val\": []},\n            \"losses\": {\"train\": [], \"val\": []},\n            \"predictions\": [],\n            \"ground_truth\": [],\n        }\n    },\n}\n\n# Hyperparameter tuning for momentum\nmomentum_values = [0.0, 0.5, 0.9]\nfor momentum in momentum_values:\n    print(f\"Training with momentum: {momentum}\")\n\n    model = BayesianLinearRegression().to(device)\n    criterion = nn.MSELoss()\n    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=momentum)\n\n    for epoch in range(100):\n        model.train()\n\n        # Forward pass\n        predictions = model(X_train_tensor)\n        train_loss = criterion(predictions.squeeze(), y_train_tensor)\n\n        # Backward and optimize\n        optimizer.zero_grad()\n        train_loss.backward()\n        optimizer.step()\n\n        # Validation\n        model.eval()\n        with torch.no_grad():\n            val_predictions = model(X_val_tensor)\n            val_loss = criterion(val_predictions.squeeze(), y_val_tensor)\n\n        # Save metrics\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"train\"\n        ].append(train_loss.item())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"val\"\n        ].append(val_loss.item())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\n            \"predictions\"\n        ].append(val_predictions.cpu().numpy())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\n            \"ground_truth\"\n        ].append(y_val)\n\n        print(\n            f\"Epoch {epoch}: train_loss = {train_loss:.4f}, validation_loss = {val_loss:.4f}\"\n        )\n\n# Reliability measure (simple demonstration)\nreliable_predictions = (val_predictions.cpu().numpy().flatten() >= 2.5) & (\n    val_predictions.cpu().numpy().flatten() <= 3.5\n)\nreliability_measure = np.mean(reliable_predictions)\nexperiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"metrics\"][\n    \"val\"\n].append(reliability_measure)\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n",
+    "plot_code": "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\n\ntry:\n    experiment_data = np.load(\n        os.path.join(working_dir, \"experiment_data.npy\"), allow_pickle=True\n    ).item()\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\ntry:\n    # Plot training and validation loss\n    plt.figure()\n    plt.plot(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"train\"\n        ],\n        label=\"Training Loss\",\n    )\n    plt.plot(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"val\"\n        ],\n        label=\"Validation Loss\",\n    )\n    plt.title(\"Loss Curves for Synthetic Data\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_data_loss_curves.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating loss curve plot: {e}\")\n    plt.close()\n\ntry:\n    # Plot predictions vs ground truth\n    predictions = np.array(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"predictions\"]\n    ).mean(axis=0)\n    ground_truth = np.array(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"ground_truth\"]\n    ).mean(axis=0)\n\n    plt.figure()\n    plt.scatter(ground_truth, predictions)\n    plt.plot(\n        [ground_truth.min(), ground_truth.max()],\n        [ground_truth.min(), ground_truth.max()],\n        \"r--\",\n    )\n    plt.title(\"Predictions vs Ground Truth for Synthetic Data\")\n    plt.xlabel(\"Ground Truth\")\n    plt.ylabel(\"Model Predictions\")\n    plt.savefig(\n        os.path.join(working_dir, \"synthetic_data_predictions_vs_ground_truth.png\")\n    )\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating predictions vs ground truth plot: {e}\")\n    plt.close()\n",
+    "plot_plan": "To visualize the results of the training and validation process from the `experiment_data.npy`, we will start by loading the data from the file. After that, we will create visualizations for both the training and validation losses over epochs. We will also include a calibration plot showing the ground truth against the model's predictions. Each plot will be in a separate try-except block, and all figures will be saved in the specified working directory. We will ensure to include titles and precise subtitles for clarity, and close figures after saving them.",
+    "plot_analyses": [
+      {
+        "analysis": "This plot shows a scatter plot of model predictions versus ground truth for synthetic data. The alignment of the points along the diagonal red dashed line indicates that the model predictions are reasonably close to the ground truth. However, there is noticeable scatter around the line, suggesting some degree of prediction error. The spread of points appears to increase as the ground truth values increase, which could indicate heteroscedasticity in the data or a limitation in the model's ability to accurately predict extreme values. While the general trend is captured, the model may benefit from further tuning or additional regularization to reduce variability.",
+        "plot_path": "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_ca0dd885309e4e84a53b8dafee5b6d39_proc_2543538/synthetic_data_predictions_vs_ground_truth.png"
+      },
+      {
+        "analysis": "This plot depicts the loss curves for training and validation over 300 epochs. Initially, both curves decrease, indicating that the model is learning. However, there are several sudden spikes, particularly around epochs 100 and 200, which suggest instability in the training process, potentially due to a high learning rate or other hyperparameter settings. After these spikes, the loss stabilizes and continues to decrease, showing convergence. The training and validation losses are closely aligned towards the end, which is a positive sign of reduced overfitting. However, the spikes warrant further investigation and may require adjustments to the training procedure to ensure smoother optimization.",
+        "plot_path": "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_ca0dd885309e4e84a53b8dafee5b6d39_proc_2543538/synthetic_data_loss_curves.png"
+      }
+    ],
+    "plot_paths": [
+      "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_ca0dd885309e4e84a53b8dafee5b6d39_proc_2543538/synthetic_data_predictions_vs_ground_truth.png",
+      "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_ca0dd885309e4e84a53b8dafee5b6d39_proc_2543538/synthetic_data_loss_curves.png"
+    ],
+    "vlm_feedback_summary": "The results demonstrate reasonable model performance with some areas for improvement. The prediction scatter plot indicates that the model captures the general trend but has variability that needs addressing. The loss curves reveal training instability at certain points, which should be investigated and mitigated for better convergence.",
+    "exp_results_dir": "experiment_results/experiment_ca0dd885309e4e84a53b8dafee5b6d39_proc_2543538",
+    "exp_results_npy_files": [
+      "experiment_results/experiment_ca0dd885309e4e84a53b8dafee5b6d39_proc_2543538/experiment_data.npy"
+    ]
+  },
+  "best node with different seeds": [
+    {
+      "overall_plan": "The overall plan involves a systematic exploration of hyperparameter tuning, focusing on the momentum parameter in the optimizer. The parent node's plan emphasizes looping through various momentum values to identify the optimal setting that minimizes both training and validation losses. This approach ensures robust model performance and thorough analysis through detailed recording of experiment data. The current node, identified as a 'Seed node,' likely serves as the foundational setup for future experiments, potentially building upon the insights gained from the momentum tuning or preparing for further research advancements.",
+      "analysis": "The training script executed successfully without any errors or bugs. The model training process was conducted for three different momentum values (0.0, 0.5, 0.9) and the output logs show a steady decrease in both training and validation losses over epochs, indicating that the model is learning effectively. The reliability measure was also calculated, and the experiment data was saved appropriately. No issues were detected in the execution.",
+      "metric": {
+        "value": {
+          "metric_names": [
+            {
+              "metric_name": "train loss",
+              "lower_is_better": true,
+              "description": "The loss value calculated on the training dataset.",
+              "data": [
+                {
+                  "dataset_name": "synthetic_data",
+                  "final_value": 0.2725,
+                  "best_value": 0.2725
+                }
+              ]
+            },
+            {
+              "metric_name": "validation loss",
+              "lower_is_better": true,
+              "description": "The loss value calculated on the validation dataset.",
+              "data": [
+                {
+                  "dataset_name": "synthetic_data",
+                  "final_value": 0.2402,
+                  "best_value": 0.2402
+                }
+              ]
+            },
+            {
+              "metric_name": "validation reliability",
+              "lower_is_better": true,
+              "description": "The reliability value calculated on the validation dataset.",
+              "data": [
+                {
+                  "dataset_name": "synthetic_data",
+                  "final_value": 0.09,
+                  "best_value": 0.09
+                }
+              ]
+            }
+          ]
+        },
+        "maximize": null,
+        "name": null,
+        "description": null
+      },
+      "code": "# Set random seed\nimport random\nimport numpy as np\nimport torch\n\nseed = 2\nrandom.seed(seed)\nnp.random.seed(seed)\ntorch.manual_seed(seed)\nif torch.cuda.is_available():\n    torch.cuda.manual_seed(seed)\n\nimport os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nfrom sklearn.model_selection import train_test_split\n\n# Create working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n# Define device\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n# Generate synthetic data\nnp.random.seed(42)\nX = np.random.rand(1000, 1)\ny = 3 * X.squeeze() + np.random.normal(0, 0.5, X.shape[0])\n\n# Split the data\nX_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)\nX_train_tensor = torch.tensor(X_train, dtype=torch.float32).to(device)\ny_train_tensor = torch.tensor(y_train, dtype=torch.float32).to(device)\nX_val_tensor = torch.tensor(X_val, dtype=torch.float32).to(device)\ny_val_tensor = torch.tensor(y_val, dtype=torch.float32).to(device)\n\n\n# Define a simple Bayesian linear regression model\nclass BayesianLinearRegression(nn.Module):\n    def __init__(self):\n        super(BayesianLinearRegression, self).__init__()\n        self.linear = nn.Linear(1, 1)\n\n    def forward(self, x):\n        return self.linear(x)\n\n\n# Experiment data\nexperiment_data = {\n    \"hyperparam_tuning_momentum\": {\n        \"synthetic_data\": {\n            \"metrics\": {\"train\": [], \"val\": []},\n            \"losses\": {\"train\": [], \"val\": []},\n            \"predictions\": [],\n            \"ground_truth\": [],\n        }\n    },\n}\n\n# Hyperparameter tuning for momentum\nmomentum_values = [0.0, 0.5, 0.9]\nfor momentum in momentum_values:\n    print(f\"Training with momentum: {momentum}\")\n\n    model = BayesianLinearRegression().to(device)\n    criterion = nn.MSELoss()\n    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=momentum)\n\n    for epoch in range(100):\n        model.train()\n\n        # Forward pass\n        predictions = model(X_train_tensor)\n        train_loss = criterion(predictions.squeeze(), y_train_tensor)\n\n        # Backward and optimize\n        optimizer.zero_grad()\n        train_loss.backward()\n        optimizer.step()\n\n        # Validation\n        model.eval()\n        with torch.no_grad():\n            val_predictions = model(X_val_tensor)\n            val_loss = criterion(val_predictions.squeeze(), y_val_tensor)\n\n        # Save metrics\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"train\"\n        ].append(train_loss.item())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"val\"\n        ].append(val_loss.item())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\n            \"predictions\"\n        ].append(val_predictions.cpu().numpy())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\n            \"ground_truth\"\n        ].append(y_val)\n\n        print(\n            f\"Epoch {epoch}: train_loss = {train_loss:.4f}, validation_loss = {val_loss:.4f}\"\n        )\n\n# Reliability measure (simple demonstration)\nreliable_predictions = (val_predictions.cpu().numpy().flatten() >= 2.5) & (\n    val_predictions.cpu().numpy().flatten() <= 3.5\n)\nreliability_measure = np.mean(reliable_predictions)\nexperiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"metrics\"][\n    \"val\"\n].append(reliability_measure)\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n",
+      "plot_code": "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\n\ntry:\n    experiment_data = np.load(\n        os.path.join(working_dir, \"experiment_data.npy\"), allow_pickle=True\n    ).item()\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\ntry:\n    # Plot training and validation loss\n    plt.figure()\n    plt.plot(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"train\"\n        ],\n        label=\"Training Loss\",\n    )\n    plt.plot(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"val\"\n        ],\n        label=\"Validation Loss\",\n    )\n    plt.title(\"Loss Curves for Synthetic Data\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_data_loss_curves.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating loss curve plot: {e}\")\n    plt.close()\n\ntry:\n    # Plot predictions vs ground truth\n    predictions = np.array(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"predictions\"]\n    ).mean(axis=0)\n    ground_truth = np.array(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"ground_truth\"]\n    ).mean(axis=0)\n\n    plt.figure()\n    plt.scatter(ground_truth, predictions)\n    plt.plot(\n        [ground_truth.min(), ground_truth.max()],\n        [ground_truth.min(), ground_truth.max()],\n        \"r--\",\n    )\n    plt.title(\"Predictions vs Ground Truth for Synthetic Data\")\n    plt.xlabel(\"Ground Truth\")\n    plt.ylabel(\"Model Predictions\")\n    plt.savefig(\n        os.path.join(working_dir, \"synthetic_data_predictions_vs_ground_truth.png\")\n    )\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating predictions vs ground truth plot: {e}\")\n    plt.close()\n",
+      "plot_analyses": [
+        {
+          "analysis": "This scatter plot compares model predictions to ground truth values for synthetic data. The red dashed line represents a perfect prediction line (y = x). The scatter points are relatively close to this line, indicating that the model achieves reasonable predictive accuracy. However, there is some spread around the line, suggesting that the model's predictions are not perfectly aligned with the ground truth. This could be due to noise in the data or limitations in the model's capacity to capture the underlying data distribution.",
+          "plot_path": "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_a5b70756be874363a0d6c4a4760bc2e8_proc_2543960/synthetic_data_predictions_vs_ground_truth.png"
+        },
+        {
+          "analysis": "This plot shows the training and validation loss curves for synthetic data over 300 epochs. Both curves exhibit a general downward trend, indicating that the model is learning effectively. However, there are sharp spikes in the loss values at certain points, which could indicate instability during training or issues with the optimization process. Despite these spikes, the losses eventually stabilize at lower values, suggesting that the model converges. The validation loss closely tracks the training loss, implying that overfitting is not a significant concern.",
+          "plot_path": "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_a5b70756be874363a0d6c4a4760bc2e8_proc_2543960/synthetic_data_loss_curves.png"
+        }
+      ],
+      "plot_paths": [
+        "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_a5b70756be874363a0d6c4a4760bc2e8_proc_2543960/synthetic_data_predictions_vs_ground_truth.png",
+        "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_a5b70756be874363a0d6c4a4760bc2e8_proc_2543960/synthetic_data_loss_curves.png"
+      ],
+      "vlm_feedback_summary": "The provided plots offer insights into the model's predictive performance and training dynamics. The predictions vs. ground truth plot demonstrates reasonable accuracy with some variability, while the loss curves reflect effective learning with occasional instability. These results suggest that the model has potential but may require further fine-tuning or adjustments to address instability during training.",
+      "exp_results_dir": "experiment_results/experiment_a5b70756be874363a0d6c4a4760bc2e8_proc_2543960",
+      "exp_results_npy_files": [
+        "experiment_results/experiment_a5b70756be874363a0d6c4a4760bc2e8_proc_2543960/experiment_data.npy"
+      ]
+    },
+    {
+      "overall_plan": "The overall plan is to optimize the model's performance through a systematic approach. Initially, the focus was on hyperparameter tuning, specifically targeting the momentum parameter of the optimizer, to enhance convergence and generalization by analyzing training and validation losses across different momentum values. The current plan introduces a seed node, indicating the initiation of a foundational phase, possibly aimed at ensuring infrastructure readiness and reproducibility. Together, these plans suggest a comprehensive strategy for iterative improvements and preparation for further explorations in model optimization.",
+      "analysis": "",
+      "metric": {
+        "value": {
+          "metric_names": [
+            {
+              "metric_name": "train loss",
+              "lower_is_better": true,
+              "description": "The loss calculated on the training dataset, indicating how well the model is learning from the training data.",
+              "data": [
+                {
+                  "dataset_name": "synthetic_data",
+                  "final_value": 0.2725,
+                  "best_value": 0.2725
+                }
+              ]
+            },
+            {
+              "metric_name": "validation loss",
+              "lower_is_better": true,
+              "description": "The loss calculated on the validation dataset, used to evaluate the model's performance on unseen data.",
+              "data": [
+                {
+                  "dataset_name": "synthetic_data",
+                  "final_value": 0.2402,
+                  "best_value": 0.2402
+                }
+              ]
+            },
+            {
+              "metric_name": "validation reliability",
+              "lower_is_better": true,
+              "description": "A metric to assess the reliability of the model's predictions on the validation dataset.",
+              "data": [
+                {
+                  "dataset_name": "synthetic_data",
+                  "final_value": 0.09,
+                  "best_value": 0.09
+                }
+              ]
+            }
+          ]
+        },
+        "maximize": null,
+        "name": null,
+        "description": null
+      },
+      "code": "# Set random seed\nimport random\nimport numpy as np\nimport torch\n\nseed = 2\nrandom.seed(seed)\nnp.random.seed(seed)\ntorch.manual_seed(seed)\nif torch.cuda.is_available():\n    torch.cuda.manual_seed(seed)\n\nimport os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nfrom sklearn.model_selection import train_test_split\n\n# Create working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n# Define device\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n# Generate synthetic data\nnp.random.seed(42)\nX = np.random.rand(1000, 1)\ny = 3 * X.squeeze() + np.random.normal(0, 0.5, X.shape[0])\n\n# Split the data\nX_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)\nX_train_tensor = torch.tensor(X_train, dtype=torch.float32).to(device)\ny_train_tensor = torch.tensor(y_train, dtype=torch.float32).to(device)\nX_val_tensor = torch.tensor(X_val, dtype=torch.float32).to(device)\ny_val_tensor = torch.tensor(y_val, dtype=torch.float32).to(device)\n\n\n# Define a simple Bayesian linear regression model\nclass BayesianLinearRegression(nn.Module):\n    def __init__(self):\n        super(BayesianLinearRegression, self).__init__()\n        self.linear = nn.Linear(1, 1)\n\n    def forward(self, x):\n        return self.linear(x)\n\n\n# Experiment data\nexperiment_data = {\n    \"hyperparam_tuning_momentum\": {\n        \"synthetic_data\": {\n            \"metrics\": {\"train\": [], \"val\": []},\n            \"losses\": {\"train\": [], \"val\": []},\n            \"predictions\": [],\n            \"ground_truth\": [],\n        }\n    },\n}\n\n# Hyperparameter tuning for momentum\nmomentum_values = [0.0, 0.5, 0.9]\nfor momentum in momentum_values:\n    print(f\"Training with momentum: {momentum}\")\n\n    model = BayesianLinearRegression().to(device)\n    criterion = nn.MSELoss()\n    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=momentum)\n\n    for epoch in range(100):\n        model.train()\n\n        # Forward pass\n        predictions = model(X_train_tensor)\n        train_loss = criterion(predictions.squeeze(), y_train_tensor)\n\n        # Backward and optimize\n        optimizer.zero_grad()\n        train_loss.backward()\n        optimizer.step()\n\n        # Validation\n        model.eval()\n        with torch.no_grad():\n            val_predictions = model(X_val_tensor)\n            val_loss = criterion(val_predictions.squeeze(), y_val_tensor)\n\n        # Save metrics\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"train\"\n        ].append(train_loss.item())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"val\"\n        ].append(val_loss.item())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\n            \"predictions\"\n        ].append(val_predictions.cpu().numpy())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\n            \"ground_truth\"\n        ].append(y_val)\n\n        print(\n            f\"Epoch {epoch}: train_loss = {train_loss:.4f}, validation_loss = {val_loss:.4f}\"\n        )\n\n# Reliability measure (simple demonstration)\nreliable_predictions = (val_predictions.cpu().numpy().flatten() >= 2.5) & (\n    val_predictions.cpu().numpy().flatten() <= 3.5\n)\nreliability_measure = np.mean(reliable_predictions)\nexperiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"metrics\"][\n    \"val\"\n].append(reliability_measure)\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n",
+      "plot_code": "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\n\ntry:\n    experiment_data = np.load(\n        os.path.join(working_dir, \"experiment_data.npy\"), allow_pickle=True\n    ).item()\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\ntry:\n    # Plot training and validation loss\n    plt.figure()\n    plt.plot(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"train\"\n        ],\n        label=\"Training Loss\",\n    )\n    plt.plot(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"val\"\n        ],\n        label=\"Validation Loss\",\n    )\n    plt.title(\"Loss Curves for Synthetic Data\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_data_loss_curves.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating loss curve plot: {e}\")\n    plt.close()\n\ntry:\n    # Plot predictions vs ground truth\n    predictions = np.array(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"predictions\"]\n    ).mean(axis=0)\n    ground_truth = np.array(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"ground_truth\"]\n    ).mean(axis=0)\n\n    plt.figure()\n    plt.scatter(ground_truth, predictions)\n    plt.plot(\n        [ground_truth.min(), ground_truth.max()],\n        [ground_truth.min(), ground_truth.max()],\n        \"r--\",\n    )\n    plt.title(\"Predictions vs Ground Truth for Synthetic Data\")\n    plt.xlabel(\"Ground Truth\")\n    plt.ylabel(\"Model Predictions\")\n    plt.savefig(\n        os.path.join(working_dir, \"synthetic_data_predictions_vs_ground_truth.png\")\n    )\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating predictions vs ground truth plot: {e}\")\n    plt.close()\n",
+      "plot_analyses": [
+        {
+          "analysis": "This scatter plot shows the relationship between model predictions and ground truth values for synthetic data. The red dashed line represents the ideal case where predictions perfectly match the ground truth. The data points are reasonably close to the diagonal line, indicating that the model is performing well overall. However, there is some variance around the line, particularly at the extremes, suggesting that the model's predictions are less reliable for certain ranges of the ground truth.",
+          "plot_path": "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_33681a0a57d14893ab8f770183605601_proc_2543962/synthetic_data_predictions_vs_ground_truth.png"
+        },
+        {
+          "analysis": "The loss curves indicate the training and validation loss over 300 epochs for synthetic data. Both the training and validation losses decrease significantly during the initial phase, indicating effective learning. However, there are sharp spikes in the loss at certain intervals, which could suggest instability in the training process, such as learning rate fluctuations or sensitivity to specific data points. After these spikes, the losses continue to decrease and eventually stabilize, showing that the model converges to a lower loss value.",
+          "plot_path": "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_33681a0a57d14893ab8f770183605601_proc_2543962/synthetic_data_loss_curves.png"
+        }
+      ],
+      "plot_paths": [
+        "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_33681a0a57d14893ab8f770183605601_proc_2543962/synthetic_data_predictions_vs_ground_truth.png",
+        "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_33681a0a57d14893ab8f770183605601_proc_2543962/synthetic_data_loss_curves.png"
+      ],
+      "vlm_feedback_summary": "The plots demonstrate that the model performs well overall, with predictions closely aligning with ground truth values. However, there is some variability in predictions, especially at the extremes. The loss curves highlight effective learning but also reveal instability during training, as evidenced by the sharp spikes in loss. These insights suggest the need for further investigation into the training process to address these instabilities and improve prediction reliability.",
+      "exp_results_dir": "experiment_results/experiment_33681a0a57d14893ab8f770183605601_proc_2543962",
+      "exp_results_npy_files": [
+        "experiment_results/experiment_33681a0a57d14893ab8f770183605601_proc_2543962/experiment_data.npy"
+      ]
+    },
+    {
+      "overall_plan": "The overall plan involves a two-step approach. Initially, the plan focuses on establishing a robust baseline setup, as indicated by the 'Seed node' current plan. This foundational stage is crucial for ensuring a controlled and well-defined start to the experimentation process. Following this, the previous plan targets the hyperparameter tuning of the momentum parameter in the optimizer. This involves a comprehensive exploration of different momentum values, training the model with each, and recording performance metrics to identify the optimal momentum value. This systematic approach ensures the model is fine-tuned for better performance, combining a solid baseline with iterative optimization.",
+      "analysis": "",
+      "metric": {
+        "value": {
+          "metric_names": [
+            {
+              "metric_name": "train loss",
+              "lower_is_better": true,
+              "description": "The loss calculated on the training dataset.",
+              "data": [
+                {
+                  "dataset_name": "synthetic_data",
+                  "final_value": 0.3065,
+                  "best_value": 0.3065
+                }
+              ]
+            },
+            {
+              "metric_name": "validation loss",
+              "lower_is_better": true,
+              "description": "The loss calculated on the validation dataset.",
+              "data": [
+                {
+                  "dataset_name": "synthetic_data",
+                  "final_value": 0.2764,
+                  "best_value": 0.2764
+                }
+              ]
+            },
+            {
+              "metric_name": "validation reliability",
+              "lower_is_better": true,
+              "description": "The reliability metric calculated on the validation dataset.",
+              "data": [
+                {
+                  "dataset_name": "synthetic_data",
+                  "final_value": 0.06,
+                  "best_value": 0.06
+                }
+              ]
+            }
+          ]
+        },
+        "maximize": null,
+        "name": null,
+        "description": null
+      },
+      "code": "# Set random seed\nimport random\nimport numpy as np\nimport torch\n\nseed = 1\nrandom.seed(seed)\nnp.random.seed(seed)\ntorch.manual_seed(seed)\nif torch.cuda.is_available():\n    torch.cuda.manual_seed(seed)\n\nimport os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nfrom sklearn.model_selection import train_test_split\n\n# Create working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n# Define device\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n# Generate synthetic data\nnp.random.seed(42)\nX = np.random.rand(1000, 1)\ny = 3 * X.squeeze() + np.random.normal(0, 0.5, X.shape[0])\n\n# Split the data\nX_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)\nX_train_tensor = torch.tensor(X_train, dtype=torch.float32).to(device)\ny_train_tensor = torch.tensor(y_train, dtype=torch.float32).to(device)\nX_val_tensor = torch.tensor(X_val, dtype=torch.float32).to(device)\ny_val_tensor = torch.tensor(y_val, dtype=torch.float32).to(device)\n\n\n# Define a simple Bayesian linear regression model\nclass BayesianLinearRegression(nn.Module):\n    def __init__(self):\n        super(BayesianLinearRegression, self).__init__()\n        self.linear = nn.Linear(1, 1)\n\n    def forward(self, x):\n        return self.linear(x)\n\n\n# Experiment data\nexperiment_data = {\n    \"hyperparam_tuning_momentum\": {\n        \"synthetic_data\": {\n            \"metrics\": {\"train\": [], \"val\": []},\n            \"losses\": {\"train\": [], \"val\": []},\n            \"predictions\": [],\n            \"ground_truth\": [],\n        }\n    },\n}\n\n# Hyperparameter tuning for momentum\nmomentum_values = [0.0, 0.5, 0.9]\nfor momentum in momentum_values:\n    print(f\"Training with momentum: {momentum}\")\n\n    model = BayesianLinearRegression().to(device)\n    criterion = nn.MSELoss()\n    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=momentum)\n\n    for epoch in range(100):\n        model.train()\n\n        # Forward pass\n        predictions = model(X_train_tensor)\n        train_loss = criterion(predictions.squeeze(), y_train_tensor)\n\n        # Backward and optimize\n        optimizer.zero_grad()\n        train_loss.backward()\n        optimizer.step()\n\n        # Validation\n        model.eval()\n        with torch.no_grad():\n            val_predictions = model(X_val_tensor)\n            val_loss = criterion(val_predictions.squeeze(), y_val_tensor)\n\n        # Save metrics\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"train\"\n        ].append(train_loss.item())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"val\"\n        ].append(val_loss.item())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\n            \"predictions\"\n        ].append(val_predictions.cpu().numpy())\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\n            \"ground_truth\"\n        ].append(y_val)\n\n        print(\n            f\"Epoch {epoch}: train_loss = {train_loss:.4f}, validation_loss = {val_loss:.4f}\"\n        )\n\n# Reliability measure (simple demonstration)\nreliable_predictions = (val_predictions.cpu().numpy().flatten() >= 2.5) & (\n    val_predictions.cpu().numpy().flatten() <= 3.5\n)\nreliability_measure = np.mean(reliable_predictions)\nexperiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"metrics\"][\n    \"val\"\n].append(reliability_measure)\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n",
+      "plot_code": "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\n\ntry:\n    experiment_data = np.load(\n        os.path.join(working_dir, \"experiment_data.npy\"), allow_pickle=True\n    ).item()\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\ntry:\n    # Plot training and validation loss\n    plt.figure()\n    plt.plot(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"train\"\n        ],\n        label=\"Training Loss\",\n    )\n    plt.plot(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\n            \"val\"\n        ],\n        label=\"Validation Loss\",\n    )\n    plt.title(\"Loss Curves for Synthetic Data\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_data_loss_curves.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating loss curve plot: {e}\")\n    plt.close()\n\ntry:\n    # Plot predictions vs ground truth\n    predictions = np.array(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"predictions\"]\n    ).mean(axis=0)\n    ground_truth = np.array(\n        experiment_data[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"ground_truth\"]\n    ).mean(axis=0)\n\n    plt.figure()\n    plt.scatter(ground_truth, predictions)\n    plt.plot(\n        [ground_truth.min(), ground_truth.max()],\n        [ground_truth.min(), ground_truth.max()],\n        \"r--\",\n    )\n    plt.title(\"Predictions vs Ground Truth for Synthetic Data\")\n    plt.xlabel(\"Ground Truth\")\n    plt.ylabel(\"Model Predictions\")\n    plt.savefig(\n        os.path.join(working_dir, \"synthetic_data_predictions_vs_ground_truth.png\")\n    )\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating predictions vs ground truth plot: {e}\")\n    plt.close()\n",
+      "plot_analyses": [
+        {
+          "analysis": "The scatter plot of predictions versus ground truth for synthetic data shows a reasonably strong linear relationship, as evidenced by the clustering of points around the diagonal red dashed line. However, there is some dispersion, suggesting that while the model captures the general trend, there is room for improvement in precision. This could indicate that the model's uncertainty quantification is not yet fully optimized or that the synthetic data has noise that the model struggles to handle.",
+          "plot_path": "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_3a7997fc0e2346419748cff68d04968a_proc_2543963/synthetic_data_predictions_vs_ground_truth.png"
+        },
+        {
+          "analysis": "The loss curves for synthetic data reveal an unusual training pattern, with sharp drops and increases in both training and validation loss at specific intervals. This suggests that the training process may involve some form of curriculum learning, staged training, or dynamic adjustment of the learning rate. While the final losses are low, the spikes in loss could indicate overfitting or instability in the training process. Monitoring these spikes and analyzing their causes would be crucial for improving model robustness.",
+          "plot_path": "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_3a7997fc0e2346419748cff68d04968a_proc_2543963/synthetic_data_loss_curves.png"
+        }
+      ],
+      "plot_paths": [
+        "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_3a7997fc0e2346419748cff68d04968a_proc_2543963/synthetic_data_predictions_vs_ground_truth.png",
+        "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_3a7997fc0e2346419748cff68d04968a_proc_2543963/synthetic_data_loss_curves.png"
+      ],
+      "vlm_feedback_summary": "The plots demonstrate that the model performs reasonably well but has areas for improvement, particularly in precision and training stability. The prediction scatter plot suggests a decent linear relationship but highlights some dispersion. The loss curves indicate potential issues with overfitting or unstable training dynamics, as seen in the sharp loss spikes.",
+      "exp_results_dir": "experiment_results/experiment_3a7997fc0e2346419748cff68d04968a_proc_2543963",
+      "exp_results_npy_files": [
+        "experiment_results/experiment_3a7997fc0e2346419748cff68d04968a_proc_2543963/experiment_data.npy"
+      ]
+    }
+  ],
+  "aggregated results of nodes with different seeds": {
+    "overall_plan": "The comprehensive plan involves first conducting hyperparameter tuning for the 'momentum' parameter in the optimizer by iterating over a range of values to determine the optimal setting based on training and validation losses. This includes recording and saving all experiment data for analysis. Building on this, the plan extends to aggregating results from multiple seeds to account for the randomness in the training process, thereby ensuring the robustness and generalizability of the results. The integration of these elements reflects a commitment to thoroughness and scientific rigor in optimizing model performance.",
+    "metric": {
+      "value": null,
+      "maximize": null,
+      "name": null,
+      "description": null
+    },
+    "code": "# plotting aggregation code",
+    "plot_code": "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\n\n# Load experiment data\ntry:\n    experiment_data_path_list = [\n        \"experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_3a7997fc0e2346419748cff68d04968a_proc_2543963/experiment_data.npy\",\n        \"experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_a5b70756be874363a0d6c4a4760bc2e8_proc_2543960/experiment_data.npy\",\n        \"experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/experiment_33681a0a57d14893ab8f770183605601_proc_2543962/experiment_data.npy\",\n    ]\n    all_experiment_data = []\n    for experiment_data_path in experiment_data_path_list:\n        experiment_data = np.load(\n            os.path.join(os.getenv(\"AI_SCIENTIST_ROOT\"), experiment_data_path),\n            allow_pickle=True,\n        ).item()\n        all_experiment_data.append(experiment_data)\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\n# Plot training and validation loss with mean and standard error\ntry:\n    train_losses = [\n        exp[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\"train\"]\n        for exp in all_experiment_data\n    ]\n    val_losses = [\n        exp[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"losses\"][\"val\"]\n        for exp in all_experiment_data\n    ]\n\n    mean_train_losses = np.mean(train_losses, axis=0)\n    mean_val_losses = np.mean(val_losses, axis=0)\n    std_train_losses = np.std(train_losses, axis=0) / np.sqrt(len(all_experiment_data))\n    std_val_losses = np.std(val_losses, axis=0) / np.sqrt(len(all_experiment_data))\n\n    plt.figure()\n    plt.plot(mean_train_losses, label=\"Mean Training Loss\")\n    plt.fill_between(\n        range(len(mean_train_losses)),\n        mean_train_losses - std_train_losses,\n        mean_train_losses + std_train_losses,\n        alpha=0.3,\n    )\n\n    plt.plot(mean_val_losses, label=\"Mean Validation Loss\")\n    plt.fill_between(\n        range(len(mean_val_losses)),\n        mean_val_losses - std_val_losses,\n        mean_val_losses + std_val_losses,\n        alpha=0.3,\n    )\n\n    plt.title(\"Mean Loss Curves for Synthetic Data\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_data_mean_loss_curves.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating mean loss curve plot: {e}\")\n    plt.close()\n\n# Plot predictions vs ground truth with mean and standard error\ntry:\n    predictions_all = [\n        exp[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"predictions\"]\n        for exp in all_experiment_data\n    ]\n    ground_truth_all = [\n        exp[\"hyperparam_tuning_momentum\"][\"synthetic_data\"][\"ground_truth\"]\n        for exp in all_experiment_data\n    ]\n\n    mean_predictions = np.mean(predictions_all, axis=0)\n    mean_ground_truth = np.mean(ground_truth_all, axis=0)\n\n    std_predictions = np.std(predictions_all, axis=0)\n    std_ground_truth = np.std(ground_truth_all, axis=0)\n\n    plt.figure()\n    plt.scatter(mean_ground_truth, mean_predictions)\n    plt.errorbar(\n        mean_ground_truth,\n        mean_predictions,\n        xerr=std_ground_truth,\n        yerr=std_predictions,\n        fmt=\"o\",\n        label=\"Mean \u00b1 Std Err\",\n        alpha=0.5,\n    )\n    plt.plot(\n        [mean_ground_truth.min(), mean_ground_truth.max()],\n        [mean_ground_truth.min(), mean_ground_truth.max()],\n        \"r--\",\n    )\n    plt.title(\"Mean Predictions vs Ground Truth for Synthetic Data\")\n    plt.xlabel(\"Ground Truth\")\n    plt.ylabel(\"Model Predictions\")\n    plt.legend()\n    plt.savefig(\n        os.path.join(working_dir, \"synthetic_data_mean_predictions_vs_ground_truth.png\")\n    )\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating mean predictions vs ground truth plot: {e}\")\n    plt.close()\n",
+    "plot_analyses": [],
+    "plot_paths": [
+      "experiments/2025-10-27_07-58-29_adaptive_bayesian_conformal_prediction_attempt_0/logs/0-run/experiment_results/seed_aggregation_7e4c22d633c04aea964f3f4df4d344a3/synthetic_data_mean_loss_curves.png"
+    ],
+    "vlm_feedback_summary": [],
+    "exp_results_dir": "experiment_results/seed_aggregation_7e4c22d633c04aea964f3f4df4d344a3",
+    "exp_results_npy_files": []
+  }
+}

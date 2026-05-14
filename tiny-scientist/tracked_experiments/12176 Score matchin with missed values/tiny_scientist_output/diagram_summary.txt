@@ -1,0 +1,1 @@
+The diagram presents a structured pipeline for a framework enhancing long-term human-LLM collaboration, illustrating the components of reinforcement learning for intent adaptation, context-aware dialogue management, and proactive engagement mechanism.

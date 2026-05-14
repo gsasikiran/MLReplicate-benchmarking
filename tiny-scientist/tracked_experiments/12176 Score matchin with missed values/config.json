@@ -1,0 +1,7 @@
+{
+  "intent": "The main research goal is to enhance large language models for improved multiturn human-LLM collaboration. The main research question is how to optimize LLM responses for long-term interactions to uncover user intent and offer proactive, insightful suggestions using a collaborative simulation framework.",
+  "model": "gpt-4o",
+  "budget": 10.0,
+  "timestamp": "20251027_082356",
+  "output_dir": "tracked_experiments/20251027_082356_The_main_research_goal_is_to_enhance_large_languag"
+}

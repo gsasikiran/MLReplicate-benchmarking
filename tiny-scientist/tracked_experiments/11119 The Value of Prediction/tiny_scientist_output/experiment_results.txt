@@ -1,0 +1,17 @@
+{
+  "run_1": {
+    "accuracy": 0.274,
+    "f1_score": 0.11785871271585557,
+    "equity_gap_metric": 0.0
+  },
+  "run_2": {
+    "accuracy": 0.253,
+    "f1_score": 0.10216919393455706,
+    "equity_gap_metric": 0.0
+  },
+  "run_3": {
+    "accuracy": 0.662,
+    "f1_score": 0.663874606172187,
+    "equity_gap_metric": 0.0
+  }
+}

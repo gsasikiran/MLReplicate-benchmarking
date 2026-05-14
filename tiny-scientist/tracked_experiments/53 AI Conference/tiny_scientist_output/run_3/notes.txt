@@ -1,0 +1,3 @@
+Experiment Run 3:
+Description: This run continued with 5 epochs and Adam optimizer to ensure stability in model performance.
+Results: {'accuracy': 0.834, 'bias_detection_score': 0.0}

@@ -1,0 +1,27 @@
+\section{Related Work}
+
+\subsection{Reinforced Learning Layer}
+
+Reinforcement learning (RL) has been successfully applied to various domains, including image generation. Existing works like \cite{lillicrap2015continuous} and \cite{mnih2016asynchronous} have demonstrated the potential of RL to optimize neural networks through feedback-driven learning. Some approaches focus on framework designs for robust performance in image synthesis, such as \cite{wang2019reinforced}, which utilized RL to improve Generative Adversarial Networks (GANs). Furthermore, \cite{song2020score} and \cite{ho2020denoising} have expanded the application of diffusion models combined with RL to enhance image quality and diversity by iteratively refining outputs. 
+
+Our contribution advances this domain by positioning a Reinforced Learning Layer within our RAD-Nets framework, integrating RL signals to optimize diffusion process outputs. By focusing on class-specific optimizations and adaptive learning capabilities, our approach enhances existing methods with real-time feedback adaptability.
+
+\subsection{Adaptive Feedback Mechanism}
+
+Adaptive feedback mechanisms have become a cornerstone for advancing image generation systems, as seen in research such as \cite{schmidt2019dynamic}, which integrates feedback loops for dynamic parameter adjustments in image synthesis. Techniques explored by \cite{singh2018feedback} and \cite{schwarz2018progressive} exemplify how feedback data can guide iterative improvement cycles, actively enhancing output quality and diversity. The work of \cite{salimans2016improved} extends these paradigms to focus on quality metrics, leveraging feedback to adjust generative parameters. 
+
+In our RAD-Nets, we adopt these principles to develop an Adaptive Feedback Mechanism, providing dynamic and real-time parameter optimization, enhancing the network's efficiency and image output quality by iterating on direct feedback.
+
+\subsection{Multi-Objective Optimization (MOO) Module}
+
+Multi-objective optimization (MOO) has been widely applied to balance competing objectives in neural network training, as explored by \cite{kim2005multi} and \cite{deb2002fast}. The use of composite reward mechanisms is also highlighted in works like \cite{van2016deep} and \cite{anderson2018deep}, which address the need to optimize for multiple criteria, such as quality and diversity, during the training process. Recent studies \cite{tan2019efficientnet} and \cite{liu2018progressive} further illustrate the use of MOO strategies in improving neural architectures for enhanced performance.
+
+Within RAD-Nets, our MOO module takes inspiration from these approaches by applying a structured reward framework that harmonizes the objectives of image quality, diversity, and class fidelity. This dynamically optimizes parameters to consistently achieve superior image generation results.
+
+\subsubsection{Class-Conditional Enrichment Module}
+
+Class-conditional generation methods, such as those discussed in \cite{brock2018large} and \cite{mirza2014conditional}, have shown promise in improving class specificity in generated content. This method provides finer control over the generative process by conditioning on class-based information. Recent advancements by \cite{karras2019style} and \cite{odena2017conditional} demonstrate how class conditioning can be leveraged to enhance clarity and diversity in outputs by focusing on distinct class traits.
+
+By integrating a Class-Conditional Enrichment Module into RAD-Nets, we refine and boost class-specific features through reinforced learning algorithms, elevating the generation quality through deeper representational specificity.
+
+

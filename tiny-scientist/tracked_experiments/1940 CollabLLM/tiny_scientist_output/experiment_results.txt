@@ -1,0 +1,32 @@
+{
+  "run_1": {
+    "validation_metrics": {
+      "accuracy": 0.8465,
+      "f1_score": 0.8504627374573794
+    },
+    "test_metrics": {
+      "accuracy": 0.8465,
+      "f1_score": 0.8504627374573794
+    }
+  },
+  "run_2": {
+    "validation_metrics": {
+      "accuracy": 0.8375,
+      "f1_score": 0.8466257668711656
+    },
+    "test_metrics": {
+      "accuracy": 0.8375,
+      "f1_score": 0.8466257668711656
+    }
+  },
+  "run_3": {
+    "validation_metrics": {
+      "accuracy": 0.845,
+      "f1_score": 0.8440643863179075
+    },
+    "test_metrics": {
+      "accuracy": 0.845,
+      "f1_score": 0.8440643863179075
+    }
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "target": "Roll the dice & look before you leap: Going beyond the creative limits of next-token prediction",
+  "source_papers": [
+    {
+      "reference": "Bachmann, G. and Nagarajan, V. The pitfalls of next-token prediction. In Proceedings of the 41st International Conference on Machine Learning, volume 235 of Proceedings of Machine Learning Research, pp. 2296-2318, 2024.",
+      "rank": 1,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper articulates the limitations of the traditional next-token prediction paradigm, paving the way for exploratory alternatives like multi-token prediction. By identifying specific failures of next-token models, it directly informs the methodological framework of the current thesis.",
+      "usage": "Its findings on the deficiencies of NTP were used to justify the exploration of multi-token methods as an improvement."
+    },
+    {
+      "reference": "Hofstadter, D. A review of mental leaps: Analogy in creative thought. AI Mag., 16(3):75-80, 1995.",
+      "rank": 2,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This paper provides a foundational understanding of cognitive processes associated with creativity, directly influencing the study\u2019s conceptualization of 'leaps of thought'. It establishes the theoretical background necessary for discussing the creative mechanics employed in the tasks.",
+      "usage": "The concepts from this work were integrated into defining the creative challenges faced by models in the experiments of the paper."
+    },
+    {
+      "reference": "Boden, M. A. The Creative Mind - Myths and Mechanisms (2. ed.). Routledge, 2003.",
+      "rank": 3,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "Boden's framework categorizes types of creativity into combinational, exploratory, and transformative, which is essential for the thesis's exploratory experiments. It provides a clear taxonomy that informs the experimental design.",
+      "usage": "Used to characterize and differentiate the types of creativity being evaluated in the proposed tasks."
+    },
+    {
+      "reference": "Li, Y., Choi, D. H., Chung, J., Kushman, N., Schrittwieser, J., et al. Competition-level code generation with Alphacode. 2022.",
+      "rank": 4,
+      "type": [
+        "component"
+      ],
+      "justification": "The methodologies involving adjacency lists and task-oriented problem generation strategies from this paper were adapted to assess the creativity and problem-solving abilities of language models.",
+      "usage": "The exposure of models to adjacency lists inspired similar constructs within the experiments aimed at quantifying creativity."
+    },
+    {
+      "reference": "Chow, Y., et al. Inference-aware fine-tuning for best-of-n sampling in large language models. ArXiv, abs/2412.15287, 2024.",
+      "rank": 5,
+      "type": [
+        "component"
+      ],
+      "justification": "The relevance of inference-aware fine-tuning techniques addresses the architecture's flexibility in exploration tasks, thus enriching the multi-token methodologies leveraged in the research.",
+      "usage": "Its findings on model tuning were applied to reinforce the evaluation of various sampling techniques used in the experiments."
+    },
+    {
+      "reference": "Zhang, H., Li, L. H., Meng, T., et al. On the paradox of learning to reason from data. In Proceedings of the Thirty-Second International Joint Conference on Artificial Intelligence, IJCAI 2023.",
+      "rank": 6,
+      "type": [
+        "component"
+      ],
+      "justification": "Their findings regarding reasoning and decision-making coherence are instrumental in defining the constraints articulated in the algorithmic creativity framework established within this paper.",
+      "usage": "Utilized to define coherence requirements across generations and measure algorithmic creativity."
+    },
+    {
+      "reference": "Yu, L., Jiang, W., Shi, H., YU, J., Liu, Z., Zhang, Y., et al. Metamath: Bootstrap your own mathematical questions for large language models. In The Twelfth International Conference on Learning Representations, 2024.",
+      "rank": 7,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "The innovative approach of generating mathematical queries resonates with the tasks designed in this research, tying creative concepts to empirical results.",
+      "usage": "This paper's methodologies inspired the creation of open-ended tasks designed to measure algorithmic creativity."
+    },
+    {
+      "reference": "Pezeshki, M., et al. Gradient starvation: A learning proclivity in neural networks. In Advances in Neural Information Processing Systems 34, 2021.",
+      "rank": 8,
+      "type": [
+        "methodological"
+      ],
+      "justification": "Identifies critical pitfalls in learning dynamics that affect the outcomes of various neural architectures, particularly next-token learners, influencing the design of the experiment.",
+      "usage": "Referenced in arguing against sole reliance on NTP for creative tasks due to its inherent learning limitations."
+    },
+    {
+      "reference": "Zhao, Y., Zhang, R., et al. Assessing and understanding creativity in large language models. ArXiv, abs/2401.12491, 2024.",
+      "rank": 9,
+      "type": [
+        "critical component"
+      ],
+      "justification": "This work provides insight into the evaluation mechanism for creativity, particularly relevant for benchmarking the originality of outputs in this study.",
+      "usage": "Used as a reference for creative assessment methodologies employed in the algorithmic tasks."
+    },
+    {
+      "reference": "Xu, M., Jiang, G., et al. Interactive visual reasoning under uncertainty. In Neural Information Processing Systems, 2022.",
+      "rank": 10,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "Shows how structured reasoning aligns with creativity which informs how the tasks designed in this paper are structured for evaluating algorithmic creativity.",
+      "usage": "Guided the construction of the tasks around fostering structured exploration in creative contexts."
+    }
+  ],
+  "authors": [
+    "Vaishnavh Nagarajan",
+    "Chen Henry Wu",
+    "Charles Ding",
+    "Aditi Raghunathan"
+  ],
+  "year": 2025,
+  "url": "http://arxiv.org/abs/2504.15266v4",
+  "abstract": "We design a suite of minimal algorithmic tasks that are a loose abstraction\nof open-ended real-world tasks. This allows us to cleanly and controllably\nquantify the creative limits of the present-day language model. Much like\nreal-world tasks that require a creative, far-sighted leap of thought, our\ntasks require an implicit, open-ended stochastic planning step that either (a)\ndiscovers new connections in an abstract knowledge graph (like in wordplay,\ndrawing analogies, or research) or (b) constructs new patterns (like in\ndesigning math problems or new proteins). In these tasks, we empirically and\nconceptually argue how next-token learning is myopic; multi-token approaches,\nnamely teacherless training and diffusion models, comparatively excel in\nproducing diverse and original output. Secondly, to elicit randomness without\nhurting coherence, we find that injecting noise at the input layer (dubbed\nseed-conditioning) works surprisingly as well as (and in some conditions,\nbetter than) temperature sampling from the output layer. Thus, our work offers\na principled, minimal test-bed for analyzing open-ended creative skills, and\noffers new arguments for going beyond next-token learning and temperature\nsampling. We make part of the code available under\nhttps://github.com/chenwu98/algorithmic-creativity",
+  "venue": "arXiv.org",
+  "venue_source": "Semantic Scholar",
+  "venue_lookup_time": "2025-10-20T16:11:56.352540",
+  "citations": 0,
+  "task1": "The model described in the paper is designed to tackle open-ended creative tasks that require a leap of thought, such as generating complex word problems or suggesting novel scientific ideas. The core methodology involves the integration of multi-token approaches, specifically through teacherless training or diffusion modeling, to enhance the model's algorithmic creativity while addressing randomness in generation.\n\nThe major technical components include:\n\n1. **Model Architecture:** Utilize a Transformer-based architecture, trained on both next-token prediction and multi-token prediction tasks. Specifically, implement a hybrid approach that includes standard teacher-forcing for next-token prediction and teacherless training (where the output is generated for multiple tokens simultaneously based on the input context).\n\n2. **Training Procedure:**\n   - **Next-Token Training:**  Use teacher forcing with the model predicting each token given the preceding tokens, optimizing using a standard cross-entropy loss.\n   - **Multi-Token Training:** Employ a teacherless approach where the model predicts multiple tokens simultaneously based on a given input prompt. Set an objective with a weight favoring multi-token predictions, such as 0.5 or 0.75 depending on the specific task.\n\n3. **Data Generation and Processing:** Build datasets tailored to creative tasks, including structured tasks that involve graph-based knowledge (like sibling discovery and triangle generation). Each task is defined by a coherence function, further enriched by diversifying the input-output mappings presented during training.\n\n4. **Randomness Injection (Seed Conditioning):** Introduce arbitrary seed strings as prefixes during training to promote diversity in generation. These seeds can be fixed-length, such as 10 characters, derived from a selected character set (e.g., uppercase letters). Random seeds are utilized at inference to ensure unique outputs are generated per task.\n\n### Implementation Steps:\n1. **Model Configuration:**\n   - Set the model's hyperparameters (learning rate, batch size, sequence length) according to the specific dataset. For example, a standard maximum learning rate might be 5 \u00d7 10^-4, with a batch size of 32.\n  \n2. **Training the Model:**\n   - Train the model on a large enough dataset (e.g., 50k samples for a sibling discovery task) to learn the underlying patterns while ensuring that the model experiences a mixture of examples that don't cover all possible outputs (overfitting).\n\n3. **Evaluation Metrics:**\n   - Implement a coherence function that evaluates the generated outputs against the desired output structures. Define original and unique strings based on empirical evaluations from multiple generated samples, potentially using metrics like \"algorithmic creativity\" to quantify the diversity and originality of the generated samples.\n\n4. **Integration of Components:**\n   - Combine the two training paradigms (next-token and multi-token) using appropriate weights, and during inference, apply the seed conditioning strategy to produce varied results in response to tasks. For multi-token training, ensure that the training step count (e.g., around 10k to 40k steps) adequately reflects the complexity of the tasks being learned.\n\n### Critical Implementation Details:\n- **Random Seed Selection:** Experiment with the length and character set of the random seed, as longer seeds may improve creativity but also evaluate performance in relation to temperature settings during sampling.\n- **Compatibility Testing:** Assess the performance differences based on varying conditions or modifications to the training setup to optimize for algorithmic creativity without compromising coherence or introducing excessive memorization.\n- **Data Sensitivity Analysis:** Notice the effects that format changes in data representation (such as edge lists versus node lists) have on model performance, adjusting strategies accordingly.\n\nThis structured guidance enables researchers to implement and test the core methodology presented in the paper, facilitating exploration of creative capabilities in generative models without needing to reference the entire document directly.",
+  "task2": "1. The primary task this research tackles is the assessment of creativity in language models (LMs) through the design of minimal algorithmic tasks that abstract real-world creative processes. These tasks require a form of open-ended thinking akin to complex human creativity and innovation, where responses must not only be correct but also diverse and original.\n\n2. Current limitations in existing approaches primarily stem from the dominant reliance on next-token prediction, which is seen as myopic and inadequate for tasks that necessitate a broader understanding of global patterns and multimodal planning. Existing models often struggle to produce original outputs and may revert to memorizing training data rather than generating novel combinations.\n\n3. The core challenges that the researchers aim to overcome include the limitations of next-token learning in capturing the complexity of creative leaps, as well as the difficulties in eliciting randomness from models without sacrificing coherence in their outputs. The research seeks to address how to implement more robust, creative strategies that allow models to explore and generate diverse solutions effectively.\n\n4. Key objectives and intended contributions of this work include the following: \n   - To provide a structured framework for evaluating creativity in language models through well-defined tasks that isolate specific creative processes.\n   - To advocate for the adoption of multi-token approaches and techniques such as seed-conditioning that enhance the diversity and originality of outputs, thereby demonstrating significant improvements in algorithmic creativity compared to traditional next-token methods.\n   - To lay the groundwork for future explorations in algorithmic creativity, inspiring new methodologies and experimental designs that prioritize open-ended and creative problem-solving in AI systems.",
+  "instance_id": "next-token_prediction"
+}

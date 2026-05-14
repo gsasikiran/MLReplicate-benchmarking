@@ -1,0 +1,162 @@
+{
+  "target": "CollabLLM: From Passive Responders to Active Collaborators",
+  "source_papers": [
+    {
+      "reference": "Causality: Models, Reasoning and Inference",
+      "rank": 1,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This foundational work on causal effect estimation provided the theoretical basis for the Multiturn-aware Rewards framework in the proposed model. The methods discussed allow for an understanding of how specific responses impact long-term interaction outcomes.",
+      "usage": "The authors leveraged the principles of causal inference to assess how model responses influence future conversational turns, a critical component in their training methodology."
+    },
+    {
+      "reference": "Training language models to follow instructions with human feedback",
+      "rank": 2,
+      "type": [
+        "methodological"
+      ],
+      "justification": "Ouyang et al.'s work on reinforcement learning from human feedback (RLHF) inspired significant adaptations in the proposed model's design to focus on multiturn interactions rather than single-turn responses, addressing limitations inherent in traditional RLHF frameworks.",
+      "usage": "This paper guided the authors in refining the RLHF approach to enhance interaction dynamics in the proposed model."
+    },
+    {
+      "reference": "Guidelines for human-ai interaction",
+      "rank": 3,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This paper highlighted the importance of understanding user intent and addressing frustrations in user interactions with AI, framing the necessity of the proposed model's proactive engagement strategies.",
+      "usage": "The insights provided about user interaction and iterative corrections shaped the research direction toward improving AI response strategies."
+    },
+    {
+      "reference": "Neural approaches to conversational AI",
+      "rank": 4,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "The foundational understanding of modern large language models\u2019 capabilities in generating high-quality responses influenced the approach taken in developing the proposed model framework.",
+      "usage": "The authors referenced these capabilities to justify the advancements made in multiturn interactions."
+    },
+    {
+      "reference": "Prompting and evaluating large language models for proactive dialogues: Clarification, target-guided, and non-collaboration",
+      "rank": 5,
+      "type": [
+        "critical component"
+      ],
+      "justification": "This work provided insights into effective prompting strategies that informed the decision to integrate dynamic prompting within the proposed model to improve user engagement.",
+      "usage": "It was used to adapt promising interactive techniques that enhance clarification and proactive questioning in interactions."
+    },
+    {
+      "reference": "A survey on medical large language models: Technology, application, trustworthiness, and future directions",
+      "rank": 6,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This paper underlined the importance of human-centric AI and established a precedent for the proposed model's design choices aimed at enhancing collaborative capabilities in AI systems.",
+      "usage": "It influenced the overall structure and expected outcomes of the proposed model."
+    },
+    {
+      "reference": "Generating multi-turn clarification for web information seeking",
+      "rank": 7,
+      "type": [
+        "critical component"
+      ],
+      "justification": "The methodologies presented within this study regarding the generation of clarification questions were instrumental in enhancing the proposed model's interactive capabilities.",
+      "usage": "The authors integrated similar strategies to amplify user engagement through effectively clarifying ambiguous user intents."
+    },
+    {
+      "reference": "Empowering llm-based code generation with intention clarification",
+      "rank": 8,
+      "type": [
+        "critical component"
+      ],
+      "justification": "This work on prompting LLMs for code clarification inspired strategies for the proposed model to ask clarifying questions and better align with user intent.",
+      "usage": "Techniques discussed aided in developing the proposed model's interactive response behavior."
+    },
+    {
+      "reference": "Multiturn reinforcement learning from preference human feedback",
+      "rank": 9,
+      "type": [
+        "methodological"
+      ],
+      "justification": "The concept of utilizing preference feedback within multi-turn interactions informed the proposed model's reinforcement learning approach, shaping how models could adapt to real-time user needs.",
+      "usage": "The framework defined in this research provided a structural basis for the proposed model\u2019s learning strategies."
+    },
+    {
+      "reference": "Bias and fairness in large language models: A survey",
+      "rank": 10,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This work examined potential biases in LLMs, reinforcing the need for a collaborative approach that the proposed model seeks to address, demonstrating the benefits of clarifying user intent.",
+      "usage": "The discussion around model fairness emphasized a need for the development of the proposed model's interactive frameworks."
+    },
+    {
+      "reference": "Measuring mathematical problem solving with the math dataset",
+      "rank": 11,
+      "type": [
+        "critical component"
+      ],
+      "justification": "The benchmark methodology informed the evaluation metrics applied to the multiturn tasks developed in the proposed model, ensuring task engagement and performance assessments.",
+      "usage": "It was pivotal in suggesting how to structure the evaluation criteria for successful interactions."
+    },
+    {
+      "reference": "ClarifyGPT: Empowering llm-based code generation with intention clarification",
+      "rank": 12,
+      "type": [
+        "component"
+      ],
+      "justification": "This work offered insights into implementing clarification strategies for coding tasks. These strategies were vital in shaping the proposed model's collaborative capabilities toward intention clarification.",
+      "usage": "The specific discussion on needing clarification directly influenced the interactivity design in the proposed model."
+    },
+    {
+      "reference": "8.687: Historical perspective on collaborative systems: Theory, design, and implementation",
+      "rank": 13,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "Understanding the foundational theories behind collaborative systems provided the historical context necessary for developing the proposed model's collaborative framework.",
+      "usage": "Historical insights on user intent further fueled the direction of the proposed model's training."
+    },
+    {
+      "reference": "Medium articles dataset",
+      "rank": 14,
+      "type": [
+        "component"
+      ],
+      "justification": "The creation of this dataset was critical for evaluating the proposed model's performance in the context of collaborative writing tasks, informing data sourcing methods.",
+      "usage": "This dataset directly contributed to the practical evaluations within the proposed model."
+    },
+    {
+      "reference": "User simulators for enhancing AI systems",
+      "rank": 15,
+      "type": [
+        "methodological"
+      ],
+      "justification": "The methodologies applied in user simulation echoed critical training philosophies used in the proposed model, particularly in developing the collaborative simulation module.",
+      "usage": "The concepts around simulating user interactions effectively influenced how the proposed model was structured to understand user needs."
+    }
+  ],
+  "authors": [
+    "Shirley Wu",
+    "Michel Galley",
+    "Baolin Peng",
+    "Hao Cheng",
+    "Gavin Li",
+    "Yao Dou",
+    "Weixin Cai",
+    "James Zou",
+    "Jure Leskovec",
+    "Jianfeng Gao"
+  ],
+  "year": 2025,
+  "url": "http://arxiv.org/abs/2502.00640v3",
+  "abstract": "Large Language Models are typically trained with next-turn rewards, limiting\ntheir ability to optimize for long-term interaction. As a result, they often\nrespond passively to ambiguous or open-ended user requests, failing to help\nusers reach their ultimate intents and leading to inefficient conversations. To\naddress these limitations, we introduce CollabLLM, a novel and general training\nframework that enhances multiturn human-LLM collaboration. Its key innovation\nis a collaborative simulation that estimates the long-term contribution of\nresponses using Multiturn-aware Rewards. By reinforcement fine-tuning these\nrewards, CollabLLM goes beyond responding to user requests, and actively\nuncovers user intent and offers insightful suggestions-a key step towards more\nhuman-centered AI. We also devise a multiturn interaction benchmark with three\nchallenging tasks such as document creation. CollabLLM significantly\noutperforms our baselines with averages of 18.5% higher task performance and\n46.3% improved interactivity by LLM judges. Finally, we conduct a large user\nstudy with 201 judges, where CollabLLM increases user satisfaction by 17.6% and\nreduces user spent time by 10.4%.",
+  "venue": "Linguistik Aktuell/Linguistics Today",
+  "venue_source": "Crossref",
+  "venue_lookup_time": "2025-10-21T11:36:54.693738",
+  "citations": 20,
+  "task1": "To implement the core methodology of the proposed model, follow these steps:\n\n1. **Task Definition**: This approach focuses on enhancing multiturn human-LLM collaboration in tasks such as document creation, coding assistance, and multiturn question answering.\n\n2. **Core Techniques**:\n   - **Collaborative Simulation**: A module that simulates conversations with users to estimate long-term collaboration rewards.\n   - **Multiturn-aware Rewards (MR)**: A reward function that incorporates both extrinsic metrics (goal-specific success) and intrinsic metrics (efficiency and engagement) to evaluate responses.\n   - **Reinforcement Learning (RL)**: Use optimization methods like Proximal Policy Optimization (PPO) or Direct Preference Optimization (DPO) for training.\n\n3. **Component Purposes**:\n   - **Collaborative Simulation**: Generates potential future user responses based on the conversation history to assess the impact of prior model responses.\n   - **Multiturn-aware Reward**: Evaluates the current response based on its anticipated future effects on the conversation trajectory.\n   - **Optimizers (PPO/DPO)**: These algorithms fine-tune the proposed model using the computed rewards to encourage collaborative engagement.\n\n4. **Implementation Details**:\n   - **Key Parameters**:\n     - For the collaborative simulation, define the window size `w` that specifies the maximum number of future conversation turns considered (window size typically set to 2).\n     - The penalty factor \u03bb controls the threshold for token efficiency, tuned higher for longer responses and set lower for more concise tasks.\n   - **Input/Output Specifications**:\n     - Input: Conversation history (`t_h`), current user input (`u_j`), and prior model responses (`m_j`).\n     - Output: Next model response (`m_j`) that optimally influences future interactions.\n   - **Constraints**: Ensure that necessary LLM and reward systems align with the computational infrastructure, particularly when sampling user responses.\n\n5. **Step-by-step Integration**:\n   - **Step 1**: Initialize the collaborative simulation module to interact with a user simulator, which will generate user responses (`u_j`) based on the conversation history.\n   - **Step 2**: Compute the Multiturn-aware Reward (MR) using both extrinsic and intrinsic metrics to evaluate the impact of responses.\n   - **Step 3**: Fine-tune the proposed model with reinforcement learning (PPO/DPO) to maximize MR values, integrating these rewards into the conversation flow, guiding further interactions effectively.\n\n6. **Critical Performance Details**:\n   - Adjust sample sizes for computing MR when desired engagement levels change (typically set to 3 samples per response).\n   - Conduct ablation studies on the reward mechanisms to determine their impact on the proposed model's performance, ensuring the configuration maximizes engagement and efficiency without incurring excessive computational costs. Optimization should show a balanced performance across all evaluated metrics.\n\nFollowing this guide should help in effectively replicating and utilizing the methodology outlined in this paper without needing to visualize the complete research.",
+  "task2": "1. The primary task this study tackles is enhancing the collaborative capabilities of Large Language Models (LLMs) to better support users in multiturn interactions. The goal is to shift LLMs from being passive responders that merely reply to user queries to becoming active collaborators that assist users in clarifying their intents and efficiently completing tasks over multiple conversational turns.\n\n2. Current limitations in existing approaches include a predominant focus on immediate, single-turn responses that fail to consider the long-term context and user needs. Most traditional approaches are trained primarily to optimize for short-term rewards related to individual turns, which diminishes their effectiveness in engaging users dynamically over extended interactions. This often leads to passive behaviors, where the model responds to user prompts without proactively guiding users or adapting to their evolving requirements.\n\n3. The core challenges the researchers aim to overcome include the lack of a mechanism for LLMs to estimate the long-term consequences of their responses and the inability to effectively engage users in a way that prompts the clarification of their goals and preferences throughout a conversation. The researchers seek to address how to evaluate and train LLMs so that they can incorporate multiturn context and respond in ways that enhance user satisfaction and engagement across complex, open-ended tasks.\n\n4. The key objectives and intended contributions of this study are to develop a training framework that leverages a collaborative simulation to assess and enhance the long-term effectiveness of LLM responses through a mechanism referred to as Multiturn-aware Rewards. This framework is designed to improve user interaction quality by encouraging LLMs to generate suggestions, ask clarifying questions, and facilitate a more engaged collaborative dialogue, ultimately improving task performance and user experience. Through this work, the researchers aim to advance the state of human-centered AI applications by making LLMs more proactive and context-aware in their interactions.",
+  "instance_id": "collabllm"
+}

@@ -1,0 +1,17 @@
+{
+    "Name": "prediction_vs_capacity_tradeoff",
+    "Title": "Evaluating the Trade-Off Between Predictive Accuracy and Screening Capacity in Social Welfare Programs",
+    "Short Hypothesis": "In resource-constrained environments, expanding screening capacity yields greater benefits in identifying vulnerable individuals compared to marginal improvements in predictive accuracy.",
+    "Related Work": "Existing research primarily emphasizes the importance of predictive models in welfare programs (e.g., causal simulation models), but lacks a comparative analysis of the effectiveness of prediction accuracy versus screening capacity expansion. This proposal introduces the Prediction-Access Ratio (PAR) to quantify this trade-off, offering a novel perspective on resource allocation in social programs.",
+    "Abstract": "As machine learning becomes integral to government programs aimed at identifying and assisting the most vulnerable populations, this paper investigates whether improving predictive accuracy is more beneficial than expanding screening capacity. We hypothesize that in typical operational conditions, enhancing capacity to reach more individuals will provide greater benefits than marginal gains in prediction accuracy. We introduce the Prediction-Access Ratio (PAR) to quantify this trade-off, guiding policymakers on when to invest in better models versus expanding access. Utilizing both mathematical modeling and a case study on long-term unemployment among German jobseekers, we will demonstrate that expanding screening capacity generally leads to improved identification of the worst-off. Our findings will empower policymakers with actionable insights, enabling more effective allocation of resources in equity-driven contexts.",
+    "Experiments": [
+        "1. Develop mathematical models to simulate varying levels of predictive accuracy and screening capacity. Analyze the outcomes to determine the optimal points of intervention.",
+        "2. Conduct a case study using historical data from German jobseekers to validate the theoretical findings, assessing the impact of screening capacity expansion versus predictive accuracy improvements on identification rates of vulnerable individuals.",
+        "3. Implement a controlled experiment where one group uses enhanced predictive models while another focuses on capacity expansion. Evaluate the effectiveness using metrics such as identification rates of 'worst-off' individuals, intervention responsiveness, and cost-effectiveness."
+    ],
+    "Risk Factors and Limitations": [
+        "Potential challenges in obtaining high-quality data for the case study.",
+        "The complexity of real-world dynamics may limit the generalizability of simulation model findings.",
+        "Resource constraints in implementing the proposed experiments in practice."
+    ]
+}

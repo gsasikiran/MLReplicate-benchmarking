@@ -1,0 +1,5 @@
+Experiment Description:
+Run 2: Increased model depth and training epochs to improve performance.
+Run Number: 2
+Validation Metrics: {'accuracy': 0.845, 'f1_score': 0.8440643863179075}
+Test Metrics: {'accuracy': 0.845, 'f1_score': 0.8440643863179075}

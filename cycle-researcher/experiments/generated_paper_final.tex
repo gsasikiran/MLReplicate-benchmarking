@@ -1,0 +1,97 @@
+Sure! Below is a fully compilable LaTeX document based on your requirements. I've included the necessary document class, preamble, and bibliography setup. You can save this as `main.tex` and create a `references.bib` file in the same directory for your citations.
+
+### main.tex
+```latex
+\documentclass[12pt]{article}
+
+% Preamble
+\usepackage{graphicx} % For including graphics
+\usepackage{wrapfig}  % For wrapping text around figures
+\usepackage{amsmath}  % For advanced math typesetting
+\usepackage{cite}     % For better citation handling
+\usepackage{geometry} % For adjusting page dimensions
+\usepackage{hyperref} % For hyperlinks in the document
+
+% Page dimensions
+\geometry{margin=1in}
+
+% Title and Author
+\title{Your Paper Title Here}
+\author{Your Name \\ Your Institution \\ \texttt{your.email@example.com}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    This is the abstract of your paper. It provides a brief overview of the content and findings.
+\end{abstract}
+
+\section{Introduction}
+This is the introduction section. You can introduce your topic here and provide background information.
+
+\section{Methodology}
+In this section, describe the methods used in your research. You can include equations, figures, and tables as needed.
+
+\begin{equation}
+    E = mc^2
+\end{equation}
+
+\section{Results}
+Present your results here. You can include figures and tables to illustrate your findings.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{example-image} % Replace with your image file
+    \caption{An example figure.}
+    \label{fig:example}
+\end{figure}
+
+\section{Discussion}
+Discuss the implications of your results and how they relate to existing research.
+
+\section{Conclusion}
+Summarize your findings and suggest future work.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
+```
+
+### references.bib
+```bibtex
+@article{sample2023,
+    author = {Author, A.},
+    title = {Sample Article Title},
+    journal = {Sample Journal},
+    year = {2023},
+    volume = {1},
+    number = {1},
+    pages = {1-10},
+    doi = {10.1234/sample.doi}
+}
+
+@book{samplebook2023,
+    author = {Author, B.},
+    title = {Sample Book Title},
+    publisher = {Sample Publisher},
+    year = {2023},
+    address = {Sample City},
+}
+```
+
+### Instructions to Compile
+1. Save the LaTeX code in a file named `main.tex`.
+2. Save the BibTeX code in a file named `references.bib`.
+3. Use the following commands to compile the document:
+   ```bash
+   pdflatex main
+   bibtex main
+   pdflatex main
+   pdflatex main
+   ```
+4. This will generate a PDF file named `main.pdf` with your formatted document.
+
+Feel free to modify the content, titles, and references as needed!

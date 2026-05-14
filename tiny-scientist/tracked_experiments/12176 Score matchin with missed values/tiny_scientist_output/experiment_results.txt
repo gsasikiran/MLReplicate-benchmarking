@@ -1,0 +1,14 @@
+{
+  "run_1": {
+    "accuracy": 1.0,
+    "f1_score": 1.0
+  },
+  "run_2": {
+    "accuracy": 1.0,
+    "f1_score": 1.0
+  },
+  "run_3": {
+    "accuracy": 1.0,
+    "f1_score": 1.0
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "intent": "The main research goal is to reform the peer review process in AI conferences to enhance review quality and reviewer accountability. The main research question is: How can implementing a bi-directional feedback loop and a structured reviewer reward system improve reviewer accountability and foster a sustainable peer review ecosystem?",
+  "model": "gpt-4o",
+  "budget": 10.0,
+  "timestamp": "20251027_110719",
+  "output_dir": "tracked_experiments/20251027_110719_The_main_research_goal_is_to_reform_the_peer_revie"
+}

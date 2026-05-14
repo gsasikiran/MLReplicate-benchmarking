@@ -1,0 +1,11 @@
+{
+  "run_1": {
+    "ConformalPredictionErrorRate": 0.30400000000000005
+  },
+  "run_2": {
+    "ConformalPredictionErrorRate": 0.1965
+  },
+  "run_3": {
+    "ConformalPredictionErrorRate": 0.13749999999999996
+  }
+}

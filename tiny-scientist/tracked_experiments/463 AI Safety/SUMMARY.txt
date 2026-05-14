@@ -1,0 +1,57 @@
+
+TINY-SCIENTIST RUN SUMMARY
+================================================================================
+
+Configuration:
+  Intent: The main research goal is to advocate for a comprehensive approach to AI safety that includes addressing AI's impact on the future of work and labor equity. The main research question is how AI's intertemporal effects on livelihoods and income inequality can be mitigated through pro-worker global AI governance and economic frameworks.
+  Model: gpt-4o
+  Budget: $10.0
+  Timestamp: 20251027_091316
+
+Timing:
+  Total Duration: 3026.0 seconds (50.4 minutes)
+  
+  Stage Breakdown:
+    Think: 304.7s
+    Code: 97.1s
+    Write: 2578.8s
+
+API Costs:
+  Total Cost: $1.1032
+  Budget: $10.0
+  Used: 11.0%
+
+  Module Breakdown:
+    - Writer: $0.9203
+    - Thinker: $0.1292
+    - Coder: $0.0483
+    - Safety Checker: $0.0054
+    - Reviewer: $0.0000
+
+Resource Usage (Average):
+  CPU: 0.6%
+  Memory: 8.6%
+  GPU Load: 0.0%
+  GPU Memory: 0.0%
+
+Tokens:
+Input tokens: 372,926
+Output tokens: 17,090
+Total okens: 390,016
+
+Outputs:
+  All files: tracked_experiments/20251027_091316_The_main_research_goal_is_to_advocate_for_a_compre/
+  Research Idea: research_idea.json
+  GitHub Code Search: github_code_search.json (if available)
+  Method Diagram: tiny_scientist_output/method_diagram.svg (if generated)
+  Experiments: tiny_scientist_output/
+  Paper (LaTeX): tiny_scientist_output/latex/
+  Terminal Log: terminal_output.log
+  Detailed Metrics: metrics.json
+  Resource Samples: resource_samples.json
+
+Next Steps:
+  1. Check tiny_scientist_output/ for all generated files
+  2. Review tiny_scientist_output/latex/acl_latex.tex for the paper
+  3. Check tiny_scientist_output/experiment.py for experiment code
+  4. View metrics.json for detailed resource usage

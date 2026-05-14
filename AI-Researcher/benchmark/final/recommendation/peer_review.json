@@ -1,0 +1,155 @@
+{
+  "target": "Position: The AI Conference Peer Review Crisis Demands Author Feedback and Reviewer Rewards",
+  "source_papers": [
+    {
+      "reference": "Has the machine learning review process become more arbitrary as the field has grown? the neurips 2021 consistency experiment",
+      "rank": 1,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper provided foundational insights into the inconsistencies and arbitrariness of the peer review process in ML, which heavily influenced the proposed model.",
+      "usage": "The concepts from this paper were integrated into the analysis of reviewer performance metrics and the inclusion of author feedback."
+    },
+    {
+      "reference": "Evaluating the efficacy of ai content detection tools in differentiating between human and ai-generated text",
+      "rank": 2,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This research highlighted the limitations of AI detection tools, directly informing the paper's discussions on the challenges posed by LLMs in peer reviews.",
+      "usage": "The reliability concerns outlined in this study shaped the methodology for integrating LLM reviews in a systematic manner."
+    },
+    {
+      "reference": "Peer reviews of peer reviews: A randomized controlled trial and other experiments",
+      "rank": 3,
+      "type": [
+        "component"
+      ],
+      "justification": "This work introduced the concept of evaluating reviewer feedback, which was core to the proposed changes in the review process, balancing power dynamics between authors and reviewers.",
+      "usage": "The feedback mechanisms explored influenced the design principles for the proposed author evaluation system."
+    },
+    {
+      "reference": "What do we know about the h index?",
+      "rank": 4,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper's insights into performance metrics were vital for defining a new reviewer impact score that aims to quantify reviewer contributions objectively.",
+      "usage": "The h-index comparison allowed for the adaptation of an appropriate system to recognize reviewer contributions more effectively."
+    },
+    {
+      "reference": "Improving the peer review process: a proposed market system",
+      "rank": 5,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "The concept of market-based incentives informed the design of a systematic reviewer reward framework to motivate high-quality peer reviewing.",
+      "usage": "It provided a comparative model for how financial and reputation incentives could be structured within the new system."
+    },
+    {
+      "reference": "The dangers of using large language models for peer review",
+      "rank": 6,
+      "type": [
+        "component"
+      ],
+      "justification": "This paper's concerns regarding LLMs enriched the dialogue about the dual system integrating human review and AI-generated evaluation.",
+      "usage": "Concerns from this study were addressed as key safeguards in the proposed reforms."
+    },
+    {
+      "reference": "Peer review in a changing world: An international study measuring the attitudes of researchers",
+      "rank": 7,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "The study provided essential context regarding researcher attitudes towards reviewing, highlighting the need for better incentives and recognition.",
+      "usage": "The insights were critical in shaping arguments for proposed reward systems for reviewers in the paper."
+    },
+    {
+      "reference": "Effect of blinded peer review on abstract acceptance",
+      "rank": 8,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This research highlighted the importance of blind review systems in reducing bias, influencing the design of the author evaluation phase.",
+      "usage": "It served as a benchmark for the proposed bi-directional review system, ensuring fairness in assessments."
+    },
+    {
+      "reference": "Challenges, experiments, and computational solutions in peer review",
+      "rank": 9,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This work addressed systemic peer review challenges, reinforcing the necessity for administrative reforms from the ground up.",
+      "usage": "The findings supported arguments for structural adjustments in the operational mechanisms of the review system."
+    },
+    {
+      "reference": "Does my rebuttal matter? insights from a major NLP conference",
+      "rank": 10,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This publication highlighted dynamics and behavioral patterns in reviewer interactions, enriching the paper's focus on addressing biases through structured feedback.",
+      "usage": "The insights gained from this work were employed to develop strategies to mitigate biases in reviewer feedback."
+    },
+    {
+      "reference": "Author-based analysis of conference versus journal publication in computer science",
+      "rank": 11,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This foundational analysis underlined the distinctions between publication venues which influenced perceptions of peer review quality varying among conference submissions.",
+      "usage": "The core arguments framed the positioning of the proposed system within the broader academic context."
+    },
+    {
+      "reference": "What makes a successful rebuttal in computer science conferences?",
+      "rank": 12,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "The understanding of rebuttal success factors added depth to the analysis of feedback loops between authors and reviewers, enhancing system dynamics.",
+      "usage": "The lessons emphasized the need for clarity in feedback mechanisms."
+    },
+    {
+      "reference": "The AI index report 2024",
+      "rank": 13,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This report framed the contemporary landscape of AI research, suggesting critical reforms necessary to sustain quality in reviewed outputs.",
+      "usage": "This context supported the framing of urgency for systemic changes in the peer review process."
+    },
+    {
+      "reference": "What can natural language processing do for peer review?",
+      "rank": 14,
+      "type": [
+        "component"
+      ],
+      "justification": "The potential of NLP tools to enhance peer review was instrumental in conceptualizing the use of LLMs within the proposed reforms.",
+      "usage": "This informed the practical application aspects of integrating automation in the review process."
+    },
+    {
+      "reference": "Making paper reviewing robust to bid manipulation attacks",
+      "rank": 15,
+      "type": [
+        "component"
+      ],
+      "justification": "The work highlighted the importance of fairness in evaluations, reiterating the need for safeguards against potential manipulation in reviewer assessments.",
+      "usage": "The principles discussed here were applied directly to safeguard features in the two-stage review system proposed."
+    }
+  ],
+  "authors": [
+    "Jaeho Kim",
+    "Yunseok Lee",
+    "Seulki Lee"
+  ],
+  "year": 2025,
+  "url": "http://arxiv.org/abs/2505.04966v1",
+  "abstract": "The peer review process in major artificial intelligence (AI) conferences\nfaces unprecedented challenges with the surge of paper submissions (exceeding\n10,000 submissions per venue), accompanied by growing concerns over review\nquality and reviewer responsibility. This position paper argues for the need to\ntransform the traditional one-way review system into a bi-directional feedback\nloop where authors evaluate review quality and reviewers earn formal\naccreditation, creating an accountability framework that promotes a\nsustainable, high-quality peer review system. The current review system can be\nviewed as an interaction between three parties: the authors, reviewers, and\nsystem (i.e., conference), where we posit that all three parties share\nresponsibility for the current problems. However, issues with authors can only\nbe addressed through policy enforcement and detection tools, and ethical\nconcerns can only be corrected through self-reflection. As such, this paper\nfocuses on reforming reviewer accountability with systematic rewards through\ntwo key mechanisms: (1) a two-stage bi-directional review system that allows\nauthors to evaluate reviews while minimizing retaliatory behavior, (2)a\nsystematic reviewer reward system that incentivizes quality reviewing. We ask\nfor the community's strong interest in these problems and the reforms that are\nneeded to enhance the peer review process.",
+  "venue": "arXiv",
+  "venue_source": "Default",
+  "venue_lookup_time": "2025-10-21T11:08:27.714266",
+  "citations": 0,
+  "task1": "1. **Task**: The model addresses the improvement of the peer review process in AI conferences by proposing a bi-directional feedback mechanism between authors and reviewers.\n\n2. **Core Techniques/Algorithms**:\n   - A two-stage review system: This allows authors to first evaluate the strengths and comprehension of the reviews before the critical parts are revealed.\n   - LLM integration: Incorporation of LLM-generated reviews to serve as a benchmark for authors and deter reviewers from relying solely on LLMs.\n   - Feedback scoring: Authors provide scores based on review quality which will later influence reviewer assessments.\n\n3. **Purpose and Function of Each Major Component**:\n   - **Two-stage review system**: Minimizes risk of author retaliation during peer review by separating initial positive feedback from critical comments.\n   - **LLM-generated reviews**: Act as a reference point for authors to critique the reviews they receive and encourage reviewers to enhance the quality of their feedback.\n   - **Feedback scoring**: Creates a systematic method to assess reviewer quality based on author evaluations, which can subsequently inform reviewer rewards.\n\n4. **Implementation Details**:\n   - **Two-stage review process**: Actively utilized review sections that include neutral content followed by critical sections, with authors providing feedback in between. Reviews should be constrained in length to prevent overly verbose feedback.\n   - **LLM reviews**: Ensure these are distinctly categorized and clearly labeled as AI-generated, keeping the reviewer identity confidential while authors can reference these during feedback.\n   - **Feedback scoring system**: Establish criteria for scoring based on comprehension and constructive value of reviews, with weighted averages impacting final reviewer evaluations.\n\n5. **Step-by-step Description of Interaction**:\n   - Authors submit manuscripts, which are paired with reviewers via the system based on expertise.\n   - Upon receiving reviews, the first stage releases neutral feedback and prompts authors to evaluate comprehension and usefulness.\n   - Authors submit feedback scores before the second stage unveils the critical parts of the reviews.\n   - Authors provide further insights which are aggregated, and reviewer scores are computed.\n   - The final evaluation includes both author scores and LLM flags to adjust reviewer assessments and maintain quality in future selections.\n\n6. **Critical Implementation Details**:\n   - Establish a definitive scoring rubric for feedback to ensure that evaluations are standardized and meaningful.\n   - Ensure safeguards to prevent malicious scoring from authors by implementing weighted averages from multiple submissions.\n   - Continuously monitor and possibly restrict reviewers based on aggregated scores and consistent flags raised by authors against their assessments to uphold review quality standards.",
+  "task2": "1. The primary task the research addresses is the sustainability and quality of the peer review process in artificial intelligence (AI) conferences, particularly in light of the significant increase in paper submissions. The authors aim to highlight the need for systemic reform in peer review practices to ensure high-quality evaluations and mitigate current challenges faced by authors, reviewers, and the overall conference system.\n\n2. Current limitations in existing approaches include a lack of accountability for reviewers, the overwhelming volume of submissions leading to declined review quality, and the absence of mechanisms for authors to provide feedback on reviews. These challenges have created an unsustainable environment where superficial reviews and reviewer negligence can flourish, reducing the overall quality of the peer review process.\n\n3. The core challenges the researchers aim to overcome involve establishing a bi-directional feedback mechanism that holds reviewers accountable for their assessments and incentivizes them to deliver high-quality reviews. Additionally, the research seeks to address the imbalance of power between authors and reviewers, which often results in a lack of constructive feedback for the authors and diminished trust in the review system.\n\n4. The key objectives of this research are to propose a dual-stage review system that allows authors to evaluate reviewer performance and to champion a reward system that recognizes and motivates quality reviews among reviewers. Ultimately, the authors intend to foster a more accountable and sustainable peer review environment that enhances the integrity and effectiveness of the peer review process in AI conferences.",
+  "instance_id": "peer_review"
+}

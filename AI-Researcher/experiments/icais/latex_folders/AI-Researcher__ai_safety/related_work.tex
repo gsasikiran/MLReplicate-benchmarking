@@ -1,0 +1,20 @@
+\section{Related Work}
+
+\subsection{Cross-Domain Collaborative Filtering}
+
+Cross-domain collaborative filtering has received substantial attention in recent years, primarily due to its potential for enhancing recommendation systems by leveraging information from multiple domains. Research by Tang et al. \cite{tang2012cross} and Fernández-Tobías et al. \cite{fernandez2012cross} illustrates mechanisms for transferring knowledge between domains to augment user preference modeling. Similarly, Sang et al. \cite{sang2015effective} and Hu et al. \cite{hu2018conet} propose methods that focus on the alignment of domain features, resulting in an enriched user experience by leveraging multi-domain interactions. This body of work underscores the importance of unified and coherent user profiles to inform recommendations across diverse contexts.
+
+Our work contributes to this domain by emphasizing the integration of graph neural networks (GNNs) to seamlessly construct unified user profiles from multi-domain data. Unlike prior work which primarily utilizes matrix factorization or neural collaborative filtering, our approach leverages the power of GNNs to capture complex interaction patterns across domains, thereby enhancing the precision of user preference predictions.
+
+\subsection{Meta-Reinforcement Learning Adaptation}
+
+Meta-reinforcement learning, particularly Model-Agnostic Meta-Learning (MAML), has been extensively explored for its ability to rapidly adapt models to new tasks with minimal data, as discussed by Finn et al. \cite{finn2017model} and Nichol et al. \cite{nichol2018first}. Researchers like Hospedales et al. \cite{hospedales2021meta} and Clavera et al. \cite{clavera2018learning} have further advanced this field by tailoring meta-learning strategies to specific application domains, thereby improving adaptability and efficiency in dynamic environments.
+
+In comparison, our method harnesses Meta-RL to dynamically adjust recommendations based on real-time feedback, integrating fairness constraints to maintain ethical standards. Our framework adapts the MAML technique to accommodate fairness-aware adjustments, ensuring not only rapid adaptation to evolving user preferences but also equitable outcomes in the recommendation process.
+
+\subsection{Fairness-Aware Mechanisms}
+
+Fairness in recommendation systems is an area of growing focus, with studies by Burke et al. \cite{burke2018balanced} and Beutel et al. \cite{beutel2019fairness} exploring various fairness metrics and mitigation strategies. Feldman et al. \cite{feldman2015certifying} and Dwork et al. \cite{dwork2012fairness} have provided foundational methodologies for detecting and mitigating bias, emphasizing the critical role of fairness-aware algorithms in decision-making systems.
+
+Our contribution lies in the integration of dynamic fairness adjustment mechanisms, informed by social reward insights, within the recommendation process. Unlike existing approaches which predominantly focus on static fairness assessments, our system proactively adjusts fairness metrics in alignment with societal changes, thus enhancing the adaptability and inclusivity of the recommendation ecosystem.
+

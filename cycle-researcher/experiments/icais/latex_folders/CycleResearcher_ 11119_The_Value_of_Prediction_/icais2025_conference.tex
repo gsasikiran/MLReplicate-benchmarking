@@ -1,0 +1,632 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{icais2025_conference,times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=green!60!black,
+    urlcolor=red!60!black
+}
+\usepackage{url}
+
+\usepackage[T1]{fontenc}
+\usepackage{microtype}           % better kerning & font spacing
+\usepackage{graphicx}            % figures
+\usepackage{booktabs}            % nice tables
+\usepackage{amsmath, amssymb, amsthm, bm} % math & symbols
+\usepackage{mathtools}           % for cases, coloneqq, etc.
+\usepackage{xcolor}              % colors (for code/figures)
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{enumitem}            % better control of itemize/enumerate
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}          % subfigures
+\usepackage{hyperref}            % clickable refs
+\usepackage{cleveref}          % smart cross-referencing
+\usepackage{amsmath} 
+\usepackage{xspace}
+% \usepackage[numbers]{natbib}
+
+
+\title{Predictive Need Assessment, Public Service Providers and Inequalities of Labor Market Outcomes}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Aid and assistance are key to reducing social inequalities. In the public sector, aid providers face the challenge to distribute resources according to needs. In recent years, algorithms for need assessment have become an integral part of public institutions. While need assessment is crucial, the implications for the distribution of aid and assistance in the public sector are still poorly understood. In this work, we investigate how the use of predictive models for need assessment impacts the distribution of aid and assistance in the German public employment service. To this end, we develop a synthetic dataset for the ``first round'' assignment in the German public employment service based on regional data from the State of Bavaria in 2019. Our dataset comprises labels for $85{,}299$ out of $275{,}889$ employed and unemployed, treated and untargeted individuals in 2019. The label indicates whether a person received a prioritized status and thus privileged access to government services. We find that the use of predictive models leads to significant resource imbalances and deepens the divides along the lines of migration background, education, and gender. These findings highlight important ethical implications for public service providers in need of need assessment for aid and assistance.
+\end{abstract}
+
+\section{Introduction}
+
+
+
+\label{sec:introduction}
+
+Aid and assistance are key to reducing social inequalities. In the public sector, providers of aid face the challenge to distribute resources according to needs. To this end, governments have a range of traditional methods for the assessment of needs and the prioritization of cases. Such historical approaches to need assessment typically utilize demography and geography \cite{loxha2014profiling}. However, methods used to target resources have limitations in terms of data and accuracy \cite{desiereUsingArtificialIntelligence2021}. With more sophisticated algorithms, specifically predictive models, there has been potential for a more accurate targeting to individual needs. Today, ML-based need assessment has become an integral part of public institutions \cite{Bach_Kern_Mautner_Kreuter_2023,FISCHERABAIGAR2024101976,sun2019mapping,wirtz2019artificial}.
+
+There has been extensive debate on the fairness notions for predictive models in the public sector \cite{barocas-hardt-narayanan,perdomo2023difficult}. The discussion has so far often been about the validation of administrative actions and the aim to demonstrate the validity of decisions in court and in the media \cite{Bach_Kern_Mautner_Kreuter_2023, wang2024}. However, the impact of need assessment on the distribution of resources in the public sector has been largely neglected. Understanding the implications of need assessments in the public sector requires new approaches that focus on the effects on the allocation of resources and thus on the structure of the public goods distribution \cite{kleinberg2015prediction}.
+
+In this work, we investigate how need assessment, specifically the use of predictive models for need assessment, impacts the distribution of aid and assistance in the public sector. We focus on the German public employment service (\pshg), a key institution in the labor market and provider of public goods and services. In a first step, we review policies and practices of need assessment in the public employment service. To provide an empirical analysis of need assessment in the public sector, we build a novel synthetic dataset. To this end, we use the \emph{IAB-Experimentation} \cite{10.1145/3588001.3609369}, a research data setup which provides access to individual labor market data for a large number of people in the German state of Bavaria in 2019. Within this sample, we label each individual according to whether or not they received active aid and assistance by the public employment service through prioritized access to active job mediation and other active support and service offers in the year 2019. We use the label to simulate a realistic aid distribution within the public employment service and thus to investigate how need assessment impacts the distribution of resources and thus the public distribution of goods and services. 
+
+
+Our main contributions in this work are as follows: (i) First, we provide evidence that in a real-world scenario, need assessment based on predictive models deepens the divide along the lines of migration background, education, and gender. Those in need with little resources for need assessment receive less help, while those with more resources receive more support. (ii) In addition, we show that interventions targeting specific marginalized groups can have very different outcomes depending on the group. For example, the benefit of intervention decreases for people with migration background, whereas it increases for single parents. In Section \ref{sec:relatedwork}, we discuss the related work. In Section \ref{sec:data}, we present our data science approach to build the synthetic dataset. In Section \ref{sec:results}, we provide an analysis of the distribution of aid and assistance in the public employment service. We provide a discussion of our work and its implications in Section \ref{sec:discussion}.
+
+
+
+
+
+\section{Related Work}
+
+\label{sec:relatedwork}
+\paragraph{Public Employment Services}
+Public Employment Services play a key role in developed countries' labor markets. In general, Public Employment Services exist in all countries with social security. They are institutions of the social security state and the labor market policy. Their functions are complex and vary by country. In the United Kingdom, public employment services support people by giving them advice and information on education and training to help them find and do jobs. In the United States, Public Employment Services help people get employment, housing, food, and other assistance. They provide information about job training programs and help people qualify for them.
+
+Public Employment Services are traditionally institutions of the labor market and social security system. Their functions include supporting people with finding jobs, housing, food and other assistance. They are also tasked with matching people to jobs. To this end, they shall provide active support and services to those in need, including the long-term unemployed. By contrast, employed people generally receive very little services. Employed people often perceive the services offered by Public Employment Services to be insufficient \cite{kortner2023predictive}. 
+\textbf{Prediction Problems and Public Sector}
+
+There is an ongoing debate regarding the use of predictive models in the public sector. The debate centers mainly on two key issues: Firstly, the validity of the models' predictions and thus the accuracy of the risk estimates of need and future harm played out by Manski's result \cite{Manski2004}. There has been a series of work trying to separate out the variables driving predictive power and trying to estimate the counterfactual impact of predictive models \cite{Bach_Kern_Mautner_Kreuter_2023, chouldechova2018case, elmachtoub2022smart, jain2024position, shirali2024}. Another line of argumentation combines the counterfactual distribution with fairness notions and thus legitimizes the use of predictive models \cite{coston2023sat,Guerdan23,wang2024}. This discussion deters many governments from adopting predictive models because of a lack of concepts of machine learning validity for the public sector \cite{Bach_Kern_Mautner_Kreuter_2023}.
+
+Secondly, public institutions have to meet a social responsibility of equitable distribution of resources \cite{kleinberg2015prediction}. This raises questions of distributive justice and the risk of the concentration of help on a small group. Public institutions need to meet fairness requirements that are more demanding than accuracy requirements. The argument here is that predictive models could be accurate but still unfair. Therefore, the discussion is increasingly on the outcome and thus the consequences for the people of need and in society as a whole. One line of argumentation starts from the position that the prediction problem is in principle solvable by the technical means, but that fairness and especially equity issues must be solved under resource constraints \cite{loriprovist2022,pmlr-v235-perdomo24a, wilder2024learning}. An accurate and fair distribution could thus be achieved under ideal conditions. An alternative argumentative strategy concludes that need assessment with predictive models could never be equitable given the limited resources of a public institution and the wide range of uses of the algorithm \cite{simone2022}. Therefore, need assessment by public institutions can only deepen the divide between the haves and have-nots.
+
+\textbf{Prediction and the Digital Division}
+Social policies and social status are closely linked to education. Research on algorithmic harms in the public sector and especially in education has shown how predictive models can reinforce stereotypes and deepen the divide \cite{chouldechova2018case}. People with migration background and low-income individuals are especially affected by these harms \cite{perdomo2023difficult}. Our work aims to shed light on whether algorithms in need assessment shall deepen the digital divide further or whether public institutions can be considered agents of change.
+
+\textbf{The IAB-Experimentation} The IAB-Experimentation \cite{10.1145/3588001.3609369} is a random-controlled experiment in which one group of the treated unified labor force cohort of the federal state of Bavaria in Germany in 2019 received active support from the public employment service (PSHG). It comprises $275{,}929$ individuals with detailed individual and sociodemographic features collected through interviews and surveys as well as administrative data for a large number of variables for the period from January 2019 to December 2019. The data provide information at the regional level for the federal state of Bavaria, where the aid was deployed. Due to its rich individual information, novel research that would not be possible with historical administrative data becomes feasible.
+
+To the best of our knowledge, need assessment with predictive models has not been studied with real-world data and labeled observations in the public sector as of yet. While there is evidence for the harms of algorithms in education in the United States \cite{chouldechova2018case}, there is a large gap in research on the impacts of algorithms on the distribution of public goods and resources. Two recent studies on the effects of predictive models in the public sector in Germany and Sweden respectively show positive technical performances of need assessment approaches in real-world settings \cite{FISCHERABAIGAR2024101976,sun2019mapping}. We expand this line of research and provide insights into the implications of need assessment for the distribution of resources in the public sector.
+
+
+
+
+\section{Data \& Methods}
+
+\label{sec:data}
+In this section, we provide information on the empirical methodology to simulate aid and assistance assignment in the public sector based on the need assessment of individuals. We use data from the IAB-Experimentation \cite{athey2021policy}. We start with an overview of the public sector's need assessment section, followed by our empirical method to simulate assignment.
+
+\subsection{From Personification to Predictive Need Assessment}
+Over the past 15 years, the German public employment service has been the central institution providing aid and assistance for people experiencing labor market and social challenges \cite{Kallus03042021, wirtz2019artificial}. In the following, we provide a glimpse behind the scenes to illustrate how aid and assistance are provided for people in need.
+
+When citizens of Germany face challenges in the labor market, as an example single parents, marginalized groups, previously long-term unemployed, or people with migration backgrounds, they can turn to the public employment service. If they fulfill the respective criteria, they have the opportunity to receive active support and privileged access to the labor market. For this purpose, the person visits one of about $700$ local offices of the public employment service in Germany. There, they complete an interview and receive a case manager. If they have difficulties in the labor market, they participate in a qualification interview. The case manager assesses the individual case and applies for benefits that match the needs and requests of the individual.
+
+The assessment by the case manager is central to the aid provision. Since the case manager cannot get a full picture of the situation during a single interview, predictive models are used to support need assessment \cite{wirtz2019artificial}. If help and assistance are assigned, the person affected will receive active support from the public employment service. Whether someone receives aid and assistance in a first round assignment decision or not is thus central to their (labor) perspective. First rounds are a key performance indicator for public sector practitioners. Access to better predictive models is expected to improve the distribution of resources in the public sector \cite{blumenstock2016}.
+
+\subsection{Data}
+\label{sec:data_data}
+
+Our work investigates how aid and assistance are distributed in the public sector and how need assessment affects the distribution of resources. To answer this central question, we set up a data science experiment.
+
+\paragraph{Overview}
+The IAB-Experimentation was a random-controlled experiment of the German public employment service run in the German federal state of Bavaria in 2019 \cite{athey2021policy}. The experiment is an extension of the existing SIAB-Regionalfile dataset \cite{siab2019, siab2019report}\footnote{The SIAB-Regionalfile is an integrated labor force survey of the Institute for Employment Research \cite{siab2019, siab2019report}. It covers a large amount of traditionally used individual, family, and labor market information provided through interviews with employed and unemployed in Germany. For an overview of traditional information collected by the IAB}. In the IAB-Experimentation, a treatment group was offered active support by an employment agent from the public employment service, while a comparison group was not. We use active support as a treatment to capture the effects of aid and assistance on the labor market outcome. We focus on the treatment of individuals with \emph{``simple needs''} since this is the group that the public employment service aims to support through active job mediation. The treatment thus comprises actual support and services, for example, support with job searching and training.
+
+\paragraph{Sample}
+The IAB-Experimentation comprises a total of $275{,}889$ individuals from a unified labor market cohort, who were randomly split into a treatment and a control group. Out of the treated sample of $137{,}945$ individuals we use the subset of individuals with at least $106$ features as surveys, and thus in total $113{,}077$ individuals. We use this subset, because we wish to exclude individuals with too many missing values, e.g., individuals who did not participate in some of the surveys. We exclude people with multiple interviews per year, because we focus on the status in January 2019. We do not include self-employed individuals, because they are not covered by the social security system and the public employment service. For further details on the pre-processing of the data. Our final sample consists of $88{,}522$ individuals.
+
+
+\paragraph{Label}
+We assume the perspective of a public sector provider in need of need assessment for aid and assistance. We label each individual in the dataset according to whether or not they received active aid and assistance in 2019. Since the treatment was only intended for people in need, we expect people with more similar features with respect to the label to have a higher likelihood of receiving aid and assistance. We, thus, train a binary classifier $m$ to predict the label $y \in \left\{ 0, 1 \right\}$ for each individual. The machine learning model is thus used to assess the support need and decide whether to provide access to resources. The label is a unique identifier to track whether an individual has received active help from the public employment service in the first round decision in 2019, or not. It is thus a valuable target variable for the experiment.
+
+\subsection{Prediction}
+\label{sec:prediction}
+\paragraph{Model}
+We wish to know the likelihood of each individual to receive aid and assistance for their labor market challenge, i.e. the probability of the label $y$. We model the probability as a logistic function of individual features $x$, where $x$ is a vector of personal characteristics. Accordingly, we model the data as
+\begin{align*}
+y\sim B(y|p(x)),
+\end{align*}
+where $p(x)=\sigma(\theta(x))$ and $\sigma$ is the logistic function. The parameters $\theta$ are estimated by maximizing the likelihood of the observed data. We use XGBoost to estimate $\theta$. This way of labeling the data serves as a basis for our empirical analysis and allows us to experiment with predictions and interventions. We use the default settings of XGBoost to make the labeling as close as possible to the real-world context.
+
+\paragraph{Baselines}
+
+We compare the predictive performance of two models. (1) A logistic regression model $m_{\mathrm{logreg}}$, and (2) an XGBoost model $m_{\mathrm{xgb}}$. We provide architectures, settings, and the predictors. The two models serve as baselines for comparison. They represent two technical lines along which need assessment and aid and assistance distribution have played out in the public sector in the past years.
+
+The first baseline, a logistic regression model, is a traditional method used in the public sector and established as a framework for predictive models \cite{desiereUsingArtificialIntelligence2021,kortner2023predictive,loxha2014profiling}. Logistic regression models have been standard practice in the public sector until around 2015. Since then, complex predictive models have become more and more part of the routine.
+
+The second baseline, a more complex model (XGBoost), represents the state-of-the-art need assessment in the German public sector today \cite{Bach_Kern_Mautner_Kreuter_2023, sun2019mapping, wirtz2019artificial}. Random forest and XGBoost have been adopted in many public sector institutions \cite{kortner2023predictive}. Other models are deployed to a lesser extent in practice \cite{Bach_Kern_Mautner_Kreuter_2023}.
+\subsection{Simulation}
+\label{sec:simulation}
+
+We use the predictive models introduced in the previous section on the data described in Section \ref{sec:data_data} to simulate a realistic aid and assistance assignment in the public employment service.
+
+\paragraph{Overview}
+Our empirical methodology is rooted in the perspective of a public sector provider of aid and assistance. We investigate how need assessment impacts the aid and assistance distribution of a public sector provider. We set up a real-world data science experiment. Based on historical individual labor market information, we predict the needs of each individual for resources using the predictive models in Section \ref{sec:prediction}. We do not use actual aid and assistance data, but labels to build a synthetic dataset for a realistic simulation of aid and assistance assignment in 2019 and thus a basis for our empirical analysis.
+
+% \begin{figure}[ht]
+% \centering
+% \includegraphics[width=0.8\linewidth]{images/design.png}
+% \caption{An Overview of the Experimental Design}
+% \label{fig:design}
+% \end{figure}
+
+\textbf{Step 1: Assessment of Needs and Resources}
+Starting from individual characteristics, we assess needs through two routes: (1.1) \emph{Actual Need Assessment:} In the real scenario, active support was assigned based on an actual need assessment. We use \emph{label}, as introduced in Section \ref{sec:data_data}. (1.2) \emph{Predicted Need Assessment:} We consider the likelihood of needs and thus resources based on predictions via the logistic function $p(x)=\sigma(\theta(x))$ . We use the predictive models $m_{\mathrm{logreg}}$ and $m_{\mathrm{xgb}}$ and calculate the predictions $p_{\mathrm{logreg}}$ and $p_{\mathrm{xgb}}$.
+
+\textbf{Step 2: Randomized Allocation and Simulation}
+In a second step, we construct a synthetic sample. We randomly assign resources to individuals based on the needs assessed in the first step. Resources may or may not correspond to actual needs, as it depends on the probability estimate from the first step. We label each individual in the dataset with a binary variable that indicates whether or not they have received active support and assistance and thus privileged access to the labor market. We use random interventions to see how the distribution of resources impacts the distribution of labor market outcomes: (2.1) \emph{No Intervention:} We left the status as it was in the actual need assessment. Individuals thus left out with a significant need for resources may not get the help they need in the future. (2.2) \emph{Needs-based intervention:} We randomly assign resources to individuals according to their needs for resources. Individuals with a probability of needs of at least $50\%$ receive resources. (2.3) ``Fair chance'': We randomly assign resources to individuals according to their needs for resources. Individuals with a probability of needs of at least $50\%$ receive resources, but everyone has at least a $50\%$ chance to receive resources.
+
+The interventions in the second step are inspired by the policies for need assessment in the public employment service. By not intervening, we use the status in the actual need assessment. By intervening and providing resources according to the predicted needs or with a fair chance, we correct the actual assignment of resources according to the distribution of the predicted needs of the models.
+The second step impacts the sample size. While we start with $88{,}522$ individuals, the sample sizes range from $22{,}695$ individuals to all $88{,}522$ individuals in the first step.
+
+We estimate how the distribution of resources impacts the distribution of outcomes and thus social outcomes and inequalities. We consider labor market outcomes in the form of income, the likelihood of remaining unemployed at the end of the observation period, and the likelihood of claiming benefits and assistance.
+
+\subsection{Evaluation}
+\label{sec:eval}
+The simulation experiment allows us to evaluate and compare the impact of different need assessment strategies on the distribution of resources and resources for specific groups. We provide statistics for the full sample. We specifically focus on three vulnerable groups: individuals with migration background, single parents, and young job seekers. Whether someone is affected by labor market challenges depends on their resources and not their status or identity. Therefore, we focus on these three groups to see if algorithms deepen the digital divide further or whether public institutions can be considered agents of change.
+
+We evaluate the simulations with two metrics to assess how the distribution of resources impacts the distribution of outcomes and thus social outcomes and inequalities:
+\begin{enumerate}
+\item[(i)] The $\emph{variance}$ of the feature in the target year;
+\item[(ii)] The Gini coefficient to measure the income distribution.
+\end{enumerate}
+The first metric measures the dispersion of the feature and thus the outcomes in the population. The second metric is a measure of income distribution and ranges between $0$ and $1$ with higher values indicating higher income inequality. We report the metrics for each simulation model and intervention, and compare the metrics to assess the impact of need assessment on resource distribution.
+
+
+\section{Results}
+
+\label{sec:results}
+Preliminary findings of this research have been presented at the German Congress of Information Researchers and Scientists (INFORT) and the German Society for Social Policy Evolution (GESPS)\footnote{The paper presented at the GESPS is under thorough revision for final publication}. 
+To ensure reproducibility, we have made all data and analysis code available in our research lab on GitHub. 
+In this section, we present the results of our real-world experiment on the effects of predictive need assessment on aid and assistance assignment in the public employment service. In Section \ref{sec:results_accuracy}, we provide preliminary results on the technical performance of need assessment in the public sector. We observe that need assessment in the public sector is characterized by accuracy and fairness limitations. In Section \ref{sec:results_distribution}, we use two different prediction models to assess needs. It can be improved for specific groups for young job seekers and single parents. People with a migration background face resources deepening the divide in need assessment. 
+
+\subsection{Predictive Needs Assessment}
+\label{sec:results_accuracy}
+The first step of our empirical methodology is the assessment of needs. We use two baseline models, $m_{\mathrm{logreg}}$ and $m_{\mathrm{xgb}}$. We provide an overview of the predictive performance of the need assessment models in the public sector in Table \ref{tab:prediction}. We use accuracy, precision, recall, and AUC to measure the performance.
+
+\begin{table*}[!ht]
+\centering
+\caption{Performance of Need Assessment}
+\label{tab:prediction}
+\resizebox{0.7\textwidth}{!}{\begin{tabular}{lcccccccc}
+{\textbf{PSHG-Id}} & \multicolumn{4}{x}{{\textbf{Predicted needs}}} & \multicolumn{4}{x}{\textbf{Actual needs}} \\
+{\textbf{Sample}} & \texttt{acc} & \texttt{prec} & \texttt{rec} & \texttt{auc} & \texttt{acc} & \texttt{prec} & \texttt{rec} & \texttt{auc} \\ \midrule
+all & $0.741$ &$0.466$ &$0.732$&$0.730$&$0.913$&$0.848$&$0.343$&$0.585$\\
+\textbf{Single parent} &$0.756$&$0.480$&$0.716$&$0.737$&$0.910$&$\textbf{0.912}$&$0.238$&$0.540$\\
+\textbf{Young job seeker} &$0.734$&$0.550$&$0.712$&$0.743$&$0.920$&$0.856$&$0.413$&$0.636$\\
+\textbf{Migration background}&\textbf{0.759}&$0.468$&$\textbf{0.785}$&$0.755$&$0.928$&$0.858$&$0.305$&$0.563$
+\end{tabular}}
+\end{table*}
+
+The predictive performance of need assessment can thus far be summarized as follows: (1) The predictive performance of need assessment can be improved with more sophisticated models. Models for need assessment in the public sector have more accuracy, precision, and recall and a better AUC. (2) Despite these improvements, the models are still far from perfect and have a lot of room for improvement. The predictive power is only slightly above chance for specific groups. (3) With respect to fairness, the evaluation shows similarities of inaccuracies across specific groups. Young job seekers, people with migration background, and single parents show similar accuracy, precision, and recall. The AUC is better for young job seekers and people with migration background, but the difference to the overall model is not big. When it comes to fairness, there are large differences in recall between actual and predicted needs for specific groups, especially for young job seekers and people with migration background. They are underserved by the need assessment.
+
+Historical need assessment in the public sector has traditionally been based on individual and family characteristics, surveys, and detailed interviews. Need assessment today is characterized by digital means and algorithms and relies on digital information. We show in our experiments that this approach is accurate and has improved the outcome, but still not at a level where digital need assessment can be considered fair.
+\subsection{Aid and Assistance Allocation}
+\label{sec:results_distribution}
+The second step of our methodology is a randomized intervention on the outcome. We build a synthetic sample and use the labels to simulate the real-world aid and assistance assignment decision. 
+
+\subsubsection{Performance of Needs Assessment}
+\label{sec:results_models}
+The interventions we evaluate in this work impact the sample. In our realistic simulation, the samples of the first intervention (\emph{Needs-based}) range from $0\%$ to $50\%$ of the overall sample. The second intervention (\emph{Fair needs}) has the same sample as the first ($50\%$), since only those with a probability of needs of at least $50\%$ are included.
+
+\begin{table*}[!ht]
+\centering
+\caption{Income Distribution}
+\label{tab:inequality}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llcccccccc}
+{\textbf{PSHG-Id}} & \multicolumn{8}{c}{\textbf{Predicted needs}} & \multicolumn{4}{x}{\textbf{Actual needs}} \\
+{\textbf{Sample}} & \texttt{intervention} & \texttt{variance} & \texttt{ineq} & $\Delta \texttt{variance}$ & $\Delta \texttt{ineq}$ & \texttt{variance} & \texttt{ineq} & $\Delta \texttt{variance}$ & $\Delta \texttt{ineq}$ \\ \toprule
+all & $0$ & $99709.60$ & $0.098$ & - & - & $99709.60$ & $0.098$ & $0$-$0$ & $0$ \\
+all & $m_{\mathrm{logreg}}$ & $109892.36$ & $\underline{0.104}$ & $+0.720$ & $+0.070$ & $99709.60$ & $0.098$ & $0$-$0$ & $0$ \\
+all & $m_{\mathrm{xgb}}$ & $\mathbf{112269.08}$ & $\mathbf{0.108}$ & $\mathbf{+1.462}$ & $\mathbf{+0.141}$ & $99709.60$ & $0.098$ & $0$-$0$ & $0$ \\
+\hline
+\hline
+\textbf{Single parent} & $0$ & $99709.60$ & $0.110$ & - & - & $99709.60$ & $0.098$ & $0$-$0$ & $0$ \\
+\textbf{Single parent} & $m_{\mathrm{logreg}}$ & $111273.63$ & $\underline{0.118}$ & $+1.163$ & $+0.108$ & $99709.60$ & $0.098$ & $0$-$0$ & $0$ \\
+\textbf{Single parent} & $m_{\mathrm{xgb}}$& $\mathbf{112445.49}$ & $\mathbf{0.121}$ & $\mathbf{+1.481}$ & $\mathbf{+0.190}$ & $99709.60$& $0.098$& $0$-$0$ & $0$ \\ 
+\hline
+\hline
+\textbf{Young job seeker} & $0$ & $99709.60$ & $0.096$ & - & - & $99709.60$ & $0.098$ & $0$-$0$ & $0$ \\
+\textbf{Young job seeker} & $m_{\mathrm{logreg}}$ & $111343.98$ & $\underline{0.108}$ & $+1.174$ & $+0.098$ & $103969.93$ & $0.101$ & $+0.426$ & $+0.032$ \\
+\textbf{Young job seeker} & $m_{\mathrm{xgb}}$& $\mathbf{112949.22}$ & $\mathbf{0.112}$ & $\mathbf{+1.335}$ & $\mathbf{+0.139}$ & $103969.93$ & $0.101$ & $+0.426$ & $+0.032$ \\ 
+\hline
+\hline
+\textbf{Migration background} & $0$ & $99709.60$ & $0.096$ & - & - & $99709.60$ & $0.098$ & $0$-$0$ & $0$ \\
+\textbf{Migration background} & $m_{\mathrm{logreg}}$ & $106159.94$ & $\underline{0.104}$ & $0.656$ & $+0.106$ & $102535.46$ & $0.100$ & $+0.284$ & $+0.018$ \\
+\textbf{Migration background} & $m_{\mathrm{xgb}}$& $\mathbf{107953.14}$ & $\mathbf{0.109}$ & $\mathbf{+0.725}$ & $\mathbf{+0.126}$ & $102535.46$ & $0.100$ & $+0.284$ & $+0.018$ \\ 
+\end{tabular}}
+\end{table*}
+
+\begin{table*}[!ht]
+\centering
+\label{tab:unemployment}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llcccccccc}
+{\textbf{PSHG-ID}} & \multicolumn{8}{x}{\textbf{Predicted needs}} & \multicolumn{4}{x}{\textbf{Actual needs}} \\
+\textbf{Sample} & \texttt{intervention} & \texttt{variance} & \texttt{ineq} & $\Delta \texttt{variance}$ & $\Delta \texttt{ineq}$ & \texttt{variance} & \texttt{ineq} & $\Delta \texttt{variance}$ & $\Delta \texttt{ineq}$ \\ \toprule
+all & $0$ & $0.241$ & $0.000$ & - & - & $0.241$ & $-0.001$ & $0$-$0$ & $0.000$ \\
+all & $m_{\mathrm{logreg}}$ & $0.244$ & $\underline{0.015}$ & $+0.302$ & $+0.015$ & $0.241$ & $-0.001$ & $0$-$0$ & $0.000$ \\
+all & $m_{\mathrm{xgb}}$ & $0.256$ & $\mathbf{0.038}$ & $+1.374$ & $\mathbf{0.037}$ & $0.241$ & $-0.001$ & $0$-$0$ & $0.000$ \\ 
+\hline
+\hline
+\textbf{Single parent} & $0$ & $0.241$ & $0.002$ & - & + & $0.241$ & $-0.001$ & $0$-$0$ & $0$ \\
+\textbf{Single parent} & $m_{\mathrm{logreg}}$ & $0.243$ & $\underline{0.027}$ & $+0.211$ & $+0.025$ & $0.241$ & $-0.001$ & $0$-$0$ & $0$\\
+\textbf{Single parent} & $m_{\mathrm{xgb}}$ & $0.251$ & $\mathbf{0.044}$ & $\mathbf{+0.998}$ & $\mathbf{+0.043}$ & $0.241$ & $-0.001$ & $0$-$0$ & $0$ \\ 
+\hline
+\hline
+\textbf{Young job seeker} & $0$ & $0.241$ & $-0.001$ & - & - & $0.243$ & $0.002$ & $0.002$-$0$ & $+0.003$ \\
+\textbf{Young job seeker} & $m_{\mathrm{logreg}}$ & $0.243$ & $\mathbf{0.039}$ & $+0.031$ & $\mathbf{0.038}$ & $0.243$ & $0.002$ & $0.002$-$0$ & $+0.003$ \\
+\textbf{Young job seeker} & $m_{\mathrm{xgb}}$& $0.249$ & $\underline{0.013}$ & $+0.477$ & $+0.012$ & $0.243$ & $0.002$ & $0.002$-$0$ & $+0.003$ \\ 
+\hline
+\hline
+\textbf{Migration background} & $0$ & $0.241$ & $0.003$ & - & + & $0.247$ & $0.006$ & $0.006$-$0$ & $0.005$ \\
+\textbf{Migration background} & $m_{\mathrm{logreg}}$ & $0.240$ & $0.004$ & $\underline{-0.081}$ & $\underline{0.003}$ & $0.247$ & $0.006$ & $0.006$-$0$ & $0.005$ \\
+\textbf{Migration background} & $m_{\mathrm{xgb}}$& $0.246$ & $0.008$ & $+0.230$ & $+0.007$ & $0.247$ & $0.006$ & $0.006$-$0$ & $0.005$ \\ 
+\end{tabular}}
+\end{table*}
+
+\begin{table*}[!ht]
+\centering
+\label{tab:benefits}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llcccccccc}
+{\textbf{PSHG-Id}} & \multicolumn{8}{x}{\textbf{Predicted needs}} & \multicolumn{4}{x}{\textbf{Actual needs}} \\
+\textbf{Sample} & \texttt{intervention} & \texttt{variance} & \texttt{ineq} & $\Delta \texttt{variance}$ & $\Delta \texttt{ineq}$ & \texttt{variance} & \texttt{ineq} & $\Delta \texttt{variance}$ & $\Delta \texttt{ineq}$ \\ \toprule
+all & $0$ & $0.071$ & $0.004$ & - & - & $0.071$ & $0.004$ & $0$-$0$ & $0$ \\
+all & $m_{\mathrm{logreg}}$ & $0.076$ & $\underline{0.025}$ & $+0.812$ & $\underline{0.021}$ & $0.071$ & $0.004$ & $0$-$0$ & $0$ \\
+all & $m_{\mathrm{xgb}}$ & $\mathbf{0.098}$ & $\mathbf{0.053}$ & $+2.656$ & $\mathbf{0.049}$ & $0.071$ & $0.004$ & $0$-$0$ & $0$ \\ 
+\hline
+\hline
+\textbf{Single parent} & $0$ & $0.071$ & $0.004$ & - & - & $0.071$ & $0.004$ & $0$-$0$ & $0$ \\
+\textbf{Single parent} & $m_{\mathrm{logreg}}$ & $0.092$ & $0.018$ & $+2.071$ & $+0.014$ & $0.071$ & $0.004$ & $0$-$0$ & $0$ \\
+\textbf{Single parent} & $m_{\mathrm{xgb}}$& $0.100$ & $\mathbf{0.063}$ & $+2.603$ & $\mathbf{0.059}$ & $0.071$ & $0.004$ & $0$-$0$ & $0$ \\ 
+\hline
+\hline
+\textbf{Young job seeker} & $0$ & $0.071$ & $0.003$ & - & - & $0.070$ & $0.002$ & $0.002$-$0$ & $0.002$ \\
+\textbf{Young job seeker} & $m_{\mathrm{logreg}}$ & $0.083$ & $0.026$ & $+1.429$ & $+0.023$ & $0.070$ & $0.002$ & $0.002$-$0$ & $0.002$ \\
+\textbf{Young job seeker} & $m_{\mathrm{xgb}}$& $\mathbf{0.106}$ & $\mathbf{0.067}$ & $+4.540$ & $\mathbf{0.065}$ & $0.070$ & $0.002$ & $0.002$-$0$ & $0.002$ \\ 
+\hline
+\hline
+\textbf{Migration background} & $0$ & $0.071$ & $0.006$ & - & + & $0.074$ & $0.003$ & $0.003$+$0$ & $0.003$ \\
+\textbf{Migration background} & $m_{\mathrm{logreg}}$ & $0.070$ & $0.006$ & $+0.062$ & $+0.007$ & $0.074$ & $0.003$ & $0.003$+$0$ & $0.003$ \\
+\textbf{Migration background} & $m_{\mathrm{xgb}}$& $0.088$ & $0.025$ & $+2.367$ & $+0.203$ & $0.074$ & $0.003$ & $0.003$+$0$ & $0.003$ \\ 
+\end{tabular}}
+\end{table*}
+The effects of need assessment on the distribution of aid and assistance in the public employment service can be summarized as follows: (i) The use of XGBoost has a strong effect on the distribution of resources and the distribution of income. The income inequality increases with predictive need assessment, leading to a significant deepening of the divide, especially for those with low income, people with migration background, and single parents. The use of the logistic regression model also has an effect on the distribution of resources, but not to the same extent as XGBoost. (ii) For young job seekers, the variance of the features increases significantly, which means that need assessment leads to a more uniform distribution of resources. The reason for this is that many young job seekers apply for benefits and thus benefit from need assessment.
+
+Specifically for people with migration background and single parents, need assessment leads to a higher variance of aid and assistance allocation. The effects are positive for single parents, whereas need assessment leads to a more non-uniform distribution for people with migration background. The effects are more distinct for income and income inequality, where significant increases for people with migration background can be observed.
+
+\textbf{Findings:} \emph{While need assessment leads to resources for vulnerable groups, it also deepens the divide along the lines of migration background, education, and gender. Those in need with few resources for need assessment have less help to get what they need, whereas those with a lot of resources get more help.}
+
+The effects on benefits and unemployment status are less pronounced but still significant. For single parents, the difference towards the target outcome of needs-based and fair interventions is considerable. For specific groups, need assessment can be considered a means to close the gaps and achieve the goal of supporting those in need. Specifically for young job seekers and single parents, the need assessment leads to a more equal distribution of resources. People in these groups benefit from the need assessment. The findings align with historical evidence of the public employment service, since young and long-term unemployed have traditionally been key target groups in the public employment service \cite{Kallus03042021, wirtz2019artificial}.
+
+Overall, need assessment has a strong effect on the distribution of resources and outcomes, and thus on social outcomes and inequalities. We investigate the effects of need assessment on the three groups in more detail in the following section.
+
+\subsection{The Effects on Vulnerable Groups}
+\label{sec:results_groups}
+In our simulation, we include three samples of specific vulnerable groups in need of aid and assistance, people with migration background, single parents, and young high-risk job seekers. The groups are affected by the need assessment differently.
+
+\subsubsection{People with Migration Background}
+\label{sec:results_migration}
+\begin{table*}[!ht]
+\centering
+\label{tab:migration}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{llcccccccc}
+{\textbf{PSHG-Id}} & \multicolumn{8}{c}{\textbf{Predicted needs}} & \multicolumn{4}{x}{\textbf{Actual needs}} \\
+{\textbf{Sample}} & \texttt{intervention} & \texttt{variance} & \texttt{ineq} & $\Delta \texttt{variance}$ & $\Delta \texttt{ineq}$ & \texttt{variance} & \texttt{ineq} & $\Delta \texttt{variance}$ & $\Delta \texttt{ineq}$ \\ \toprule
+\textbf{Migration background} & $0$ & $0.241$ & $0.003$ & - & + & $0.247$ & $0.006$ & $0.006$-$0$ & $0.005$ \\
+\textbf{Migration background} & $m_{\mathrm{logreg}}$ & $0.232$ & $0.002$ & $-0.080$ & $-0.004$ & $0.247$ & $0.006$ & $0.006$-$0$ & $0.005$ \\
+\textbf{Migration background} & $m_{\mathrm{xgb}}$& $0.247$ & $0.004$ & $+1.400$ & $+0.005$ & $0.247$ & $0.006$ & $0.006$-$0$ & $0.005$ \\ 
+\end{tabular}}
+\end{table*}
+The results with respect to people of migration background can be summarized as follows: (i) The difference between the need assessment for people with migration background and overall need is small. (ii) Need assessment has a significant negative effect on income, though, when using need assessment. The poor performance of need assessment at need assessment leads to lower income and thus significant deepening of the divide along the lines of migration background and a very large increase in income inequality.
+
+There has been extensive debate in the public sector on avoiding ethnic bias and stereotypes when trying to help people with migration background \cite{ desiere2019statistical}. Our results contribute to this discussion by showing that a needs-based assignment leads to a better distribution of resources for people with migration background as well as for the overall population. It thus seems possible with need assessment to achieve a win-win. However, the fair chance needs-based assignment leads to a deepening of the divide for people with migration background. This is a result we would have liked to have discussed if we had observed improvements in need assessment as well. 
+
+\subsubsection{Single Parents}
+\label{sec:results_singles}
+The results as regards single parents and need assessment can be summarized as follows: (i) With respect to accuracy, need assessment has a positive effect on the outcome of single parents, even if compared to the real scenario where needs are left untreated. (ii) For single parents, the difference between the needs-based and fair chance interventions are significant for all outcomes.
+
+With respect to single parents and need assessment, the following can be noted: Need assessment overall has a positive effect on the outcome of single parents compared to the group that remains left out. This effect increases significantly when using XGBoost. This aligns with historical evidence of the practices of public sector providers, where single parents have been a key target group for aid and assistance \cite{Kallus03042021, wirtz2019artificial}. The targeted intervention shows that there are significant differences between the outcomes of the two simulation conditions. The fair chance needs-based assignment leads to overall better outcomes than the needs-based assignment. The results under the first intervention are significantly lower than in the fair chance needs-based assignment. The results under the second intervention are similar to the real scenario, in which no intervention is applied. The results show that it is possible to target single parents with need assessment, but that in the public sector this opportunity may not be used. The findings suggest that need assessment, especially using predictive models, can significantly deepen the divide between single parents and parents without single parents.
+
+\subsubsection{Young Job Seekers}
+\label{sec:results_young}
+The results of need assessment for young job seekers can be summarized as follows: (i) Need assessment in general and with respect to specific young job seekers not in need can be improved (predicted needs). The use of need assessment in this group is characterized by high precision, recall, and AUC. (ii) Need assessment deepens the digital divide of young job seekers since the more they benefit from need assessment, the more this is reflected in outcomes. The deepening of the divide for young job seekers is significantly more pronounced than for the other groups. Need assessment can be considered a solution to the digital divide for young job seekers. Since they are the most affected by labor market challenges, they benefit the most from need assessment.
+
+
+
+
+\section{Discussion}
+
+\label{sec:discussion}
+
+\paragraph{Effects on Vulnerable Groups}
+\label{sec:discussion_groups}
+In the three groups of people with migration background, single parents, and young high-risk job seekers significant effects of need assessment can be observed. For young job seekers and single parents this is good news, as they benefit from the need assessment. This aligns with evidence from other contexts, where including features of need and vulnerability into need assessment can lead to a more equitable distribution \cite{chan2012}. For people with migration background the need assessment can lead to deepening of the digital divide and a concentration of resources in the hands of a selected few.
+\begin{itemize}
+\item \emph{Single Parents:} For both need assessments there are large differences. Single parents specifically benefit from interventions. This aligns well with historical evidence since single parents have traditionally been a key group for access to services and help in the public employment service \cite{Kallus03042021}. The findings highlight the effects social policies have to have in mind when implementing need assessment. 
+\item \emph{Young Job Seekers:} For this group significant effects can be observed as well. However, they benefit from the need assessment with respect to their labor market outcome. This finding aligns well with historical evidence of the public employment service. Young and long-term unemployed have traditionally been a key group for aid and assistance in the public employment service \cite{Kallus03042021}. The need assessment can deepen the digital divide by amplifying the effects of a good or bad labor market entry into labor market outcomes. The need assessment can in this context be considered part of the solution to reduce the divide.
+\item \emph{Migrants:} For people with needs but without migration background, the need assessment has a strong effect on the outcome. For people with migration background the need assessment can deepen the digital divide and a concentration of resources in the hands of a selected few. This is a result we would have liked to have discussed if we had seen need assessment improving over time.
+\end{itemize}
+
+\begin{table*}[!ht]
+\centering
+\resizebox{0.8\textwidth}{!}{
+\begin{tabular}{llcccccccc}
+{\textbf{PSHG-ID}} & \multicolumn{8}{x}{{\textbf{Predicted needs}}}& \multicolumn{4}{x}{\textbf{Actual needs}}\\
+\textbf{Sample}& \texttt{intervention} & \texttt{acc} & \texttt{prec} & \texttt{rec} & \texttt{auc}  & \texttt{acc} & \texttt{prec} & \texttt{rec} & \texttt{auc}  \\ \toprule
+
+all & $0$ & $0.386$&$0.366$&$0.616$&$0.477$&$0.421$&$0.444$&$0.590$&$0.501$\\
+all & $m_{\mathrm{logreg}}$ & $0.410$&$0.407$&$0.650$&$0.503$&$0.421$&$0.444$&$0.590$&$0.501$\\
+all & $m_{\mathrm{xgb}}$& $0.497$&$0.602$&$0.701$&$0.617$&$0.421$&$0.444$&$0.590$&$0.501$\\ \hline
+\hline
+Single parent & $0$ & $0.249$&$0.314$&$0.593$&$0.444$&$0.210$&$0.330$&$0.254$&$0.374$\\
+Single parent & $m_{\mathrm{logreg}}$ &$0.346$&$0.437$&$0.757$&$0.557$&$0.210$&$0.330$&$0.254$&$0.374$\\
+Single parent & $m_{\mathrm{xgb}}$& $0.500$&$0.613$&$0.790$&$0.645$&$0.210$&$0.330$&$0.254$&$0.374$\\ \hline
+\hline
+Young job seeker & $0$ &$0.282$&$0.219$&$0.597$&$0.376$&$0.411$&$0.643$&$0.506$&$0.517$\\
+Young job seeker & $m_{\mathrm{logreg}}$ &$0.348$&$0.281$&$0.683$&$0.433$&$0.411$&$0.643$&$0.506$&$0.517$\\
+Young job seeker & $m_{\mathrm{xgb}}$& $0.584$&$0.521$&$0.699$&$0.642$&$0.411$&$0.643$&$0.506$&$0.517$\\ \hline
+\hline
+Migration background & $0$ &$0.371$&$0.307$&$0.532$&$0.448$&$0.421$&$0.357$&$0.304$&$0.280$\\
+Migration background & $m_{\mathrm{logreg}}$ &$0.395$&$0.347$&$0.584$&$0.477$&$0.421$&$0.357$&$0.304$&$0.280$\\
+Migration background & $m_{\mathrm{xgb}}$& $0.412$&$0.324$&$0.580$&$0.487$&$0.421$&$0.357$&$0.304$&$0.280$\\ 
+\end{tabular}}
+\caption{Performance of needs assessment in the first round}
+\label{tab:prediction_gini2019}
+\end{table*}
+
+\paragraph{Implications}
+
+The need assessment with predictive models amplifies social inequalities as it benefits the wealthy and harms the marginalized. It is key to acknowledge the risks of need assessment, but also the chance to utilize it to close the digital divide in aid and assistance. Need assessment can play out both ways. It can deepen the digital divide and harm the most vulnerable, but it can also serve to enhance access to services for those in need. It is thus crucial to monitor need assessment so that we do not overestimate technical capabilities as has been the case in the past.
+
+
+
+
+
+
+
+\section{Conclusion}
+
+Our research aims to evaluate the impact of need assessment with predictive models. We set up a synthetic dataset for the ``first round'' assignment in the German public employment service based on detailed individual information. We use interviews, surveys, and administrative data. The dataset comprises $85{,}299$ individuals, out of which $275{,}889$ individuals in the unified labor market cohort in 2019. We set up a real-world experiment with two baseline need assessment methods, a logistic regression model and an XGBoost model. The need assessment impacts the distribution of resources and thus the distribution of outcomes significantly. The need assessment can be considered an agent of change to close the digital divide and deepen the inequalities at the same time. For specific groups, the need assessment can have positive effects, but for others, it can be detrimental. This is a very undesired outcome of need assessment and public policy as such. We call for more research and experimentation into need assessment and its impacts on the public distribution of goods and services. 
+
+
+\section{Limitations}
+
+\label{sec:limitations}
+Our experimental design has limitations rooted in the dataset, need assessment, and the experimental design itself. The regional information in our research limits the generalizability of the findings. However, the need assessment method we use is a real-world application. The need assessment method is on the one hand a baseline for need assessment and on the other hand an example for a method that could be used, for example, in a different region. The need assessment method, thus, is not region-specific. The need assessment method may, however,  not transfer to other countries. The need assessment method we use serves as an example of need assessment in the public sector as it is today.
+
+The need assessment we use has limitations since it could be more accurate and fair. We use the need assessment models we could find in the literature. We use two baselines and two well-established models. There could be more accurate and fair need assessments, but we do not assume to have a perfect model for need assessment and thus include this discussion in our reading and discussion. The experimental design itself has limitations. We have two interventions. We do not study how the interventions impact specific groups. We leave this for future research. We have two measurements for distributive justice, the Gini coefficient and variance of the outcomes. Other measures could be used, for example, Hoeffding's inequality. However, we measure a variety of outcomes and thus need to account for multiple interventions. We limit the measures to not overreact us to something else.
+
+\begin{thebibliography}{37}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Aiken et~al.(2023)Aiken, Ohlenburg, and Blumenstock]{10.1145/3588001.3609369}
+E.~Aiken, T.~Ohlenburg, and J.~Blumenstock.
+\newblock {M}oving targets: {W}hen does a poverty prediction model need to be updated?
+\newblock In \emph{Proceedings of the 6th ACM SIGCAS/SIGCHI Conference on Computing and Sustainable Societies}, COMPASS '23, page 117, New York, NY, USA, 2023. Association for Computing Machinery.
+\newblock ISBN 9798400701498.
+\newblock \doi{10.1145/3588001.3609369}.
+\newblock URL \url{https://doi.org/10.1145/3588001.3609369}.
+
+\bibitem[Antoni et~al.(2019{\natexlab{a}})Antoni, Ganzer, and vom Berge]{siab2019}
+M.~Antoni, A.~Ganzer, and P.~vom Berge.
+\newblock Factually anonymous version of the {{Sample}} of {{Integrated Labour Market Biographies}} ({{SIAB-Regionalfile}}) -- {{Version}} 7517 v1.
+\newblock Research Data Centre of the Federal Employment Agency (BA) at the Institute for Employment Research (IAB), 2019{\natexlab{a}}.
+\newblock 10.5164/IAB.SIAB-R7517.de.en.v1.
+
+\bibitem[Antoni et~al.(2019{\natexlab{b}})Antoni, Ganzer, and vom Berge]{siab2019report}
+M.~Antoni, A.~Ganzer, and P.~vom Berge.
+\newblock {{Sample}} of {{Integrated Labour Market Biographies Regional File (SIAB-R)}} 1975 - 2027.
+\newblock FDZ-Datenreport 04/2019 (en), Research Data Centre of the Federal Employment Agency (BA) at the Institute for Employment Research (IAB), Nürnberg, 2019{\natexlab{b}}.
+\newblock 10.5164/IAB.FDZD.1904.en.v1.
+
+\bibitem[Athey and Wager(2021)]{athey2021policy}
+S.~Athey and S.~Wager.
+\newblock {P}olicy {L}earning with {O}bservational {D}ata.
+\newblock \emph{Econometrica}, 89\penalty0 (1):\penalty0 133--161, 2021.
+
+\bibitem[Bach et~al.(2023)Bach, Kern, Mautner, and Kreuter]{Bach_Kern_Mautner_Kreuter_2023}
+R.~L. Bach, C.~Kern, H.~Mautner, and F.~Kreuter.
+\newblock The impact of modeling decisions in statistical profiling.
+\newblock \emph{Data \& Policy}, 5:\penalty0 e32, 2023.
+\newblock \doi{10.1017/dap.2023.29}.
+
+\bibitem[Barocas et~al.(2023)Barocas, Hardt, and Narayanan]{barocas-hardt-narayanan}
+S.~Barocas, M.~Hardt, and A.~Narayanan.
+\newblock \emph{Fairness and Machine Learning: Limitations and Opportunities}.
+\newblock MIT Press, 2023.
+
+\bibitem[Blumenstock(2016)]{blumenstock2016}
+J.~E. Blumenstock.
+\newblock Fighting {P}overty with {D}ata.
+\newblock \emph{Science}, 2016.
+
+\bibitem[Boehmer et~al.(2024)Boehmer, Nair, Shah, Janson, Taneja, and Tambe]{boehmer2024evaluating}
+N.~Boehmer, Y.~Nair, S.~Shah, L.~Janson, A.~Taneja, and M.~Tambe.
+\newblock {E}valuating the {E}ffectiveness of {I}ndex-{B}ased {T}reatment {A}llocation.
+\newblock \emph{arXiv preprint arXiv:2402.11771}, 2024.
+
+\bibitem[Chan et~al.(2012)Chan, Farias, Bambos, and Escobar]{chan2012}
+C.~W. Chan, V.~F. Farias, N.~Bambos, and G.~J. Escobar.
+\newblock {O}ptimizing {I}ntensive {C}are {U}nit {D}ischarge {D}ecisions with {P}atient {R}eadmissions.
+\newblock \emph{Operations Research}, 60\penalty0 (6):\penalty0 1323--1341, 2012.
+\newblock \doi{10.1287/opre.1120.1105}.
+\newblock URL \url{https://doi.org/10.1287/opre.1120.1105}.
+
+\bibitem[Chouldechova et~al.(2018)Chouldechova, Benavides-Prado, Fialko, and Vaithianathan]{chouldechova2018case}
+A.~Chouldechova, D.~Benavides-Prado, O.~Fialko, and R.~Vaithianathan.
+\newblock A case study of algorithm-assisted decision making in child maltreatment hotline screening decisions.
+\newblock In \emph{Conference on Fairness, Accountability and Transparency}, pages 134--148. PMLR, 2018.
+
+\bibitem[Clementi and Gallegati(2005)]{clementi2005pareto}
+F.~Clementi and M.~Gallegati.
+\newblock Pareto’s law of income distribution: {E}vidence for {G}ermany, the {U}nited {K}ingdom, and the {U}nited {S}tates.
+\newblock \emph{Econophysics of wealth distributions: Econophys-Kolkata I}, pages 3--14, 2005.
+
+\bibitem[Coston et~al.(2023)Coston, Kawakami, Zhu, Holstein, and Heidari]{coston2023sat}
+A.~Coston, A.~Kawakami, H.~Zhu, K.~Holstein, and H.~Heidari.
+\newblock {A} {V}alidity {P}erspective on {E}valuating the {J}ustified {U}se of {D}ata-driven {D}ecision-making {A}lgorithms.
+\newblock In \emph{2023 IEEE Conference on Secure and Trustworthy Machine Learning (SaTML)}, pages 690--704, 2023.
+\newblock \doi{10.1109/SaTML54575.2023.00050}.
+
+\bibitem[Desiere and Struyven(2021)]{desiereUsingArtificialIntelligence2021}
+S.~Desiere and L.~Struyven.
+\newblock Using {{Artificial Intelligence}} to classify {{Jobseekers}}: {{The Accuracy-Equity Trade-off}}.
+\newblock \emph{Journal of Social Policy}, 50\penalty0 (2):\penalty0 367--385, Apr. 2021.
+\newblock ISSN 0047-2794, 1469-7823.
+\newblock \doi{10.1017/S0047279420000203}.
+
+\bibitem[Desiere et~al.(2019)Desiere, Langenbucher, and Struyven]{desiere2019statistical}
+S.~Desiere, K.~Langenbucher, and L.~Struyven.
+\newblock Statistical {P}rofiling in {P}ublic {E}mployment {S}ervices: An {I}nternational {C}omparison.
+\newblock Technical Report 224, OECD Publishing, 2019.
+\newblock URL \url{https://doi.org/10.1787/b5e5f16e-en}.
+
+\bibitem[Drezner and Wesolowsky(1990)]{drezner1990}
+Z.~Drezner and G.~O. Wesolowsky.
+\newblock On the {C}omputation of the {B}ivariate {N}ormal {I}ntegral.
+\newblock \emph{Journal of Statistical Computation and Simulation}, 1990.
+
+\bibitem[Elmachtoub and Grigas(2022)]{elmachtoub2022smart}
+A.~N. Elmachtoub and P.~Grigas.
+\newblock Smart “predict, then optimize”.
+\newblock \emph{Management Science}, 68\penalty0 (1):\penalty0 9--26, 2022.
+
+\bibitem[Fern\'{a}ndez-Lor\'{\i}a and Provost(2022)]{loriprovist2022}
+C.~Fern\'{a}ndez-Lor\'{\i}a and F.~Provost.
+\newblock {C}ausal {D}ecision {M}aking and {C}ausal {E}ffect {E}stimation {A}re {N}ot the {S}ame…and {W}hy {I}t {M}atters.
+\newblock \emph{INFORMS Journal on Data Science}, 1\penalty0 (1):\penalty0 4--16, 2022.
+\newblock \doi{10.1287/ijds.2021.0006}.
+\newblock URL \url{https://doi.org/10.1287/ijds.2021.0006}.
+
+\bibitem[Fischer-Abaigar et~al.(2024)Fischer-Abaigar, Kern, Barda, and Kreuter]{FISCHERABAIGAR2024101976}
+U.~Fischer-Abaigar, C.~Kern, N.~Barda, and F.~Kreuter.
+\newblock Bridging the {G}ap: Towards an {E}xpanded {T}oolkit for {A}i-driven {D}ecision-making in the {P}ublic {S}ector.
+\newblock \emph{Government Information Quarterly}, 41\penalty0 (4):\penalty0 101976, 2024.
+\newblock ISSN 0740-624X.
+\newblock \doi{https://doi.org/10.1016/j.giq.2024.101976}.
+\newblock URL \url{https://www.sciencedirect.com/science/article/pii/S0740624X24000686}.
+
+\bibitem[Guerdan et~al.(2023)Guerdan, Coston, Holstein, and Wu]{Guerdan23}
+L.~Guerdan, A.~Coston, K.~Holstein, and Z.~S. Wu.
+\newblock {C}ounterfactual {P}rediction {U}nder {O}utcome {M}easurement {E}rror.
+\newblock In \emph{Proceedings of the 2023 ACM Conference on Fairness, Accountability, and Transparency}, FAccT '23, page 1584–1598, New York, NY, USA, 2023. Association for Computing Machinery.
+\newblock ISBN 9798400701924.
+\newblock \doi{10.1145/3593013.3594101}.
+\newblock URL \url{https://doi.org/10.1145/3593013.3594101}.
+
+\bibitem[Jain et~al.(2024)Jain, Creel, and Wilson]{jain2024position}
+S.~Jain, K.~Creel, and A.~C. Wilson.
+\newblock {P}osition: {S}carce {R}esource {A}llocations {T}hat {R}ely {O}n {M}achine {L}earning {S}hould {B}e {R}andomized.
+\newblock In \emph{Forty-first International Conference on Machine Learning}, 2024.
+\newblock URL \url{https://openreview.net/forum?id=44qxX6Ty6F}.
+
+\bibitem[Johnson and Zhang(2022)]{simone2022}
+R.~A. Johnson and S.~Zhang.
+\newblock What is the {B}ureaucratic {C}ounterfactual? {C}ategorical versus {A}lgorithmic {P}rioritization in {U}.{S}. {S}ocial {P}olicy.
+\newblock In \emph{Proceedings of the 2022 ACM Conference on Fairness, Accountability, and Transparency}, FAccT '22, page 1671–1682, New York, NY, USA, 2022. Association for Computing Machinery.
+\newblock ISBN 9781450393522.
+\newblock \doi{10.1145/3531146.3533223}.
+\newblock URL \url{https://doi.org/10.1145/3531146.3533223}.
+
+\bibitem[Kallus(2021)]{Kallus03042021}
+N.~Kallus.
+\newblock More {E}fficient {P}olicy {L}earning via {O}ptimal {R}etargeting.
+\newblock \emph{Journal of the American Statistical Association}, 116\penalty0 (534):\penalty0 646--658, 2021.
+\newblock \doi{10.1080/01621459.2020.1788948}.
+\newblock URL \url{https://doi.org/10.1080/01621459.2020.1788948}.
+
+\bibitem[Kern et~al.(2024)Kern, Bach, Mautner, and Kreuter]{kern2024design}
+C.~Kern, R.~Bach, H.~Mautner, and F.~Kreuter.
+\newblock When {S}mall {D}ecisions {H}ave {B}ig {I}mpact: {F}airness {I}mplications of {A}lgorithmic {P}rofiling {S}chemes.
+\newblock \emph{ACM Journal on Responsible Computing}, 1\penalty0 (4), Nov. 2024.
+\newblock \doi{10.1145/3689485}.
+\newblock URL \url{https://doi.org/10.1145/3689485}.
+
+\bibitem[Kitagawa and Tetenov(2018)]{Kitagawa2018}
+T.~Kitagawa and A.~Tetenov.
+\newblock {W}ho {S}hould {B}e {T}reated? {E}mpirical {W}elfare {M}aximization {M}ethods for {T}reatment {C}hoice.
+\newblock \emph{Econometrica}, 86\penalty0 (2):\penalty0 591--616, 2018.
+\newblock \doi{https://doi.org/10.3982/ECTA13288}.
+\newblock URL \url{https://onlinelibrary.wiley.com/doi/abs/10.3982/ECTA13288}.
+
+\bibitem[Kleinberg et~al.(2015)Kleinberg, Ludwig, Mullainathan, and Obermeyer]{kleinberg2015prediction}
+J.~Kleinberg, J.~Ludwig, S.~Mullainathan, and Z.~Obermeyer.
+\newblock Prediction {P}olicy {P}roblems.
+\newblock \emph{American Economic Review}, 105\penalty0 (5):\penalty0 491--495, 2015.
+
+\bibitem[K{\"o}rtner and Bonoli(2023)]{kortner2023predictive}
+J.~K{\"o}rtner and G.~Bonoli.
+\newblock Predictive {A}lgorithms in the {D}elivery of {P}ublic {E}mployment {S}ervices.
+\newblock In \emph{Handbook of Labour Market Policy in Advanced Democracies}, pages 387--398. Edward Elgar Publishing, 2023.
+
+\bibitem[Loxha and Morgandi(2014)]{loxha2014profiling}
+A.~Loxha and M.~Morgandi.
+\newblock Profiling the unemployed: a review of {OECD} experiences and implications for emerging economics.
+\newblock \emph{Social protection discussion papers and notes}, \penalty0 (91051), 2014.
+
+\bibitem[Manski(2004)]{Manski2004}
+C.~F. Manski.
+\newblock {S}tatistical {T}reatment {R}ules for {H}eterogeneous {P}opulations.
+\newblock \emph{Econometrica}, 72\penalty0 (4):\penalty0 1221--1246, 2004.
+\newblock \doi{https://doi.org/10.1111/j.1468-0262.2004.00530.x}.
+\newblock URL \url{https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1468-0262.2004.00530.x}.
+
+\bibitem[Perdomo(2024)]{pmlr-v235-perdomo24a}
+J.~C. Perdomo.
+\newblock The {{R}}elative {{V}}alue of {{P}}rediction in {{A}}lgorithmic {{D}}ecision {{M}}aking.
+\newblock In \emph{Proceedings of the 41st International Conference on Machine Learning}, ICML'24. JMLR.org, 2024.
+
+\bibitem[Perdomo et~al.(2023)Perdomo, Britton, Hardt, and Abebe]{perdomo2023difficult}
+J.~C. Perdomo, T.~Britton, M.~Hardt, and R.~Abebe.
+\newblock Difficult {L}essons on {S}ocial {P}rediction from {W}isconsin {P}ublic {S}chools.
+\newblock \emph{arXiv preprint arXiv:2304.06205}, 2023.
+
+\bibitem[Potash et~al.(2015)Potash, Brew, Loewi, Majumdar, Reece, Walsh, Rozier, Jorgenson, Mansour, and Ghani]{potash2015}
+E.~Potash, J.~Brew, A.~Loewi, S.~Majumdar, A.~Reece, J.~Walsh, E.~Rozier, E.~Jorgenson, R.~Mansour, and R.~Ghani.
+\newblock {P}redictive {M}odeling for {P}ublic {H}ealth: {P}reventing {C}hildhood {L}ead {P}oisoning.
+\newblock In \emph{Proceedings of the 21th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, KDD '15, page 2039–2047, New York, NY, USA, 2015. Association for Computing Machinery.
+\newblock ISBN 9781450336642.
+\newblock \doi{10.1145/2783258.2788629}.
+\newblock URL \url{https://doi.org/10.1145/2783258.2788629}.
+
+\bibitem[Salganik et~al.(2020)Salganik, Lundberg, Kindel, Ahearn, Al-Ghoneim, Almaatouq, Altschul, Brand, Carnegie, Compton, Datta, Davidson, Filippova, Gilroy, Goode, Jahani, Kashyap, Kirchner, McKay, Morgan, Pentland, Polimis, Raes, Rigobon, Roberts, Stanescu, Suhara, Usmani, Wang, Adem, Alhajri, AlShebli, Amin, Amos, Argyle, Baer-Bositis, Büchi, Chung, Eggert, Faletto, Fan, Freese, Gadgil, Gagné, Gao, Halpern-Manners, Hashim, Hausen, He, Higuera, Hogan, Horwitz, Hummel, Jain, Jin, Jurgens, Kaminski, Karapetyan, Kim, Leizman, Liu, Möser, Mack, Mahajan, Mandell, Marahrens, Mercado-Garcia, Mocz, Mueller-Gastell, Musse, Niu, Nowak, Omidvar, Or, Ouyang, Pinto, Porter, Porter, Qian, Rauf, Sargsyan, Schaffner, Schnabel, Schonfeld, Sender, Tang, Tsurkov, van Loon, Varol, Wang, Wang, Wang, Wang, Weissman, Whitaker, Wolters, Woon, Wu, Wu, Yang, Yin, Zhao, Zhu, Brooks-Gunn, Engelhardt, Hardt, Knox, Levy, Narayanan, Stewart, Watts, and McLanahan]{Salganik2020}
+M.~J. Salganik, I.~Lundberg, A.~T. Kindel, C.~E. Ahearn, K.~Al-Ghoneim, A.~Almaatouq, D.~M. Altschul, J.~E. Brand, N.~B. Carnegie, R.~J. Compton, D.~Datta, T.~Davidson, A.~Filippova, C.~Gilroy, B.~J. Goode, E.~Jahani, R.~Kashyap, A.~Kirchner, S.~McKay, A.~C. Morgan, A.~Pentland, K.~Polimis, L.~Raes, D.~E. Rigobon, C.~V. Roberts, D.~M. Stanescu, Y.~Suhara, A.~Usmani, E.~H. Wang, M.~Adem, A.~Alhajri, B.~AlShebli, R.~Amin, R.~B. Amos, L.~P. Argyle, L.~Baer-Bositis, M.~Büchi, B.-R. Chung, W.~Eggert, G.~Faletto, Z.~Fan, J.~Freese, T.~Gadgil, J.~Gagné, Y.~Gao, A.~Halpern-Manners, S.~P. Hashim, S.~Hausen, G.~He, K.~Higuera, B.~Hogan, I.~M. Horwitz, L.~M. Hummel, N.~Jain, K.~Jin, D.~Jurgens, P.~Kaminski, A.~Karapetyan, E.~H. Kim, B.~Leizman, N.~Liu, M.~Möser, A.~E. Mack, M.~Mahajan, N.~Mandell, H.~Marahrens, D.~Mercado-Garcia, V.~Mocz, K.~Mueller-Gastell, A.~Musse, Q.~Niu, W.~Nowak, H.~Omidvar, A.~Or, K.~Ouyang, K.~M. Pinto, E.~Porter, K.~E. Porter, C.~Qian, T.~Rauf, A.~Sargsyan, T.~Schaffner, L.~Schnabel,
+  B.~Schonfeld, B.~Sender, J.~D. Tang, E.~Tsurkov, A.~van Loon, O.~Varol, X.~Wang, Z.~Wang, J.~Wang, F.~Wang, S.~Weissman, K.~Whitaker, M.~K. Wolters, W.~L. Woon, J.~Wu, C.~Wu, K.~Yang, J.~Yin, B.~Zhao, C.~Zhu, J.~Brooks-Gunn, B.~E. Engelhardt, M.~Hardt, D.~Knox, K.~Levy, A.~Narayanan, B.~M. Stewart, D.~J. Watts, and S.~McLanahan.
+\newblock Measuring the {P}redictability of {L}ife {O}utcomes with a {S}cientific {M}ass {C}ollaboration.
+\newblock \emph{Proceedings of the National Academy of Sciences}, 117\penalty0 (15):\penalty0 8398--8403, 2020.
+\newblock \doi{10.1073/pnas.1915006117}.
+\newblock URL \url{https://www.pnas.org/doi/abs/10.1073/pnas.1915006117}.
+
+\bibitem[Shirali et~al.(2024)Shirali, Abebe, and Hardt]{shirali2024}
+A.~Shirali, R.~Abebe, and M.~Hardt.
+\newblock {A}llocation {R}equires {P}rediction {O}nly if {I}nequality {I}s {L}ow.
+\newblock In \emph{Forty-first International Conference on Machine Learning, {ICML} 2024, Vienna, Austria, July 21-27, 2024}. OpenReview.net, 2024.
+\newblock URL \url{https://openreview.net/forum?id=WUicA0hOF9}.
+
+\bibitem[Sun and Medaglia(2019)]{sun2019mapping}
+T.~Q. Sun and R.~Medaglia.
+\newblock Mapping the challenges of {A}rtificial {I}ntelligence in the public sector: {E}vidence from public healthcare.
+\newblock \emph{Government Information Quarterly}, 36\penalty0 (2):\penalty0 368--383, 2019.
+
+\bibitem[Wang et~al.(2024)Wang, Kapoor, Barocas, and Narayanan]{wang2024}
+A.~Wang, S.~Kapoor, S.~Barocas, and A.~Narayanan.
+\newblock {A}gainst {P}redictive {O}ptimization: {O}n the {L}egitimacy of {D}ecision-making {A}lgorithms {T}hat {O}ptimize {P}redictive {A}ccuracy.
+\newblock \emph{ACM J. Responsib. Comput.}, 1\penalty0 (1), Mar. 2024.
+\newblock \doi{10.1145/3636509}.
+\newblock URL \url{https://doi.org/10.1145/3636509}.
+
+\bibitem[Wilder and Welle(2024)]{wilder2024learning}
+B.~Wilder and P.~Welle.
+\newblock Learning treatment effects while treating those in need.
+\newblock \emph{arXiv preprint arXiv:2407.07596}, 2024.
+
+\bibitem[Wirtz et~al.(2019)Wirtz, Weyerer, and Geyer]{wirtz2019artificial}
+B.~W. Wirtz, J.~C. Weyerer, and C.~Geyer.
+\newblock Artificial {I}ntelligence and the {P}ublic {S}ector—{A}pplications and {C}hallenges.
+\newblock \emph{International Journal of Public Administration}, 42\penalty0 (7):\penalty0 596--615, 2019.
+
+\end{thebibliography}
+
+
+\end{document}

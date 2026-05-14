@@ -1,0 +1,183 @@
+
+% The paper 'Estimation of Non-Normalized Statistical Models by Score Matching' by Aapo Hyvärinen (2005) introduces the concept of score matching. This foundational work establishes the theoretical basis for the score matching approach, which is central to the proposed integration with deep learning. It should be cited in the related work section to provide background and context for the methodology.
+@article{hyvarinen2005estimationon,
+ author = {Aapo Hyvärinen},
+ booktitle = {Journal of machine learning research},
+ journal = {J. Mach. Learn. Res.},
+ pages = {695-709},
+ title = {Estimation of Non-Normalized Statistical Models by Score Matching},
+ volume = {6},
+ year = {2005}
+}
+
+% The paper 'Auto-Encoding Variational Bayes' by Diederik P. Kingma and Max Welling is the foundational work introducing Variational Autoencoders (VAEs) and the reparameterization trick. This paper is critical as the proposed methodology integrates VAEs for improving score matching with missing data. It should be cited in the methodology section to acknowledge the foundational generative modeling technique employed.
+@article{kingma2013autoencodingvb,
+ author = {Diederik P. Kingma and M. Welling},
+ booktitle = {International Conference on Learning Representations},
+ journal = {CoRR},
+ title = {Auto-Encoding Variational Bayes},
+ volume = {abs/1312.6114},
+ year = {2013}
+}
+
+% Paper 1 discusses a deep learning-based approach, specifically using MultiLayer Perceptrons, for imputing long-term missing values in time series data. This is relevant to the proposed research as it provides insights into handling missing data with neural networks and can be cited in the related work section to position the study within the broader context of deep learning for missing data. Paper 4 presents a novel framework, M-LSTNet, for time series prediction with missing data, extending existing methods with additional algorithms to improve robustness. This paper should be cited in the related work section to highlight alternative approaches and provide context for the challenges addressed in the proposed methodology.
+@article{park2022longtermmv,
+ author = {Jangho Park and Juliane Müller and B. Arora and B. Faybishenko and G. Pastorello and C. Varadharajan and R. Sahu and Deb Agarwal},
+ booktitle = {Neural computing & applications (Print)},
+ journal = {Neural Computing and Applications},
+ pages = {9071-9091},
+ title = {Long-term missing value imputation for time series data using deep neural networks},
+ volume = {35},
+ year = {2022}
+}
+
+@conference{zhou2020robustts,
+ author = {uancheng Zhou},
+ booktitle = {2020 International Conference on Computer Communication and Network Security (CCNS)},
+ journal = {2020 International Conference on Computer Communication and Network Security (CCNS)},
+ pages = {178-183},
+ title = {Robust Time Series Prediction with Missing Data Based on Deep Convolutional Neural Networks},
+ year = {2020}
+}
+
+% This paper establishes theoretical foundations for score-based generative models in learning high-dimensional sub-Gaussian distributions and provides insights into the dimension-free approximation rates of these models. It is relevant to the proposed research as it supports the theoretical argument for using score-based generative models in high-dimensional settings with missing data. It should be cited in the methodology section to provide a theoretical basis for integrating score matching with deep learning.
+@article{cole2024scorebasedgm,
+ author = {Frank Cole and Yulong Lu},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Score-based generative models break the curse of dimensionality in learning a family of sub-Gaussian probability distributions},
+ volume = {abs/2402.08082},
+ year = {2024}
+}
+
+% The paper 'Deep Imputation of Missing Values in Time Series Health Data: A Review with Benchmarking' benchmarks state-of-the-art deep learning methods for imputing missing data in multivariate time series datasets. It highlights the dependency of imputation performance on data types, missingness mechanisms, and other factors. This citation is relevant for the related work section to provide context for the proposed research's experiments comparing the performance of the proposed framework with existing methods.
+@article{kazijevs2023deepio,
+ author = {Maksims Kazijevs and Manar D. Samad},
+ booktitle = {Journal of Biomedical Informatics},
+ journal = {Journal of biomedical informatics},
+ pages = {
+          104440
+        },
+ title = {Deep Imputation of Missing Values in Time Series Health Data: A Review with Benchmarking},
+ year = {2023}
+}
+
+% This paper presents a synthetic dataset designed to mimic real-world healthcare data, including missing data, interactions, and noise, making it an ideal candidate for benchmarking the proposed framework. This citation should be included in the experiments section to support the choice of datasets used for evaluating the method's effectiveness in practical scenarios.
+@article{burns2024asd,
+ author = {Dan K Burns and Kathryn Richardson and C. Driessens},
+ booktitle = {NIHR Open Research},
+ journal = {NIHR Open Research},
+ title = {A synthetic dataset for the exploration of survival and classification models: prediction of heart attack or stroke within a 10-year follow-up period},
+ year = {2024}
+}
+
+% The paper 'Unbiased Learning of Deep Generative Models with Structured Discrete Representations' discusses the integration of graphical models with deep learning for generative modeling and their robustness to missing data in high-dimensional settings. This paper is relevant to the methodology section as it highlights optimization challenges and solutions for learning deep generative models in scenarios involving missing data, providing theoretical and practical insights that complement the proposed framework.
+@article{bendekgey2023unbiasedlo,
+ author = {H. Bendekgey and Gabriel Hope and Erik B. Sudderth},
+ booktitle = {Neural Information Processing Systems},
+ journal = {ArXiv},
+ title = {Unbiased Learning of Deep Generative Models with Structured Discrete Representations},
+ volume = {abs/2306.08230},
+ year = {2023}
+}
+
+% The paper 'Score Matching With Missing Data' by Givens et al. (2025) adapts score matching to work with missing data, including high-dimensional settings. It provides theoretical foundations and practical approaches (importance weighting and variational methods) for score matching when data is incomplete. This citation is crucial for the methodology section to highlight prior work on score matching adaptations that inform the proposed integration with deep learning techniques.
+@article{givens2025scoremw,
+ author = {Josh Givens and Song Liu and Henry W J Reeve},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Score Matching With Missing Data},
+ volume = {abs/2506.00557},
+ year = {2025}
+}
+
+% This paper explores a novel deep learning algorithm for diagnosing thyroid cancer with randomly distributed missing data and high-dimensional challenges. It discusses dimensionality and size reduction approaches to eliminate redundant data, which aligns with the challenges of integrating deep learning with statistical methods for missing data. This citation should be included in the related work section to highlight challenges in handling missing data in high-dimensional settings and provide context for the research gap addressed by the proposed framework.
+@article{tutsoy2024and,
+ author = {Onder Tutsoy and H. E. Sumbul},
+ booktitle = {Briefings Bioinform.},
+ journal = {Briefings in Bioinformatics},
+ title = {A novel deep machine learning algorithm with dimensionality and size reduction approaches for feature elimination: thyroid cancer diagnoses with randomly missing data},
+ volume = {25},
+ year = {2024}
+}
+
+% The paper 'Deep Learning Methods for Omics Data Imputation' provides a comprehensive overview of the challenges and limitations associated with applying deep learning methods to high-dimensional omics datasets with missing data. It highlights issues such as non-linear relationships, non-random missingness mechanisms, and technical variations. This citation is relevant for the 'Risk Factors and Limitations' section to support the discussion of potential challenges in applying the proposed deep learning-based score matching framework.
+@article{huang2023deeplm,
+ author = {Lei Huang and Meng Song and Hui Shen and H. Hong and Ping Gong and Hong-Wen Deng and Chaoyang Zhang},
+ booktitle = {Biology},
+ journal = {Biology},
+ title = {Deep Learning Methods for Omics Data Imputation},
+ volume = {12},
+ year = {2023}
+}
+
+% The paper 'Missing data imputation for noisy time-series data and applications in healthcare' discusses the use of deep learning methods, including SAITS, BRITS, and Transformers, for imputing missing values in noisy healthcare time-series datasets. It highlights the denoising effects of imputation and evaluates performance across varying missing data rates. This citation is relevant for the experiments section to support the practical application and evaluation of the proposed framework in healthcare scenarios, showcasing the effectiveness of deep learning-based imputation methods.
+@article{le2024missingdi,
+ author = {Lien P. Le and Xuan-Hien Nguyen Thi and Thu Nguyen and M. Riegler and Paal Halvorsen and Binh T. Nguyen},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Missing data imputation for noisy time-series data and applications in healthcare},
+ volume = {abs/2412.11164},
+ year = {2024}
+}
+
+% The paper 'Simulation-based Inference via Langevin Dynamics with Score Matching' explores the integration of score matching with Langevin dynamics for simulation-based inference in high-dimensional parameter spaces. This is relevant to the methodology section as it provides insights into overcoming challenges in applying score matching in complex, high-dimensional settings, which aligns with the proposed integration of deep learning and score matching for handling missing data.
+@inproceedings{jiang2025simulationbasediv,
+ author = {Haoyu Jiang and Yuexi Wang and Yun Yang},
+ title = {Simulation-based Inference via Langevin Dynamics with Score Matching},
+ year = {2025}
+}
+
+% The paper 'Automated Hyperparameter Optimization in Deep Learning: AI-Driven Approaches for Model Efficiency and Accuracy' provides a comprehensive discussion on hyperparameter optimization techniques, including Bayesian Optimization, evolutionary algorithms, and AutoML frameworks. This is relevant for the methodology and experiments section, as it supports the discussion on hyperparameter tuning (e.g., hidden layer size) and its impact on model performance in deep learning applications.
+@article{rahman2023automatedho,
+ author = {Md Mostafizur Rahman and Sharmin Nahar and Md Mostafijur Rahman and Mohammad Shahadat Hossain and Md Mashfiquer Rahman and Md Shafiq Ullah},
+ booktitle = {International Journal of Innovative Research in Computer and Communication Engineering},
+ journal = {International Journal of Innovative Research in Computer and Communication Engineering},
+ title = {Automated Hyperparameter Optimization in Deep Learning: AI-Driven Approaches for Model Efficiency and Accuracy},
+ year = {2023}
+}
+
+% The paper 'A Variational Perspective on Diffusion-Based Generative Models and Score Matching' provides theoretical insights into integrating score matching with diffusion-based generative models, emphasizing high-dimensional data. This is highly relevant to the methodology section as it supports the theoretical basis for combining score matching with generative modeling techniques, such as VAEs or GANs, in the proposed framework for missing data imputation.
+@article{huang2021avp,
+ author = {Chin-Wei Huang and Jae Hyun Lim and Aaron C. Courville},
+ booktitle = {Neural Information Processing Systems},
+ journal = {ArXiv},
+ title = {A Variational Perspective on Diffusion-Based Generative Models and Score Matching},
+ volume = {abs/2106.02808},
+ year = {2021}
+}
+
+% The paper 'Addressing Missing Data Challenges in Geriatric Health Monitoring' examines statistical and machine learning imputation methods for handling missing data in healthcare, focusing on geriatric monitoring. It discusses missing data mechanisms and evaluates various imputation methods under real-world conditions, providing valuable context for the challenges addressed by the proposed framework. This citation should be included in the related work section to highlight the limitations of existing methods and the gap filled by integrating deep learning techniques.
+@article{sasu2025addressingmd,
+ author = {Gabriel-Vasilică Sasu and Bogdan-Iulian Ciubotaru and Nicolae Goga and A. Vasilățeanu},
+ booktitle = {Italian National Conference on Sensors},
+ journal = {Sensors (Basel, Switzerland)},
+ title = {Addressing Missing Data Challenges in Geriatric Health Monitoring: A Study of Statistical and Machine Learning Imputation Methods},
+ volume = {25},
+ year = {2025}
+}
+
+% The paper 'Deep learning for irregularly and regularly missing data reconstruction' discusses a deep learning approach using encoder-decoder architectures (U-Net) for reconstructing data with both irregular and regular missingness patterns. It benchmarks the method on several synthetic and real-world datasets, demonstrating its effectiveness and generalization capability. This paper is relevant to the methodology and experiments sections as it provides insights into handling diverse missingness mechanisms and validates the application of deep learning in such scenarios.
+@article{chai2020deeplf,
+ author = {Xintao Chai and Hanming Gu and Feng Li and Hongyou Duan and Xiaobo Hu and Kai Lin},
+ booktitle = {Scientific Reports},
+ journal = {Scientific Reports},
+ title = {Deep learning for irregularly and regularly missing data reconstruction},
+ volume = {10},
+ year = {2020}
+}
+
+% The paper 'A REVIEW OF CHALLENGES AND SOLUTIONS FOR USING MACHINE LEARNING APPROACHES FOR MISSING DATA' provides an in-depth review of both traditional and advanced machine learning imputation techniques, including deep learning methods such as autoencoders and GANs. It discusses challenges like overfitting, computational demands, and varying missing data mechanisms (MCAR, MAR, NMAR), which are relevant to the 'Risk Factors and Limitations' section of the proposed research. This citation supports the discussion of potential pitfalls and practical challenges in applying deep learning methods for missing data imputation.
+@article{wani2024aro,
+ author = {Aasim Ayaz Wani},
+ booktitle = {International Journal of Engineering Applied Sciences and Technology},
+ journal = {International Journal of Engineering Applied Sciences and Technology},
+ title = {A REVIEW OF CHALLENGES AND SOLUTIONS FOR USING MACHINE LEARNING APPROACHES FOR MISSING DATA},
+ year = {2024}
+}
+
+% The paper 'Deep Generative Models for Survival Analysis and Synthetic Data Generation in Healthcare' outlines key future research directions for integrating generative AI with statistical methods in healthcare, including handling high-dimensional data, privacy concerns, and heterogeneity. This paper is relevant for the 'Suggesting Future Research' section to highlight gaps and inspire future advancements in combining deep learning with statistical approaches for missing data handling.
+@misc{none,
+ author = {Patricia Alonso de Apellániz},
+ title = {Deep Generative Models for Survival Analysis and Synthetic Data Generation in Healthcare}
+}

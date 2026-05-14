@@ -1,0 +1,16 @@
+Current notes:
+
+1. Filename: plot1_annual_sales.png
+   Description: This plot illustrates the annual sales data for the company over the past five years. It is a line graph where the x-axis represents the years and the y-axis represents the sales figures in millions of dollars. Each point on the line indicates the total sales for that particular year, allowing for a clear visualization of trends, peaks, and declines in sales performance over time.
+
+2. Filename: plot2_market_share.png
+   Description: This plot depicts the market share distribution among the top five competitors within the industry. Presented as a pie chart, each slice represents the percentage of total market share held by each company. The chart provides a visual representation of competitive positioning, highlighting which companies dominate the market and which have smaller shares.
+
+3. Filename: plot3_customer_satisfaction.png
+   Description: This histogram shows the distribution of customer satisfaction scores from recent surveys. The x-axis displays the satisfaction score ranges, while the y-axis indicates the number of respondents. This plot helps to identify the overall customer sentiment and satisfaction levels with the company's products or services, showcasing areas of strength and improvement.
+
+4. Filename: plot4_product_launch_impact.png
+   Description: This bar chart compares the sales performance of new product launches over the first six months post-launch. Each bar represents a different product, with the height corresponding to the total sales revenue generated within the examined period. The chart allows for analysis of which products performed best and provided significant returns shortly after their introduction to the market.
+
+5. Filename: plot5_expense_breakdown.png
+   Description: This stacked bar chart provides a breakdown of the company's expenses for the current fiscal year. The x-axis lists different expense categories such as marketing, research and development, and operations, while the y-axis indicates the total expenditure in each category. Each segment of the stacked bar represents a subcategory of expenses, offering insight into the allocation of financial resources across various business operations.

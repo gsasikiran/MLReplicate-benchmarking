@@ -1,0 +1,170 @@
+
+% This paper provides a foundational overview of masked diffusion models (MDMs), discussing their strengths, limitations, and comparisons to autoregressive models. It is particularly relevant for introducing MDMs as a concept and highlighting their recent advancements and challenges. This citation is crucial for the introduction section to establish the basis for the proposed adaptive inference strategies.
+@article{zheng2024maskeddm,
+ author = {Kaiwen Zheng and Yongxin Chen and Hanzi Mao and Mingying Liu and Jun Zhu and Qinsheng Zhang},
+ booktitle = {International Conference on Learning Representations},
+ journal = {ArXiv},
+ title = {Masked Diffusion Models are Secretly Time-Agnostic Masked Models and Exploit Inaccurate Categorical Sampling},
+ volume = {abs/2409.02908},
+ year = {2024}
+}
+
+% Paper 0 introduces adaptive inference-time computation strategies in generative models, which is relevant to enhancing adaptive token ordering in masked diffusion models. It should be cited in the methodology section to contextualize adaptive inference strategies. Paper 1 directly explores adaptive token decoding in masked diffusion models, including results on Sudoku tasks, making it highly relevant for summarizing related work and comparing findings in the experiments section.
+@article{manvi2024adaptiveic,
+ author = {Rohin Manvi and Anikait Singh and Stefano Ermon},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Adaptive Inference-Time Compute: LLMs Can Predict if They Can Do Better, Even Mid-Generation},
+ volume = {abs/2410.02725},
+ year = {2024}
+}
+
+@article{kim2025trainft,
+ author = {Jaeyeon Kim and Kulin Shah and Vasilis Kontonis and S. Kakade and Sitan Chen},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Train for the Worst, Plan for the Best: Understanding Token Ordering in Masked Diffusions},
+ volume = {abs/2502.06768},
+ year = {2025}
+}
+
+% The paper 'LARP: Tokenizing Videos with a Learned Autoregressive Generative Prior' discusses autoregressive decoding in generative models, focusing on tokenization and structured decoding. This is relevant for comparing the structured decoding capabilities of autoregressive models to masked diffusion models. It should be cited in the introduction and comparison sections to provide context for the autoregressive baseline.
+@article{wang2024larptv,
+ author = {Hanyu Wang and Saksham Suri and Yixuan Ren and Hao Chen and Abhinav Shrivastava},
+ booktitle = {International Conference on Learning Representations},
+ journal = {ArXiv},
+ title = {LARP: Tokenizing Videos with a Learned Autoregressive Generative Prior},
+ volume = {abs/2410.21264},
+ year = {2024}
+}
+
+% This paper investigates the ability of causal language models (CLMs) to solve logic puzzles like Sudoku and Zebra puzzles by leveraging reasoning and search capabilities. It discusses the importance of training models with a logical sequence of steps to achieve high accuracy on these tasks. This citation is relevant for the experiments section to provide context for solving Sudoku puzzles with generative models and to compare findings on performance and methodologies.
+@article{shah2024causallm,
+ author = {Kulin Shah and Nishanth Dikkala and Xin Wang and Rina Panigrahy},
+ booktitle = {Neural Information Processing Systems},
+ journal = {ArXiv},
+ title = {Causal Language Modeling Can Elicit Search and Reasoning Capabilities on Logic Puzzles},
+ volume = {abs/2409.10502},
+ year = {2024}
+}
+
+% The paper 'DySpec: Faster Speculative Decoding with Dynamic Token Tree Structure' introduces a novel dynamic token tree structure for speculative decoding in generative models. It discusses strategies for dynamically expanding token trees and optimizing token acceptance rates, which is relevant for the methodology section to provide context and theoretical grounding for adaptive token ordering strategies in masked diffusion models. This citation will support the introduction of adaptive decoding techniques in the proposed work.
+@article{xiong2024dyspecfs,
+ author = {Yunfan Xiong and Ruoyu Zhang and Yanzeng Li and Tianhao Wu and Lei Zou},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {DySpec: Faster Speculative Decoding with Dynamic Token Tree Structure},
+ volume = {abs/2410.11744},
+ year = {2024}
+}
+
+% This paper introduces ViLaD, a Large Vision Language Diffusion framework, that addresses computational inefficiencies in masked diffusion models for real-time applications like autonomous driving. This citation is relevant to the motivation section to highlight the computational challenges of masked diffusion models and the need for innovative strategies like adaptive inference to overcome them.
+@article{cui2025viladal,
+ author = {Can Cui and Yupeng Zhou and Juntong Peng and Sung-Yeon Park and Zichong Yang and Prashanth Sankaranarayanan and Jiaru Zhang and Ruqi Zhang and Ziran Wang},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {ViLaD: A Large Vision Language Diffusion Framework for End-to-End Autonomous Driving},
+ volume = {abs/2508.12603},
+ year = {2025}
+}
+
+% This paper discusses limitations and challenges of deploying diffusion models in resource-constrained environments, such as IoT and edge networks, and proposes adaptive strategies for efficient inference. It is relevant to the motivation and related work sections to highlight the computational challenges of adaptive inference and the need to optimize inference strategies for complex real-world tasks in masked diffusion models.
+@article{tian2025acceleratingac,
+ author = {Meng Tian and Zhicheng Liu and Chenxuan Hou and Chao Qiu and Xiaofei Wang and Dusit Niyato and Victor C. M. Leung},
+ booktitle = {IEEE Transactions on Cloud Computing},
+ journal = {IEEE Transactions on Cloud Computing},
+ pages = {1011-1025},
+ title = {Accelerating AI-Generated Content Collaborative Inference Via Transfer Reinforcement Learning in Dynamic Edge Networks},
+ volume = {13},
+ year = {2025}
+}
+
+% The paper 'Reward-Weighted Sampling: Enhancing Non-Autoregressive Characteristics in Masked Diffusion LLMs' introduces a decoding strategy that leverages global sequence-level coherence to promote non-autoregressive generation orders in masked diffusion models. This is directly relevant to the theoretical aspects of token ordering and adaptive inference strategies, making it suitable for the methodology section to provide context and justification for the proposed adaptive token ordering strategies.
+@article{gwak2025rewardweightedse,
+ author = {Daehoon Gwak and Minseo Jung and Junwoo Park and Minho Park and chaeHun Park and J. Hyung and Jaegul Choo},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Reward-Weighted Sampling: Enhancing Non-Autoregressive Characteristics in Masked Diffusion LLMs},
+ volume = {abs/2509.00707},
+ year = {2025}
+}
+
+% Paper 0 discusses an energy-aware generative AI framework for IoT devices, emphasizing robustness under noise, cross-task, and cross-dataset conditions. This is relevant to the robustness testing section to highlight generalizability in adaptive inference strategies. Paper 3 introduces a predictive coding approach with Langevin dynamics, improving robustness and convergence in generative models. This provides theoretical grounding for adaptive inference strategies and is relevant to the methodology section.
+@article{xie2025aneg,
+ author = {Yafei Xie and Quanrong Fang},
+ booktitle = {Electronics},
+ journal = {Electronics},
+ title = {An Energy-Aware Generative AI Edge Inference Framework for Low-Power IoT Devices},
+ year = {2025}
+}
+
+@article{zahid2023sampleay,
+ author = {Umais Zahid and Qinghai Guo and Z. Fountas},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Sample as You Infer: Predictive Coding With Langevin Dynamics},
+ volume = {abs/2311.13664},
+ year = {2023}
+}
+
+% This paper discusses limitations of fixed-order decoding in generative models and proposes a novel framework to address these issues by employing template-order prompts and feature integration. It highlights critical challenges in token ordering strategies, which is directly relevant to our study. This citation will be used in the motivation and related work sections to emphasize existing research gaps and justify the need for adaptive token ordering strategies in masked diffusion models.
+@article{chen2025templateorderdf,
+ author = {Jiazhou Chen and Ruiqiang Guo},
+ booktitle = {IEEE Transactions on Audio, Speech, and Language Processing},
+ journal = {IEEE Transactions on Audio, Speech and Language Processing},
+ pages = {2275-2285},
+ title = {Template-Order Driven Feature Integration With Generative Models for Aspect Sentiment Triplet Extraction},
+ volume = {33},
+ year = {2025}
+}
+
+% This paper provides a comprehensive review of diffusion model advancements, focusing on image data augmentation, model architectures, and evaluation metrics. It also discusses current challenges and future research directions, which can provide insights into broader implications and potential advancements for diffusion models. This citation will be used in the discussion section to highlight future research avenues related to adaptive inference and its applications in generative models.
+@article{alimisis2024advancesid,
+ author = {Panagiotis Alimisis and Ioannis Mademlis and Panagiotis I. Radoglou-Grammatikis and Panagiotis G. Sarigiannidis and Georgios Th. Papadopoulos},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Advances in Diffusion Models for Image Data Augmentation: A Review of Methods, Models, Evaluation Metrics and Future Research Directions},
+ volume = {abs/2407.04103},
+ year = {2024}
+}
+
+% The paper 'Balcony: A Lightweight Approach to Dynamic Inference of Generative Language Models' introduces a dynamic inference framework that balances computational efficiency and model performance through adaptive strategies. This is directly relevant to the discussion of computational overhead and limitations of adaptive inference strategies in masked diffusion models. It will be cited in the motivation and limitations sections to emphasize the challenges and potential solutions in balancing efficiency and performance in real-world applications.
+@article{jamialahmadi2025balconyal,
+ author = {Benyamin Jamialahmadi and Parsa Kavehzadeh and Mehdi Rezagholizadeh and Parsa Farinneya and Hossein Rajabzadeh and A. Jafari and Boxing Chen and Marzieh S. Tahaei},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Balcony: A Lightweight Approach to Dynamic Inference of Generative Language Models},
+ volume = {abs/2503.05005},
+ year = {2025}
+}
+
+% The paper 'Evaluating DL Model Scaling Trade-Offs During Inference via an Empirical Benchmark Analysis' presents a benchmarking framework to assess trade-offs in classification accuracy, computational overhead, and latency during inference in deep learning models. This citation is relevant for the limitations and risk factors section to contextualize the computational challenges and trade-offs associated with adaptive inference strategies in masked diffusion models, especially in real-world applications requiring efficiency and scalability.
+@article{trihinas2024evaluatingdm,
+ author = {Demetris Trihinas and Panagiotis Michael and Moysis Symeonides},
+ booktitle = {Future Internet},
+ journal = {Future Internet},
+ pages = {468},
+ title = {Evaluating DL Model Scaling Trade-Offs During Inference via an Empirical Benchmark Analysis},
+ volume = {16},
+ year = {2024}
+}
+
+% The paper 'Masked Diffusion Models as Energy Minimization' provides a systematic theoretical framework interpreting MDMs as solutions to energy minimization problems. It clarifies the theoretical foundations of MDMs through energy formulations and motivates practical improvements in sampling. This citation is relevant for the introduction and methodology sections to establish the theoretical basis of MDMs and contextualize their training and inference processes.
+@article{chen2025maskeddm,
+ author = {Sitong Chen and Shen Nie and Jiacheng Sun and Zijin Feng and Zhenguo Li and Jingwei Wen and Chongxuan Li},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Masked Diffusion Models as Energy Minimization},
+ volume = {abs/2509.13866},
+ year = {2025}
+}
+
+% The paper 'Text-Conditioned Sampling Framework for Text-to-Image Generation with Masked Generative Models' introduces adaptive sampling strategies, including Frequency Adaptive Sampling (FAS), to improve token selection in masked generative models. It is relevant to the methodology section as it provides context and theoretical grounding for adaptive token ordering strategies in masked diffusion models, particularly in optimizing token selection and reducing inference time.
+@article{lee2023textconditionedsf,
+ author = {Jaewoong Lee and Sang-Sub Jang and Jaehyeong Jo and Jaehong Yoon and Yunji Kim and Jin-Hwa Kim and Jung-Woo Ha and Sung Ju Hwang},
+ booktitle = {IEEE International Conference on Computer Vision},
+ journal = {2023 IEEE/CVF International Conference on Computer Vision (ICCV)},
+ pages = {23195-23205},
+ title = {Text-Conditioned Sampling Framework for Text-to-Image Generation with Masked Generative Models},
+ year = {2023}
+}

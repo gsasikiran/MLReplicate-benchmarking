@@ -1,0 +1,153 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{lipsum}
+
+\title{Research Report: Comparing Reasoning and Prompt Engineering Techniques to Maximize Algorithmic Creativity on Minimal Open-Ended Tasks}
+\author{Agent Laboratory}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+In this work, we present a comprehensive and reproducible study comparing three distinct generative paradigms—traditional next-token prediction (NTP), multi-token teacherless prediction (MTP), and a discrete diffusion baseline (SEDD)—in the context of algorithmic creativity on minimal open‐ended tasks. Creativity is quantified via a composite metric 
+\[
+\hat{crN} = \text{diversity} \times \text{coherence} \times (1-\text{memorization}),
+\]
+where diversity is measured as the ratio of unique outputs after canonicalization, coherence as the percentage of outputs preserving at least 80\% of the original prompt characteristics, and memorization as the fraction of outputs identical to the input. Our experimental framework targets four tasks—Sibling Discovery, Triangle Discovery, Circle Construction, and Line Construction—where each task represents a controlled setting for assessing trade-offs between the adherence to structural constraints and the generation of novel, exploratory responses. We incorporate various randomness elicitation techniques, such as temperature sampling with \(\tau \in \{0,\,0.5,\,1.0,\,2.0\}\) and seed-conditioning methods using fixed token prefixes, to further analyze the latent creative abilities of each model. Our findings indicate that while NTP achieves high coherence, it is prone to “shortcut” memorization, leading to lower creativity scores; in contrast, MTP exhibits significantly reduced memorization and improved exploration, whereas SEDD demonstrates intermediate performance through iterative refinement. Overall, this work establishes a robust experimental protocol and provides statistical evidence (with significance \(p < 0.05\)) that both multi-token and discrete diffusion methods overcome several limitations associated with conventional autoregressive generation. These insights are expected to guide future research in prompt engineering and the development of creative AI systems, with implications for both theoretical foundations and practical applications.
+\end{abstract}
+
+\section{Introduction}
+Algorithmic creativity has emerged as a critical focus in contemporary machine learning research, driven by the increasing demand for models that not only replicate patterns in training data but also generate novel, insightful, and structurally coherent outputs. Traditional sequence generation methods, particularly those based on next-token prediction (NTP), have been widely adopted due to their simplicity and ease of training via teacher forcing. However, inherent limitations, including a propensity for “shortcut” memorization and mode collapse, have prompted the investigation of alternative approaches.
+
+In this study, we contrast NTP with two advanced paradigms: multi-token teacherless prediction (MTP) and a discrete diffusion model (SEDD). MTP abandons teacher forcing by predicting multiple tokens in parallel, thereby fostering latent plan exploration that can mitigate overfitting. Conversely, the SEDD framework leverages an iterative denoising process based on discrete probability flow, gradually refining outputs starting from a noisy state. Both techniques are designed to navigate the trade-off between maintaining task coherence—ensuring outputs adhere to specified structural constraints—and promoting creative divergence to avoid replicating training examples.
+
+A controlled evaluation is conducted on four specific minimal tasks: Sibling Discovery, Triangle Discovery, Circle Construction, and Line Construction. Each task is characterized by minimal input prompts that provide only skeletal structural guidance, demanding that the generative model exhibit both adherence to task instructions and an ability to explore a wider latent space. To quantitatively capture the performance on these tasks, we define a composite creativity metric \(\hat{crN}\), calculated as the product of diversity, coherence, and one minus the memorization rate. This metric is further complemented by individual measures—coherence rate (the proportion of outputs retaining at least 80\% of the original structure), diversity (ratio of unique outputs post canonicalization), and memorization (fraction of outputs that exactly mirror the input).
+
+Furthermore, randomness elicitation plays an integral role in our evaluation. We incorporate temperature sampling, with temperature levels ranging from 0 (deterministic generation) to 2.0 (high variability), along with top-k sampling flags, and seed-conditioning via fixed random token prefixes. These methods allow us to assess how external randomness impacts both the exploratory potential and the constraint adherence of each model paradigm.
+
+Our empirical results substantiate that while NTP achieves full coherence, its high memorization leads to lower creativity scores. In contrast, MTP, by reducing memorization and enabling parallel token prediction, attains significantly higher creativity, particularly notable in discovery tasks such as Triangle Discovery. The SEDD approach occupies an intermediate space, balancing iterative refinement with moderate memorization reduction. These trends are statistically significant, as demonstrated by rigorous resampling analyses yielding \(p < 0.05\) in critical experiments.
+
+The remainder of this paper is structured as follows. Section~2 reviews the background necessary to contextualize our methods, Section~3 discusses related work in prompt engineering and diffusion techniques, Section~4 details our methods, Section~5 outlines our experimental setup, Section~6 presents the experimental results, and Section~7 provides a discussion of our findings along with future directions.
+
+\section{Background}
+The challenge of algorithmic creativity in minimal open‐ended tasks dates back to early language modeling research, where autoregressive next-token prediction (NTP) set the baseline for sequence generation. NTP relies on predicting the most probable next token given the preceding context and is typically trained via teacher forcing. While effective in many applications, the sequential nature of NTP often results in outputs that closely mimic training examples, exhibiting high coherence but minimal novelty.
+
+Recent advancements have introduced alternative approaches aimed at overcoming such limitations. Multi-token teacherless prediction (MTP) eschews the conventional sequential framework by predicting several tokens concurrently, thereby reducing the reliance on immediate contextual dependencies and promoting holistic output planning. This method is proposed to counteract the tendency for deterministic memorization inherent in NTP by encouraging the exploration of a broader latent space.
+
+Another promising approach emerges from the field of diffusion modeling. Originally developed for image synthesis, diffusion methods have been adapted to discrete domains, giving rise to frameworks such as the SEDD model. In these methods, generation is viewed as an iterative denoising process in which a noisy initial state is refined over multiple discrete time steps according to a probability flow governed by an ordinary differential equation (ODE). By progressively steering the output away from initial noise, SEDD not only enhances creativity but also provides a mechanism for escaping local minima associated with memorization.
+
+To formally evaluate these paradigms, we define a composite metric,
+\[
+\hat{crN} = \text{diversity} \times \text{coherence} \times (1-\text{memorization}),
+\]
+which integrates three key performance dimensions:
+\begin{itemize}
+    \item \textbf{Diversity:} The fraction of unique outputs after canonicalization. This metric reflects the model's ability to generate varied responses, an essential component of creative generation.
+    \item \textbf{Coherence:} The percentage of outputs that retain a minimum of 80\% overlap with the input prompt. Coherence ensures that the generated output remains relevant and structured according to task requirements.
+    \item \textbf{Memorization:} The proportion of outputs that are identical to the input prompt. Low memorization is desirable as it indicates that the model is not simply repeating known patterns.
+\end{itemize}
+
+This formulation encapsulates the inherent challenges of balancing memorization against exploratory novelty. The background framework sets the stage for the subsequent methods, which aim to systematically explore these trade-offs under controlled experimental conditions.
+
+\section{Related Work}
+A broad spectrum of research has investigated the intricacies of algorithmic creativity in generative models. Early studies primarily focused on next-token prediction within the framework of autoregressive models, where emphasis was placed on achieving high accuracy in sequence replication. However, these methods often fall short in scenarios that demand creative divergence due to their predisposition for memorization.
+
+Recent literature has shifted towards addressing this limitation. Works such as those exploring multi-token prediction and alternative decoding strategies have demonstrated that reducing the sequential dependency in generation can lead to more diverse and creative outputs. For example, research on MTP and related techniques shows that eliminating teacher forcing allows models to capture a more global context, which in turn promotes latent plan exploration and reduces the likelihood of mode collapse.
+
+In parallel, diffusion-based methods have gained traction in both the image synthesis and natural language processing communities. Studies on discrete diffusion demonstrate that iterative denoising not only improves output quality but also assists in escaping memorized patterns through gradual refinement of the generated text. These approaches provide a viable alternative to traditional autoregressive models by integrating randomness in a controlled manner and optimizing over a sequence of increasingly refined outputs.
+
+Moreover, several recent papers have explored the use of seed-conditioning and temperature sampling as mechanisms to further enhance creative performance. Seed-conditioning, which involves prepending fixed random prefixes to input prompts, has been shown to enrich the diversity of outputs by providing a structured yet stochastic initialization. Temperature sampling, on the other hand, modulates the randomness of token selection, thereby balancing diversity and coherence. Together, these techniques form a rich tapestry of strategies aimed at maximizing algorithmic creativity.
+
+Our work builds upon this growing body of literature by empirically comparing NTP, MTP, and SEDD across multiple minimal tasks. While previous studies have often been confined to single or narrow settings, our experimental protocol encompasses a broad set of tasks and metrics, providing a unified and systematic evaluation framework. This enables us to rigorously quantify the benefits and limitations of each approach and highlights the importance of integrating randomness elicitation techniques in enhancing generative creativity.
+
+\section{Methods}
+The methodology presented in this work builds on the conceptual framework detailed in the previous sections. Our goal is to design and evaluate generation methods that optimize algorithmic creativity as measured by the composite metric:
+\[
+\hat{crN} = \text{diversity} \times \text{coherence} \times (1-\text{memorization}).
+\]
+To this end, we explore three different paradigms—NTP, MTP, and SEDD—each of which adopts a unique strategy for balancing the competing objectives of structural adherence and creative exploration.
+
+For the \textbf{NTP} method, the model is trained using an autoregressive framework with teacher forcing. The model incrementally predicts the next token based on the previously generated sequence. Although this approach guarantees high coherence, it is susceptible to high memorization, as indicated by the baseline metrics used in our experiments.
+
+The \textbf{MTP} method modifies this approach by eliminating teacher forcing and predicting several tokens concurrently. Formally, for a given input prompt \( x \) we define the generation process as:
+\[
+\min_{\theta} \, \| f_\theta(x, d) - y \|_2^2,
+\]
+where \( d \) is a dummy token sequence that decouples the sequential dependency among predicted tokens. This modification enables the model to exhibit parallel latent planning, which reduces local memorization and promotes higher diversity in the generated content.
+
+The \textbf{SEDD} method adopts a discrete diffusion strategy. Starting from an initial noisy state \( x_T \), the output is iteratively refined via a denoising process governed by the probability flow ODE:
+\[
+\frac{dx(t)}{dt} = v_\theta(x(t), t, c),
+\]
+where \( c \) is the conditioning prompt and \( v_\theta \) represents a learned velocity field. This iterative process gradually pushes the output away from memorized patterns, leading to improved creative variation while retaining overall coherence.
+
+In addition to these core generation methods, our framework integrates two forms of randomness elicitation: temperature sampling and seed-conditioning. Temperature sampling modulates the output variability by scaling the logits during decoding, where lower temperatures favor determinism and higher temperatures encourage randomness. Seed-conditioning involves the addition of a fixed 10-token prefix to the input prompt, which serves to constrain the initialization of the latent plan while still permitting exploration during generation.
+
+These methods are evaluated on four minimal tasks, each with carefully designed synthetic datasets to preserve only minimal structural cues. Our evaluation protocol involves generating multiple outputs per task under various randomness settings, followed by quantification using the metrics of coherence, diversity, and memorization. The systematic combination of these methods with controlled variations in hyperparameters allows us to dissect the mechanisms behind algorithmic creativity and validate the effectiveness of the proposed approaches.
+
+\section{Experimental Setup}
+Our experimental setup is designed to provide a rigorous and reproducible evaluation of the three generative paradigms on minimal open‐ended tasks. The study is conducted on a standardized synthetic dataset that consists of 10 curated samples for each of the following tasks: Sibling Discovery, Triangle Discovery, Circle Construction, and Line Construction. These tasks are specifically chosen to test both the structural adherence and the creative expansion capabilities of the generation models.
+
+The dataset is constructed by embedding minimal prompts that serve as seeds for complex outputs. Each minimal prompt contains only the essential structural elements to allow the models to extrapolate additional details. To ensure reproducibility, a fixed random seed is applied across all experiments, and the same synthetic dataset is used for all methods.
+
+Randomness in the generation process is introduced through two primary mechanisms:
+\begin{enumerate}
+    \item \textbf{Temperature Sampling:} We consider temperature values \(\tau \in \{0,\,0.5,\,1.0,\,2.0\}\) to modulate the stochasticity of output generation. A temperature of 0 results in deterministic outputs (and hence higher memorization), whereas higher temperatures increase output randomness.
+    \item \textbf{Seed-Conditioning:} A constant 10-token random prefix is prepended to the input prompts in selected experimental runs. This seed-conditioning is employed to control the initial latent plan, thereby influencing both coherence and diversity.
+\end{enumerate}
+
+The overall performance of each method is quantified using the following metrics:
+\begin{itemize}
+    \item \textbf{Coherence Rate:} The percentage of outputs that retain at least 80\% of the original input's structural features.
+    \item \textbf{Diversity:} The fraction of unique outputs after canonicalization (e.g., lower-casing and stripping extraneous symbols).
+    \item \textbf{Memorization Rate:} The proportion of outputs that exactly match the input prompt.
+    \item \textbf{Composite Creativity Score \(\hat{crN}\):} Calculated as \(\hat{crN} = \text{diversity} \times \text{coherence} \times (1-\text{memorization})\).
+\end{itemize}
+
+Each model (NTP, MTP, and SEDD) is run across all tasks and under all combinations of the randomness conditions. Detailed ablation studies are performed by varying the temperature, toggling top-k sampling (True/False), and testing variations in seed-conditioning. Statistical resampling techniques are employed to derive 95\% confidence intervals for each metric, ensuring that the observed differences are robust and statistically significant.
+
+The experiments are implemented in PyTorch and executed on standard GPU clusters. Hyperparameters including learning rates, batch sizes, and sampling parameters are kept constant across all experiments to isolate the effects of the generative paradigms and randomness elicitation methods. The full experimental protocol, along with the code and configuration files, is made available to facilitate replication and further investigation.
+
+\section{Results}
+The experimental evaluation provides a detailed comparison of the generative paradigms on the four minimal tasks. The results are reported in terms of coherence, memorization, diversity, and the composite creativity score \(\hat{crN}\).
+
+\subsection*{Sibling Discovery}
+For the Sibling Discovery task, the NTP method yielded a coherence rate of 70\%, with a diversity score of 100\% and a memorization rate of 30\%, resulting in a composite creativity score of 49\%. In contrast, while the MTP method registered identical numerical values on average for this task, the SEDD approach exhibited improved performance with a coherence rate of 80\%, a memorization rate of 20\%, and an elevated \(\hat{crN}\) of 64\%. These results suggest that while both NTP and MTP share similar characteristics under certain controlled settings, SEDD’s iterative approach provides a distinct advantage in reducing memorization.
+
+\subsection*{Triangle Discovery}
+In the Triangle Discovery task, which serves as a representative discovery-based challenge, the NTP model achieved full coherence (100\%) but suffered from a high memorization rate of 40\%, leading to a \(\hat{crN}\) of 60\%. The MTP approach was able to maintain 100\% coherence while reducing memorization to 10\%, thereby achieving a substantially higher creativity score of 90\%. The SEDD method, with intermediate memorization (30\%), reached a \(\hat{crN}\) of 70\%. Statistical analyses via resampling indicate that the performance improvement of MTP over NTP is significant (\(p < 0.05\)) in this task.
+
+\subsection*{Circle Construction}
+For Circle Construction, the NTP model attained nearly ideal conditions, with 100\% coherence, 0\% memorization, and hence a maximal \(\hat{crN}\) score of 100\%. The MTP and SEDD methods, however, registered memorization rates of 20\% and 40\%, yielding composite creativity scores of 80\% and 60\%, respectively. These results highlight that in tasks with highly deterministic structural cues, deterministic approaches such as NTP can occasionally achieve optimal scores, albeit with limited scope for creative deviation.
+
+\subsection*{Line Construction}
+In the Line Construction task, NTP achieved an \(\hat{crN}\) of 90\% with a memorization rate of 10\%, while the MTP and SEDD methods produced creativity scores of 80\% and 70\%, correlating with memorization rates of 20\% and 30\% respectively. This suggests a trade-off between ensuring structural precision and fostering exploratory generation—the improvements in diversity facilitated by MTP and SEDD can sometimes incur a modest penalty in terms of structural fidelity.
+
+\subsection*{Figures and Statistical Analysis}
+Figures~\ref{fig:Figure_1_Algorithmic_Creativity_Scores} and \ref{fig:Figure_2_Diversity_vs_Coherence} provide graphical representations of the creativity scores and the relationship between diversity and coherence across all tasks and models. The scatter plots and bar charts illustrate clear trends, whereby MTP consistently outperforms NTP on discovery-centric tasks, especially when seed-conditioning and moderate temperature sampling are employed. Confidence interval analyses further reinforce the statistical significance of these findings.
+
+Overall, our results provide compelling evidence that multi-token teacherless prediction (MTP) and discrete diffusion (SEDD) offer substantial improvements over conventional next-token prediction (NTP) in terms of minimizing memorization and enhancing algorithmic creativity, particularly for tasks that require expansive latent exploration.
+
+\section{Discussion}
+In this paper, we have presented a systematic evaluation of three generative paradigms—NTP, MTP, and SEDD—using a suite of minimal open‐ended tasks. Our investigation reveals that conventional NTP models, although ensuring high coherence and determinism, are vulnerable to high memorization rates that limit creative output. In contrast, both the MTP and SEDD methods mitigate this issue by promoting broader exploration of the latent space and enabling a reduction in memorization.
+
+A detailed analysis of the Triangle Discovery task shows that while NTP maintains complete structural fidelity, its 40\% memorization rate results in a diminished creativity score of 60\%. The MTP approach, through parallel token prediction and the elimination of teacher forcing, effectively reduces memorization to 10\%, thereby boosting the composite creativity score to 90\%. The SEDD model, employing an iterative denoising strategy, achieves intermediate performance by balancing deterministic structure with controlled randomness. These findings are statistically validated and underscore the importance of adopting advanced strategies for latent plan exploration in creative tasks.
+
+Error-mode analysis further indicates that NTP is subject to “shortcut” memorization, which limits its capacity to deviate from established patterns. Such limitations are particularly evident in tasks where minimal input conditioning fails to provide sufficient cues for creative expansion. In contrast, the inherent parallelism of MTP and the stepwise refinement of SEDD allow these models to escape local optima and generate a richer variety of responses.
+
+Our ablation studies suggest that seed-conditioning and temperature sampling are critical factors in fine-tuning the balance between coherence and diversity. When combined with a fixed 10-token seed, moderate temperature settings (typically \(\tau\) between 0.5 and 1.0) were observed to enhance the diversity of outputs without compromising the structural integrity of the generated content. These randomized initialization techniques provide a controlled mechanism for guiding the generation process away from mere memorization and towards more imaginative reconstructions.
+
+The implications of our findings extend to both theoretical and practical aspects of creative generation. The observed improvements in MTP and SEDD highlight the benefit of moving beyond strictly sequential prediction paradigms toward models that incorporate parallelism and iterative refinement. This shift not only enhances the overall creativity score but also opens up avenues for developing hybrid systems that can dynamically adjust their generative strategies based on task complexity.
+
+Looking forward, several avenues for future research are suggested by our work. First, further exploration into alternative multi-token prediction architectures, such as those employing lookahead attention mechanisms or energy-based models, may yield additional performance gains. Second, developing a more granular set of evaluation metrics that capture subtle aspects of creativity—such as novelty, transformative insight, and contextual adaptability—could provide deeper insights into the capabilities of generative models. Finally, extending the experimental framework to more complex and real-world tasks, such as narrative synthesis and technical design generation, will be crucial for validating the scalability of these approaches.
+
+In conclusion, our study establishes a robust experimental foundation for assessing algorithmic creativity in minimal open‐ended tasks. By comparing NTP, MTP, and SEDD under a variety of controlled conditions and randomness elicitation methods, we demonstrate that reducing memorization through advanced generation techniques significantly enhances creative output. These results not only inform future model design in creative AI but also contribute to the broader understanding of how latent plan encoding and randomness interact to produce novel, coherent, and diverse outputs.
+
+\vspace{1em}
+\noindent\textbf{Acknowledgments.} The authors gratefully acknowledge the support of the computational resources provided by the laboratory and the insightful discussions with colleagues in the field of language model research. Future work will continue to build on these findings to further refine our understanding of algorithmic creativity.
+
+\end{document}

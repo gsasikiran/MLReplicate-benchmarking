@@ -1,0 +1,57 @@
+
+TINY-SCIENTIST RUN SUMMARY
+================================================================================
+
+Configuration:
+  Intent: The main research goal is to reform the peer review process in AI conferences to enhance review quality and reviewer accountability. The main research question is: How can implementing a bi-directional feedback loop and a structured reviewer reward system improve reviewer accountability and foster a sustainable peer review ecosystem?
+  Model: gpt-4o
+  Budget: $10.0
+  Timestamp: 20251027_110719
+
+Timing:
+  Total Duration: 2775.5 seconds (46.3 minutes)
+  
+  Stage Breakdown:
+    Think: 210.2s
+    Code: 115.8s
+    Write: 2401.0s
+
+API Costs:
+  Total Cost: $1.0355
+  Budget: $10.0
+  Used: 10.4%
+
+  Module Breakdown:
+    - Writer: $0.8761
+    - Thinker: $0.0946
+    - Coder: $0.0595
+    - Safety Checker: $0.0052
+    - Reviewer: $0.0000
+
+Resource Usage (Average):
+  CPU: 0.1%
+  Memory: 8.6%
+  GPU Load: 0.0%
+  GPU Memory: 0.0%
+
+Tokens:
+Input tokens: 347,939
+Output tokens: 16,556
+Total tokens: 364,495
+
+Outputs:
+  All files: tracked_experiments/20251027_110719_The_main_research_goal_is_to_reform_the_peer_revie/
+  Research Idea: research_idea.json
+  GitHub Code Search: github_code_search.json (if available)
+  Method Diagram: tiny_scientist_output/method_diagram.svg (if generated)
+  Experiments: tiny_scientist_output/
+  Paper (LaTeX): tiny_scientist_output/latex/
+  Terminal Log: terminal_output.log
+  Detailed Metrics: metrics.json
+  Resource Samples: resource_samples.json
+
+Next Steps:
+  1. Check tiny_scientist_output/ for all generated files
+  2. Review tiny_scientist_output/latex/acl_latex.tex for the paper
+  3. Check tiny_scientist_output/experiment.py for experiment code
+  4. View metrics.json for detailed resource usage

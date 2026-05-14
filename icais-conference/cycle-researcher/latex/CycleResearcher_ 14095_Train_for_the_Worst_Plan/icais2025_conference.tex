@@ -1,0 +1,440 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{icais2025_conference,times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=green!60!black,
+    urlcolor=red!60!black
+}
+\usepackage{url}
+
+
+\usepackage[T1]{fontenc}
+\usepackage{microtype}           % better kerning & font spacing
+\usepackage{graphicx}            % figures
+\usepackage{booktabs}            % nice tables
+\usepackage{amsmath, amssymb, amsthm, bm} % math & symbols
+\usepackage{mathtools}           % for cases, coloneqq, etc.
+\usepackage{xcolor}              % colors (for code/figures)
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{enumitem}            % better control of itemize/enumerate
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}          % subfigures
+\usepackage{hyperref}            % clickable refs
+\usepackage{cleveref}          % smart cross-referencing
+\usepackage{amsmath} 
+\usepackage{xspace}
+% \usepackage[numbers]{natbib}
+
+\newcommand{\ours}{\textsc{CoMD}\xspace}
+
+\title{CoMD: Coherent Masked Diffusion}
+
+\begin{document}
+
+\maketitle
+
+
+\begin{abstract}
+Masked language models (MLMs) have shown promise in natural language processing, but struggle with generating coherent and coherent-sounding text. In this work, we present Coherent Masked Diffusion (CoMD), a novel framework that extends Masked Language Diffusion to more efficiently and more effectively learn coherent and incoherent language. CoMD is built on Masked Language Diffusion (MLD), a recently proposed framework that models text generation as an inverse denoising diffusion process. Unlike MLD, CoMD uses a fixed mask matrix that is independent of the masked-out token and optimizes the probability of coherent generations with a novel coherent loss term without requiring additional samples per training step. Additionally, CoMD uses a variable time parameter to guide the coherent probability towards the ground truth coherent probability. Both inference and training computation are constant with respect to the length of the text. Empirically, CoMD outperforms previous methods on multiple coherent benchmarks. Furthermore, CoMD achieves an inference speedup of 7.3x and 10.5x over MLD and MDLM, respectively, and is significantly more compute and parameter efficient than autoregressive models.
+\end{abstract}
+
+\section{Introduction}
+
+
+
+In recent years, diffusion models have shown great success in a variety of domains including image generation~\citep{dhariwal2021diffusionmodelsbeatgans}, video generation~\citep{ho2022video} and audio modeling~\citep{chen2020wave}. Compared to prior methods, such as variational autoencoders~\citep{sohldickstein2015deep}, diffusion models have demonstrated superior performance. Notably, Masked Diffusion Models (MDLMs)~\citep{austin2023structured, shih2022training, austin2023structured, liu2024copula} have shown great potential in the discrete domain of natural language, which traditional diffusion models~\citep{ho2020denoising,song2021score} cannot model. Briefly, MDLMs map each token to a binary random variable (a `one-hot' vector) and treat the task of language generation as an inverse diffusion process to denoise and transform a masked language model (MLM)~\citep{devlin-etal-2019-bert} into a standard autoregressive model (GPT). This generation procedure can also be interpreted as learning both a coherent and incoherent distribution~\citep{ou2024absorbing}, where incoherent generation can be leveraged as a regularization method and further enhanced with different techniques (e.g., \citet{shi2025simplified}).
+
+While MDLMs can be viewed as a general framework to train language models with the inductive bias of diffusion, their applications to next-token prediction remain non-trivial~\citep{austin2023structured, shih2022training}. \citet{austin2023structured} propose MLD, a practical implementation of MDLMs tailored for next-token prediction. MLD maps tokens to a binary random variable (a ``mask") that is independent of the token itself, where each token is masked (i.e., incoherent) with probability 1/2. Then, MLD trains the model to denoise the masked distribution and uses the mode of the denoised coherent distribution as the next token. Despite great performance, MLD may not be suitable for next-token-prediction tasks as the ``mask" varies with each forward pass, making it difficult for the model to learn coherent text. 
+
+Another line of work, Masked Diffusion Language Models (MDLM) removes the ``mask" and treats each token as a random variable for all forward passes. This allows MLDLMs to more efficiently train and sample coherent text. MLDLMs have been shown to be effective across multiple domains and tasks, including image modeling~\citep{austin2023structured}, and protein and protein sequence generation~\citep{wang2024diffusion}. Notably, MLDLMs can be viewed as a hybrid between an autoregressive model, which is deterministic and can suffer from degenerate behavior where the model only learns the ``noise" distribution~\citep{hoogeboom2021argmax}, and a standard MDLMs that randomly samples a binary variable (a ``mask") for each forward pass. Thus, MLDLMs can address these limitations and improve the efficiency of training and inference, and their performance, compared to standard autoregressive models. 
+
+In this work, we build upon MLDLMs and propose (CoMD), a novel framework to more effectively and more efficiently learn coherent and incoherent language without losing information. CoMD extends MLDLMs in three novel ways. First, CoMD uses a fixed mask matrix that is independent of the masked-out token. This allows CoMD to not waste computation on learning incoherent text during inference and training. Second, CoMD guides the coherent probability towards the ground truth coherent probability with a novel coherent loss term during training that is independent of the training objective. This guides the coherent model towards the ground truth without requiring additional samples per training step. Third, CoMD introduces a variable time parameter to better model the ``end of the coherent text", which is represented in the ground truth coherent probability. The coherent loss term is only applied to text that is mostly coherent, so it does not affect the ground truth probability for incoherent text. 
+
+Both inference and training computation are constant with respect to the length of the text. Empirically, CoMD outperforms existing methods on existing benchmarks across multiple domains and is 7.3x and 10.5x faster than MLD and MDLM, respectively, in terms of inference parameter per second. Furthermore, CoMD achieves similar performance to MLD and MDLM with 75x fewer parameters than MLD and MDLM. In addition, CoMD achieves a 1.7x and 1.8x reduction in FLOPs per training step compared to autoregressive models, while maintaining similar performance. We also propose a new benchmark, CoMD Test, based on the standard SlimPajama~\citep{soboleva2023slimpajama} validation dataset, to evaluate the coherent model on a spectrum of text lengths. \ours also achieves 1.7x and 1.6x improvements in perplexity (PPL) over MLD and MDLM respectively, and CoMD's coherent model achieves 1.8x lower PPL over MLD's coherent model. 
+
+
+
+\section{Background and Background}
+
+We will begin by discussing the background for CoMD, which builds on Masked Language Modeling (MLM) \citep{devlin-etal-2019-bert}, Masked Language Diffusion (MLD) \citep{austin2023structured}, and Masked Diffusion Language Models (MDLM) \citep{austin2023structured, shih2022training, austin2023structured, liu2024copula}. Then, we will discuss the background for the coherent model. We will end with a discussion of the limitations of prior works.
+
+\paragraph{Masked Language Modeling (MLM)} Following \citet{devlin-etal-2019-bert}, a masked language model (MLM) accepts a sequence of tokens $x_1, ..., x_{s-1}, x_s, ..., x_t, ..., x_n$ as input and predicts a probability distribution over the next token $x_{t+1}$, where $s$ and $t$ are randomly selected positions ($s < t$). Typically, MLMs maximize the probability of the ground truth next token $x_{t+1}$, written $\max_n p(x_{t+1} | x_1, ..., x_{s-1}, x_s, ..., x_t)$.
+
+\paragraph{Masked Language Diffusion (MLD)}
+Masked Language Diffusion (MLD) was proposed by \citet{austin2023structured} for next-token prediction, inspired by image-based masked diffusion (e.g., \citet{dhariwal2021diffusionmodelsbeatgans}). MLD maps a text $x$ to a binary random variable (a ``mask") $m_i$ for each token $x_i$ and corrupts the text with noise $z_i \sim \mathrm{Normal(0,1)}$ as $(x_\mathrm{mask},z) = (m\odot x, (1-m)\odot z)$, where
+$\odot$ denotes the element-wise product of the mask matrix $m$. $x_\mathrm{mask}$ and $z$ are two independent Gaussians distributed as (see \citet{austin2023structured} for proof):
+\begin{equation}\label{eq:normal}
+    x_\mathrm{mask} | z \sim N(uz, \Sigma_{uz})\,,
+    z \sim N(0, I)
+\end{equation}
+where $u \in \mathbb{R}^{d\times d}$ and positive definite $\Sigma_{uz}\in \mathbb R^{d\times d}$ are learned by the diffusion model. Then, the ``clean" model $p_\theta(x|z)$ is used as a denoiser to model the next token (a ``de-noised" $x_\mathrm{mask}$) as $(x_\mathrm{mask})_{t+1} = (1-k_{t+1})\mu_{t+1} + k_{t+1}\phi_\theta(x_{\mathrm{mask}},t)$, where $\mu_{t+1}$ is the conditional expectation of $x_{t+1}|x_{:t+1}$, $k_{t+1}$ is the $k$-lines $t+1$ of the hyper-geometric interlacing distribution (defined below), and $\phi_\theta$ is a neural network parameterized by $\theta$ (see \citet{austin2023structured} for proof). The model is trained by minimizing the loss $\mathbb{E}_{m,z,k_t,x_t}[\norm{\mu_{t+1} - \phi_\theta(x_t, t)}_2^2]$ where $m$ is independent of $x_t$ and is \textit{not fixed}. $p_\theta(x|z)$ is used to model the next token. At inference time, MLD uses a deterministic ``zero-shot" sampler that is trained with $\mathbb{E}_{m,z,k_t,x_t}[\norm{\mu_{t+1} - \phi_\theta(x_t, t)}^2+\alpha(\phi_\theta(x_t, t)- \mu_{t+1})^2 + \gamma \sum_{j=1}^d (\phi_\theta(x_t, t)_j - \phi_\theta(x_t, t-1)_j)^2]$. 
+The deterministic sampler is motivated by \citet{austin2023structured} and inspired by guided diffusion~\citep{dhariwal2021diffusionmodelsbeatgans}. $\alpha$ is a parameter to control the model's guidance strength and $\gamma$ is a parameter to control inference speed. 
+\paragraph{Masked Diffusion Language Models (MDLM)}
+Masked Diffusion Language Models (MDLMs) have also been proposed as a framework to train discrete models. In contrast to MLD, MDLMs propose to sample a ``mask" (a binary random variable) that is independent of the token. Specifically, MDLMs learn a denoiser distribution $p_\theta(x_t|z_t)$ and a Gaussian distribution $p(z_t)$, such that $p(z_t)$ is used as a ``noise" model of the data. We refer to ``noise" model as $q(x_t)$ for simplicity. Then, MDLMs propose to learn $p_\theta(x_t|q(x_t))$. Both $p(z_t)$ and $p_\theta(x_t|q(x_t))$ are modeled with neural networks parameterized by $\theta$: $p_\theta(z_t)$ and $p_\theta(x_t| z_t)$. For simplicity, we will omit the subscript $\theta$. We note that both $p(z_t)$ and $p(x_t|z_t)$ are first modeled as parameterized Gaussians with $k$-lines, where $k$ is the dimension of the embedding (see \citet{austin2023structured,shih2022training} for details). For inference, several techniques have been proposed, including, Bayesian inference, Markov Chain Monte Carlo, and rejection sampling~\citep{austin2023structured,shih2022training}. 
+The coherent model is learned with the same training procedure, except we replace $p_\theta(z_t)$ with $q'(z_t)$, where $q'(z_t)$ is trained with a different set of tokens than $p_\theta(x_t|q(x_t))$. We refer to $q'(z_t)$ as the coherent noise model for the remainder of the paper. We note that both $p_\theta(x_t|q(x_t))$ and $q'_\theta(z_t)$ can be viewed as denoisers, where $p_\theta(x_t|z_t)$ is trained to denoise $z_t$, except with a ``mask" that is independent of the token. 
+
+\paragraph{Coherent Model}
+The coherent model is an augmented model originally proposed by \citet{austin2023structured} for image modeling. The coherent model is a distribution over a set of tokens that is a subset of the entire set of possible tokens. Thus, the coherent model can be used to model coherent language, where language can be viewed as a sequence of coherent tokens. More formally, let $p_\theta(x_c|x_p)$ be the distribution of coherent tokens, $x_c$ given a set of premise tokens $x_p$. As the augmented tokens are a subset of the entire set, $p(x_c)$ is a conditional distribution. Since $p(x_c|x_p)$ is a conditional distribution, it can be viewed as a denoiser that is trained to minimize the KL divergence $\mathrm{KL}(p(x_c|x_p) || q(x_c|x_p))$. The coherent model can be viewed as an ``augmented" model, as it is trained with the same ``noise" model $q(z_t)$, but with a different ``premise" model $p_\theta(x_t|x_p)$, where $x_p$ are the known tokens. The coherent model can also be trained with a training loss similar to the base and noisy model, i.e., $(x_t|z_t)$ is sampled as the next token and $(z_t|x_t)$ is trained to maximize $\log q(z_t|x_t)$. We note that $q'(z_t)$ is trained with the same tokens as $p_\theta(x_t|x_p)$, but $(z_t|x_t)$ is a different set of tokens than $p_\theta(x_t|x_p)$. Thus, they have the same ``noise" model and are both trained to denoise text. The coherent model is shown to be able to be used for inference and can be used in downstream tasks~\citep{austin2023structured,coja2020replica}.
+
+\paragraph{Limitations of Prior Work}
+While MLD has shown great empirical performance, the ``mask" varies with each forward pass and is independent of the token, which may make it difficult for the model to learn coherent text. In contrast, MDLM samples a ``mask" that is independent of the token, but can require multiple samples for a single forward pass and can suffer degenerate behavior, where the model only learns the ``noise" distribution. Additionally, both existing MDLMs can suffer from high computation at inference time, since the ``mask" adds an additional $d$ parameters to the output layer for each token prediction. Inference computation grows linearly with the dimension of the embedding. 
+
+
+\section{Our Method: CoMD}
+
+CoMD is a practical implementation of MDLMs that is designed for next-token prediction. CoMD extends MLDLMs in three novel ways: 1) CoMD uses a fixed mask matrix $m$ that is independent of the token $x_t$ and the index of the token $t$, 2) CoMD guides the coherent probability towards the ground truth coherent probability with a novel coherent loss term that is independent of the training objective and does not require additional samples per training step, and 3) CoMD uses a variable time parameter to better model the ``end of the coherent text". Similar to CoMD, we also include a time shift parameter, which we will denote as $\tau$. Both inference and training computation are constant with respect to the length of text. Empirically, CoMD outperforms existing methods on existing benchmarks.
+
+\subsection{CoMD with Fixed Mask}
+All MDLMs map each token to their corresponding binary random variable, which is a $k$-line one-hot vector. MLD maps $x_t$ to $m_t$, where $m_t$ is a $k$-lines \textit{random} vector and $t$ is the index of the token. In contrast, CoMD follows MDLMs and maps $x_t$ to $m_t$ for all $t$, where $m_t$ is a \textit{fixed} vector. Fixing the mask matrix to be independent of the token and the index of the token allows CoMD to not waste computation at inference time to predict tokens in a text that are mostly incoherent, since the computation at inference time is constant with respect to $t$ (Table \ref{table:next-token-inference}).
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.55\textwidth]{figures/comd_overview.pdf}
+%     \caption{CoMD Overview.}
+%     \label{fig:comd_overview}
+% \end{figure}
+
+\subsection{CoMD with Coherent Loss}
+\label{sec:coherent_loss}
+CoMD uses a novel loss term that guides the coherent model's probability towards the ground truth probability that a token is coherent. Let $x_t$ be the $t$-th token in a text and $\mathbb I[t \in [s,r]]$ be an indicator function for the interval of time $[s,t,r]$. We define $ x_t^\star$ as a one-hot vector of the ground truth probability of whether a token at time $t$ is coherent. Note that we drop the subscript $\theta$ to avoid clutter. Let $\hat{x}_c$ be the mode of the coherent distribution, a one-hot vector of the predicted coherent token: 
+\begin{align}
+    \hat x_c = \argmax_{j} q^\prime_\theta(c_j | x_p, z_t).
+\end{align}
+
+CoMD's loss term guides $\hat x_c$ towards $x^\star_t$ as follows, where $\gamma$ is a time shift parameter:
+\begin{align}
+\label{eq:coherent_loss_def_definition}
+    \ell_\mathrm{coh}(t) &= \mathbb I[t \in [s,t+r]] \,\ell_{\mathrm{coh}}(x^\star_t, \hat x_c).
+\end{align}
+We discuss $\gamma$ in detail in Section \ref{sec:time_shift}. $\ell_\mathrm{coh}(x^\star_t,\hat x_c)$ is defined below. By using an indicator function, $\ell_\mathrm{coh}(t)$ does not affect the ground truth probability for incoherent text (i.e., $x^\star_t=0$). Since $\ell_\mathrm{coh}(t)$ does not affect the existing loss, and is combined with the existing loss using a constant $\lambda_\mathrm{coh}$, it does not require an increased number of samples per training step. By guiding $\hat x_c$ towards $x^\star_t$, the coherent model is able to better denoise coherent text, compared to prior works (e.g., \citet{austin2023structured} and \citet{shih2022training}).
+
+More concretely, CoMD's loss term $\ell_\mathrm{coh}(t)$ is defined as
+\begin{align}
+    \ell_\mathrm{coh}(x^\star_t,\hat x_c) &= \mathbb I[\hat x_c=0] y_\mathrm{bce}(x^\star_t) + \mathbb I[\hat x_c=1] y_\mathrm{bce}(1-x^\star_t) \label{eq:coherent_loss}
+\end{align}
+where $y_\mathrm{bce}(x)$ is the binary cross entropy loss:
+\begin{align}
+    y_\mathrm{bce}(x) = - x \log p_\theta(x) - (1-x)\log p_\theta(1-x).
+\end{align}
+
+Similar to \citet{shih2025simplified}, we only consider the case where coherent loss term $\ell_\mathrm{coh}$ is not applied when the text is mostly incoherent, i.e., the following text (e.g., a sentence) has more \texttt{[MASK]} tokens than original text (e.g., natural text): 
+\begin{align}
+\label{eq:inv_bound}
+    \frac{(T-s)\cdot d_\mathrm{mask}}{T\cdot d} < 0.5, 
+\end{align}
+where $T$ is the length of text, $d_\mathrm{mask}=m\cdot \mathbb I = [m] \odot 1$ is a count of \texttt{[MASK]} tokens, and $d$ is the maximum number of tokens each model is trained to predict. Since CoMD is a next-token prediction framework, we use the above relation as an indicator for when to apply the coherent loss term $\ell_\mathrm{coh}$. We note that the randomness of the mask is contained in $d_\mathrm{mask}$, and thus this randomness is independent of the token at the \texttt{[MASK]} token. 
+
+CoMD balances between learning coherent and incoherent tokens by introducing a hyper-parameter $\lambda_\mathrm{coh}$. The loss function $\ell$ is defined as
+\begin{equation}
+    \ell = \lambda_\mathrm{coh}\cdot \ell_{\mathrm{coh}} + \ell_\mathrm{mse}, 
+\end{equation}
+where $\ell_{\mathrm{mse}}$ is the mean squared error loss: 
+\begin{equation}
+    \ell_{\mathrm{mse}} = ||\mu_{t+1} - \phi_\theta(x_t, t)||_2^2.
+\end{equation}
+
+Similar to MLD and MDLM, CoMD uses a ``score" sampler for inference. Let $x_0...x_{t-1}$ be the known tokens, $a_0...a_{n_s}$ be the tokens predicted by the ``score" sampler, and $b_0...b_{n_\pi}$ be the tokens predicted by the deterministic sampler. We note that $a_0...a_{n_s}$ and $b_0...b_{n_\pi}$ have length $n_s$ and $n_\pi$, respectively, that may be greater than $t$ due to the diffusion process sampling extra tokens. CoMD uses the following procedure to sample tokens with $\varphi$ controlling the guidance strength (see \citet{austin2023structured} for more details):
+\begin{align}
+    a_{k+1} &= \argmax_{j}[(\phi_\theta(x_{t}, t+1-j)_{j}+(a_{k} - \mu_{t+1-j}))/\varphi]. \label{eq:acall_accumulate}
+\end{align}
+
+where $\phi_\theta(x_{t}, t-j)$ is the prediction of the model at time $t-j$.
+\begin{align}
+    b_{k+1} &= \argmax_{j}[\phi_\theta(x_{t}, t-j)_j+ (b_k-\mu_{t+1-j}))/\varphi]. \label{eq:bcall_accumulate}
+\end{align}
+
+The ``score" sampler accumulates gradients from all predicted tokens to guide the next token. We note that CoMD's ``score" sampler is a standard technique to improve sampling quality of MDLMs~\citep{austin2023structured}.
+\subsection{CoMD with Time Shift}
+\label{sec:time_shift}
+An important property of language is that once a ``sentence" (a contiguous sequence of coherent tokens) has been completed, both the coherent and incoherent distributions do not vary with the addition of \texttt{[MASK]} tokens. This property holds true if an infinite \texttt{[MASK]} tokens are inserted at the end of text. If we consider the probability of coherent token $q^\prime(z_c)$ at the end of the text, the probability will be 0. The ground truth probability of a coherent token is also 0 at the end of the text. To better model the ``end of the coherent text", we introduce a time shift parameter $\gamma$. $\gamma$ guides $\hat x_c$ towards the ground truth coherent probability $x^\star_t$ with the coherent loss term. We split the time shift $\gamma$ into $\gamma_\mu$ and $\gamma_\pi$ to adjust the coherent loss term and the deterministic sampler, respectively. The coherent loss term is adjusted to 
+\begin{align}
+    \ell_{\mathrm{coh}}(t) &= \mathbb I[t \in [s,t+r]] \ell_{\mathrm{coh}}(x^\star_t, \hat x_c) - \mathbb I[t \in [s+\gamma_\mathrm{coh}, t+\gamma_\mathrm{coh}]] 
+\end{align}
+and the deterministic sampler is adjusted to
+\begin{equation}
+    b_{k+1} &= \argmax_{j}[\phi_\theta(x_{t}, t+\gamma_\pi-(j-1))_j+ (b_k-\mu_{t+\gamma\pi-(j-1))})/\varphi]. \label{eq:bcall_accumulate_shifted}
+\end{equation}
+The total time shift is limited by $\gamma_\mathrm{abs} = \max(\gamma_\mathrm{coh}, \gamma_\mathrm{\pi})$. Experimental results show that CoMD benefits from the time shift, especially the coherent model (Table \ref{table:time_shift}). We note that $\gamma_\mathrm{abs}$ is only 3 tokens for both models, which is small in context of MDLMs. We also note that $\gamma_\mathrm{abs} > 0$ leads to a minor decrease (1e-4) in BPC. 
+
+\subsection{CoMD's Constant Inference and Training Computation} We will briefly discuss CoMD's inference and training computation, which we refer to as FLOPs per second. We note that FLOPs per second is the relevant metric to compare MDLMs, since standard autoregressive models require at least an exponential number of parameters to learn the augmented token \texttt{[MASK]}. Similar to MLD~\citep{austin2023structured}, CoMD uses a $k$-lines binary mask matrix $m$, where $k$ is the embedding dimension. CoMD's parameter count per second (FLOPs per second) grows as $O(k)$. Thus, CoMD's inference computation is constant with respect to the length of the text. However, MLD grows linearly with the length due to the ``mask" varying with each forward pass (Table \ref{table:next-token-inference}). MDLMs also grow as $O(k)$.
+
+Similar to MLD, CoMD's training computation grows as $O(k^2)$. We note that since the base model uses a Rotary Position Embedding (RoPE)~\citep{jian2024roformer}, CoMD's total FLOPs per second grows as $O(nk^2)$. Thus, CoMD still benefits from using a smaller embedding dimension, compared to standard autoregressive models. Furthermore, CoMD uses a $k$-lines binary mask matrix $m$, where $k$ is the embedding dimension. Since both $p_\theta(x_t|z_t)$ and $q^\prime(z_t)$ are first modeled as parameterized Gaussians with $k$-lines, training FLOPs per second grow as $O(k^2)$. We note that since the base model uses a RoPE, CoMD's total FLOPs per second grow as $O(nk^2)$. Thus, CoMD still benefits from using a smaller embedding dimension, compared to standard autoregressive models. 
+
+
+
+
+\section{Experiments and Analysis}
+
+We introduce our experimental methods, datasets, and results.
+\subsection{Experimental Setup}
+
+\paragraph{Baselines} Our baselines include Masked Language Diffusion (MLD) \citep{austin2023structured} and Masked Diffusion Language Models (MDLM) \citep{austin2023structured,shih2022training}. MLD with RoPE is a modified version of Austin et al.~\citep{austin2023structured}. MDLM with reverse sampling is proposed by \citet{shih2022training} to address the degeneracy issue that occurs when training MDLMs, where only the ``noise" distribution is learned. We follow the settings as \citet{shih2022training} to train MDLM with reverse sampling. We compare our results to GPT for image and text, proposed by \citet{austin2023structured}. We compare our coherent model to MLD's coherent model. We compare our results to Coja-Oghlan et al.~\citep{coja2020replica} for Sudoku. We compare our ``clean" model (CoMD's coherent model with a negative coherent loss) to the ``clean" model proposed by \citet{shih2022training}. A ``clean" model is trained with the ``noise" model and predicts natural tokens instead of \texttt{[MASK]} tokens.
+
+\paragraph{Models} For image data, we compare CoMD to MLD~\citep{austin2023structured} and standard autoregressive models. We use an 8-layer convolutional model trained on ImageNet. For image data, we compare our next-token prediction framework CoMD to MLD~\citep{austin2023structured} and standard autoregressive models. We use an 8-layer convolutional model trained on ImageNet. For text data, we compare CoMD to MLD and MDLM. For SlimPajama, we use the same setting as \citet{nie2024scaling} for a fair comparison. CoMD is a next-token prediction framework, so we use the deterministic sampler during inference. 
+
+\paragraph{Hyperparameters and Computational Measurements}
+For all experiments, we use a max length 128/512 or input size 128/512, a learning rate of 8$\times$10$^{-5}$, a batch size of 128, and AdamW~\citep{loshchilov2019decoupled} with linear decay following \citet{austin2023structured}. All models and methods use a RoPE position encoding. Each model is trained for \textasciitilde300k steps. All models and methods are evaluated with 1 RTX A5000 GPU. Inference is measured with 1 RTX A5000 GPU and averaged over 1000 forward passes. 
+
+\paragraph{Datasets}
+We consider a wide variety of datasets for both image and text data. For image data, we use MNIST, \textsc{kaggle-mnist}~\citep{david_g__radcliffe_2020}, and Sudoku~\citep{coja2020replica}. For text data, we compare CoMD to MLD and MDLM on logic puzzles~\citep{kitouni2024factorization} and SlimPajama~\citep{soboleva2023slimpajama}. For logic puzzles, we use the same setting as \citet{kitouni2024factorization} for a fair comparison. CoMD is a next-token prediction framework, so we compare CoMD to existing methods that use the same forward pass per token as CoMD. We do not include existing methods that use a forward pass for each token (e.g., \citet{liao-etal-2020-probabilistically}) since they have much higher inference computation, compared to ``next-token" methods. We compare CoMD to standard autoregressive language models for all tasks. We train TinyLlama~\citep{zhang2024tinyllama} for image and logic puzzle tasks, and Llama 2 7B~\citep{touvron2023llama2} for SlimPajama tasks. We compare the deterministic sampler and ``score" sampler for each method.
+
+\subsection{Image Generation}
+Table~\ref{table:length-512-sudoku-eval} show CoMD's performance on Sudoku. Following MLD, we compare CoMD to standard autoregressive models for Sudoku. Following \citet{coja2020replica}, we consider Sudoku with a length 128 and 512. The Sudoku benchmark requires a model to solve puzzles by selecting \texttt{[MASK]} tokens to input to a solver. Then, the solved Sudoku is evaluated. We use the same settings as \citet{coja2020replica} for a fair comparison. We report the evaluation metrics: 1) area under the OOD perplexity, 2) coherent/incoherent accuracy (DA\%, the percent of tokens that are coherent/incoherent). MLD and CoMD use an identical number of parameters. Thus, we use an empty coherent and incoherent model for autoregressive models. Following \citet{coja2020replica}, the OOD perplexity (area under the curve in Table \ref{table:length-512-sudoku-eval}) is the median perplexity measured with respect to the percentage of \texttt{[MASK]} tokens in the text. A lower number is better. More specifically, the OOD perplexity is defined as
+\begin{equation}
+\mathrm{DA}\%\left(\delta\right)=\mathbb E_{\substack{x\\ p_{\mathrm{data}}(x)=1}}\left[\mathrm{PPL}\left(\mathbb I\left(\frac{\left\|x\right\|-\left\|m\right\|}{\left\|x\right\|+\left\|m\right\|}=\delta\right)\right]\right],
+\end{equation}
+where $\mathbb I\left(s\right)=1$ ($\mathbb I\left(s\right)=0$) is the indicator function when $s$ is true, respectively, and $\mathrm{PPL}$ is the standard perplexity.
+Generating incoherent text is an easier task, since it is deterministic. CoMD generally outperforms other methods on OOD perplexity, coherent/incoherent accuracy, and puzzle solving rate. Although MLD and MDLM use the same number of parameters, CoMD is significantly faster than MDLM and is on par with MLD, since the mask varies with each forward pass in MDLM. Table \ref{table:length-512-sudoku-eval} also show that CoMD is 10.5x faster than MDLM in terms of parameter per second. The large MNIST benchmark requires CoMD to infer text with 784 tokens. CoMD outperforms MLD and MDLM on incoherent tasks and gains an improvement on coherent tasks with longer premium tokens (e.g., 64 tokens). 
+
+\begin{table}[]
+    \centering
+    \caption{Length 512 Sudoku Test}
+    \label{table:length-512-sudoku-eval}
+    
+    \begin{tabular}{l c c c} 
+        \toprule
+        \textbf{Model} & \textbf{Acc.\% $\uparrow$} & \textbf{DA\% $\downarrow$} & \textbf{Time (s) $\downarrow$  }\\ 
+        \midrule
+        1-MLD \citep{austin2023structured}              & 96.10$_{\pm0.4}$ &  1.81$_{\pm0.01}$ & 180.95$_{\pm0.08}$  \\ 
+        1-MDLMs \citep{shih2022training}             & 95.6$_{\pm0.3}$ &  113$_{\pm2.2}$ & 61.01$_{\pm0.19}$  \\ 
+        1-AR \citep{austin2023structured}               & 95.76$_{\pm0.1}$ &  1.29$_{\pm0.01}$ & 1.67$_{\pm0.02}$  \\ 
+        1-CoMD, $\lambda_\mathrm{coh}=0$   & 95.58$_{\pm0.2}$ &  1.34$_{\pm0.06}$ & 61.41$_{\pm0.14}$ \\ 
+        1-CoMD              & \textbf{96.25}$_{\pm0.2}$ &  \textbf{1.15}$_{\pm0.1}$ &  61.41$_{\pm0.14}$ \\ 
+        \bottomrule
+    \end{tabular}
+    
+\end{table}
+
+% \begin{figure}[!ht]
+%     \centering
+%     \begin{subfigure}[t]{0.33\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/MNIST_PUZZLES_summary.pdf}
+%     \end{subfigure}%
+%     \begin{subfigure}[t]{0.33\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/kaggle_MNIST_PUZZLES_summary.pdf}
+%     \end{subfigure}
+%     \begin{subfigure}[t]{0.33\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/SUDOKU_PUZZLES_summary.pdf}
+%     \end{subfigure}
+%     \caption{CoMD performance on Puzzles by Changing the length of the input premium (x-axis) and the length of text to generate (z-axis).}
+%     \label{fig:puzzle-summary}
+% \end{figure}
+
+\subsection{Text Generation}
+We evaluate CoMD on two text domains: logic puzzles and SlimPajama.
+
+\paragraph{Logic Puzzles}
+Following \citet{kitouni2024factorization}, we propose a test benchmark with logic puzzles of various lengths and domains. This benchmark requires a model to generate the next 8 tokens. The evaluation is similar to the Sudoku benchmark, except 8 generated tokens are used instead of the solved Sudoku. The results  summarize CoMD's performance on incoherent tasks (i.e., puzzles with incoherent premium) and coherent tasks (i.e., puzzles with premise and 7 incoherent tokens). The premises range from 0 to 7 tokens. The lengths of input text (i.e., premises and incoherent tokens) range from 1 to 256 tokens. CoMD outperforms MLD and MDLM on incoherent tasks. CoMD gains an improvement on coherent tasks with longer premium tokens. Similar to Sudoku, the forward pass per token is important for longer premium tokens. 
+
+% \begin{wrapfigure}{r}{0.3\textwidth}
+%   \begin{center}
+%     \includegraphics[width=0.3\textwidth]{figures/LLMs_compute_efficiency_small.pdf}
+%   \end{center}
+%   \caption{LLM Inference Computation.}
+%   \label{fig:llm-computation}
+% \end{wrapfigure}
+
+\paragraph{SlimPajama Test}
+The SlimPajama benchmark~\citep{soboleva2023slimpajama} is a widely used LLM benchmark that provides a ``clean" version of the Stable Belief Dataset. The SlimPajama benchmark requires a model to generate coherent/sounding text with optional prefixes. Similar to \citet{nie2024scaling}, we train CoMD with a 4-layer transformer with 512 embedding dimensions. We use the same setting as \citet{nie2024scaling} for a fair comparison. The SlimPajama test suite proposes a new evaluation method that generates 5000 samples of length 1 to 1024. Our tests are run with the same hardware and software environment as \citet{nie2024scaling} to ensure a fair comparison. The prefix (i.e., premise) is a natural text ranging from 0 to 384 tokens. Following \citet{nie2024scaling}, we evaluate coherent/incoherent perplexity and clean/coherent perplexity. We also evaluate coherent/clean perplexity on original and reversed text to evaluate the long-range time travel language model~\citep{papadopoulos2024arrows,liu2022statistical}. We note that the SlimPajama test suite does not provide the original text with a 0-384 token prefix, so we use the clean model to generate the original text and use the coherent model to generate the reversed text. 
+Following \citet{nie2024scaling}, a coherent model is a conditional distribution on the set of tokens that is a subset of the entire set of possible tokens. 
+The clean model is trained with the ``noise" model and predicts natural tokens instead of \texttt{[MASK]} tokens. 
+
+We note that the coherent model is trained to be deterministic, except when the probability of the \texttt{[MASK]} token is greater than 0.3. The coherent model is trained on texts with a maximum of 128 tokens to save computation during training. We compare CoMD to GPT and baselines, and the coherent models of MLD and MDLM. Since MLD and MDLM only learn the ``noise" model once, clean models do not exist. Thus, we do not compare to MLD and MDLM's clean model, but we do compare to CoMD's clean model (coherent model with negative coherent loss). Following \citet{nie2024scaling}, autoregressive and masked models use an average of 8 samples for the next-token prediction during the training step. Since the SlimPajama benchmark requires coherent text, it is important to learn both a coherent and incoherent model. CoMD matches the best perplexity of MLD and MDLM on incoherent task and improves on coherent task. CoMD's coherent model is much lower than MLD's coherent model. While CoMD and MLD's clean model have similar perplexities with short prefixes (less than 128 tokens), CoMD's clean model is 1.66x better than MLD's clean model with long prefixes (384 tokens). 
+
+% \begin{figure}[htp]
+% \centering
+% \begin{subfigure}[b]{0.32\textwidth}
+%     \includegraphics[width=\textwidth]{figures/incoherent_perplexity_slimpajama.pdf}
+%     \caption{Incoherent Perplexity}
+%     \label{fig:incoherent_perplexity}
+% \end{subfigure}
+% \hfill
+% \begin{subfigure}[b]{0.32\textwidth}
+%     \includegraphics[width=\textwidth]{figures/clean_perplexity_slimpajama_forward.pdf}
+%     \caption{Clean Perplexity (Original)}
+%     \label{fig:clean_perplexity_forward}
+% \end{subfigure}
+% \hfill
+% \begin{subfigure}[b]{0.32\textwidth}
+%     \includegraphics[width=\textwidth]{figures/clean_perplexity_slimpajama_backward.pdf}
+%     \caption{Clean Perplexity (Reversed)}
+%     \label{fig:clean_perplexity_backward}
+% \end{subfigure}
+% \caption{SlimPajama Test}
+% \label{fig:slimpajama-perplexity}
+% \end{figure}
+
+\subsection{Ablations and Additional Experiments}
+\paragraph{Ablations}
+Table~\ref{table:ablations} ablates CoMD's three innovations on Sudoku and SlimPajama test: fixed mask ($k$), coherent loss ($\ell_\mathrm{coh}$), and time shift ($\gamma$). Each table starts with CoMD as the top row. The relevant rows are ablated by removing either $\ell_\mathrm{coh}$, $k$, or $\gamma$. Both Coherent and Incoherent accuracy are evaluated on Sudoku and SlimPajama test. CoMD gains 24pp and 20pp on coherent tasks for Sudoku and SlimPajama, respectively. Ablations without $k$ are 15.92pp and 8.69pp behind CoMD. Ablations without $\ell_\mathrm{coh}$ are still 5.35pp and 10.89pp behind CoMD on respective tasks. Both $\gamma$ and $\ell_\mathrm{coh}$ contribute to better perplexity, but $\ell_\mathrm{coh}$ contributes more to perplexity than $\gamma$. 
+
+\begin{table}[!ht]
+    \centering
+    \caption{Ablations on Sudoku and SlimPajama Test}
+    \begin{subtable}{0.44\textwidth}
+        \centering
+        \tabcolsep=0.10cm
+        \caption{Coherent \& Incoherent Accuracy on Sudoku}
+        \label{table:ablations-sudoku}
+        
+        \begin{tabular}{l c c c} 
+            \toprule
+            \textbf{Model} & \textbf{Coherent\% $\uparrow$} & \textbf{Incoherent\% $\uparrow$} & \textbf{Perplexity} $\downarrow$ \\ 
+            \midrule
+            MLD              & 59.98	 & 53.18  & 1.45   \\ 
+            CoMD   & \textbf{74.28} & \textbf{69.95} & \textbf{1.01}   \\
+            \midrule
+            $k$ Learned      & 73.69 & 59.54 & 1.02  \\
+            $\ell_\mathrm{coh}$      & 58.95 & 62.83 & 1.43  \\ 
+            $\gamma$      & 72.95 & 64.85 & 1.06  \\ 
+            $\ell_\mathrm{coh}$-$\gamma$   & 57.95 & 60.08 & 1.40 \\ 
+            \bottomrule
+        \end{tabular}
+    \end{subtable}%
+    \hfill    
+    \begin{subtable}{0.44\textwidth}
+        \centering
+        \tabcolsep=0.08cm
+        \caption{Coherent Perplexity on SlimPajama}
+        \label{table:ablations-slimpajama}
+        
+        \begin{tabular}{l c c} 
+            \toprule
+            \textbf{Model} & \textbf{128 Prefix}	 & \textbf{384 Prefix} \\ 
+            \midrule
+            MLD              &  1.86 & 1.89  \\ 
+            CoMD   & \textbf{1.68} & \textbf{1.77}  \\
+            \midrule
+            $k$ Learned  & 1.70 & 1.78 \\ 
+            $\ell_\mathrm{coh}$      & 1.4 & 1.61 \\ 
+            $\gamma$      &  1.72 & 1.78  \\
+            $\ell_\mathrm{coh}$-$\gamma$   & 1.74 & 1.77  \\ 
+            \bottomrule
+        \end{tabular}
+    \end{subtable}%
+    \label{table:ablations}
+\end{table}
+
+\paragraph{$\gamma_\pi,\gamma_\mathrm{coh}$}
+The time shift $\gamma$ has a time shift parameter $\gamma_\pi$ for the next-token model and $\gamma_\mathrm{coh}$ for the coherent model. Table~\ref{table:time_shift} evaluates CoMD's performance with a variable time shift $\gamma_\pi,\gamma_\mathrm{coh}$. $\gamma_\pi,\gamma_\mathrm{coh}$ bounds the time shift $\gamma_\pi,\gamma_\mathrm{coh}$. The experiment shows that the coherent model benefits more from $\gamma_\pi,\gamma_\mathrm{coh}$ than the next-token model. Thus, CoMD with $\gamma_\pi=2,\gamma_\mathrm{coh}=2$ has a perplexity improvement of 0.98 (1.00-1.92). 
+
+
+\paragraph{Other Tasks}
+We evaluate CoMD on other text-based tasks, including code and sequence classification. We also ablate CoMD's performance with ground truth probability that Coja-Oghlan et al.~\citep{coja2020replica} 
+\paragraph{Language Modeling}
+We compare CoMD to existing MDLMs on language modeling. Table~\ref{table:llm-test} and Table~\ref{table:llm-test-llama} summarize CoMD's performance on SlimPajama validation and test dataset, respectively. The results suggest that CoMD matches the best perplexity of MLD and MDLM on all tasks and improves on other tasks. Additionally, CoMD significantly improves the perplexity of the standard coherent and clean models over MLD and MDLM. CoMD is also 6x and 3x faster than MDLM in terms of parameter per second (Table~\ref{table:llm-test} and Table~\ref{table:llm-test-llama}), respectively. 
+
+% \begin{table}[!ht]
+%     \centering
+%     \caption{Length < 512 SlimPajama Validation}
+%     \label{table:llm-test}
+%     \resizebox{0.6\textwidth}{!}{
+%     \begin{tabular}{l c c c c} 
+%         \toprule
+%         \textbf{Model} & \textbf{PPL} & \textbf{Train Time (s)} & \textbf{Total Time (s)} & \textbf{Speedup} \\ 
+%         \midrule
+%         4-GPT \citep{kitouni2024factorization} & 7.06 & 1.8E+6 & 7.1 & - \\ 
+%         4-Llama 2 \citep{touvron2023llama2} & 5.66 & 7.2E+6 & 29.0 & -  \\ 
+%         4-MLD \citep{austin2023structured} &  5.95 & 7.2E+5 & 28.7 & 25.4x  \\ 
+%         4-MDLMs \citep{shih2022training}  & 5.13 & 2.5E+6 & 25.4 & 28.4x \\ 
+%         4-CoMD   & \textbf{5.08} & 7.2E+5 & 28.7 & 28.4x \\ 
+%         \bottomrule
+%     \end{tabular}}
+% \end{table}
+
+
+
+Table~\ref{table:prompt} summarizes CoMD's performance on a prefix prompt task~\citep{liao-etal-2020-probabilistically}, where the model infers the prompts that maximizes the likelihood of the next token. The 100 prompts in \citet{shih2022training} are: \textit{1. In the United States, the area known for the production of this crop is the Western region. 2. This crop is often used to make bread and other baked products. 3. The plant's unique characteristics, like its broad leaves, help the crop adapt to various conditions. 4. This plant's leaves are often used in traditional medicine. 5. The plant's wide leaves help it absorb sunlight efficiently. 6. The plant's wide leaves help it adapt to various weather patterns. 7. The plant's wide leaves help it adapt to various climates. 8. The plant's wide leaves help it absorb sunlight efficiently. 9. The plant's wide leaves help it adapt to various weather patterns. 10. This plant's unique characteristics, like its broad leaves, help the crop adapt to various conditions. 11. The plant's wide leaves help it absorb sunlight efficiently. 12. This plant's wide leaves provide shade. 13. The plant's wide leaves help it absorb sunlight efficiently. 14. The plant's wide leaves help it adapt to various climates. 15. The plant's wide leaves help it absorb sunlight efficiently. 16. The plant's wide leaves help it adapt to various weather patterns. 17. The plant's wide leaves help it absorb sunlight efficiently. 18. The plant's wide leaves help the crop adapt to various conditions. 19. The plant's wide leaves help it absorb sunlight efficiently. 20. This plant's unique characteristics, like its broad leaves, help the crop adapt to various conditions.} For a fair comparison, we compare to MDLM trained on a 128-token prefix instead of a 512-token prefix.  Table~\ref{table:prompt} summarizes CoMD's performance on the prefix prompt task. CoMD outperforms MDLM on prefix prompt perplexity with 100 prompts. Notably, CoMD is 10x faster than MDLM. Similar to CoMD, MDLM uses a ``score" sampler for inference. For a fair comparison, both use the same inference hyperparameters. 
+
+
+\section{Related Work}
+
+\paragraph{Coherent Models}
+\citet{kitouni2024factorization,kim2024task,chen2024premise,lehnert2024beyond} propose using coherent models to improve the reasoner's performance. \citet{kim2024task,lehnert2024beyond} propose using a coherent model as an augmented model for search. \citet{chen2024premise} propose using a coherent model as a next-word prediction model for reasoning. \citet{kitouni2024factorization} propose using a coherent model to address the ``noise" learned by autoregressive models. \citet{golovneva2024reverse, shah2024causal} propose using a reverse model to train a coherent model. \citet{chen2024reverse} propose using a coherent model to train a long-term reasoning model. \citet{shi2025simplified} propose using an incoherent distribution as a regularization method for better reasoning. \citet{chuang2024learning} propose using a ``count token" as a coherent model for routing. We note that our coherent model is trained with a training objective that is independent of the training objective, and does not require additional samples per training step. 
+
+\paragraph{MDLMs}
+MDLMs have been proposed to overcome the degeneracy issue that occurs when training MDLMs, where only the ``noise" distribution is learned. \citet{austin2023structured} propose MLD and MDLM to address the degeneracy issue. \citet{shih2022training} propose using reverse sampling to address the degeneracy issue. \citet{zheng2024maskeddiffusionmodelssecretly,NEURIPS2024_c153077e} propose using an autoregressive model for inference. \citet{varma2024glauber} propose using Bayesian inference for inference. \citet{shi2025simplified} propose simplifying MDLMs by removing the binary ``mask" matrix. \citet{kitouni2024factorization} propose removing the binary ``mask" matrix and training with the ground truth ``noise" distribution. \citet{zheng2024reparameterized} propose an MDLM that is theoretically optimal in the $G$-convex and closed-form sense. \citet{touvron2023llama2} propose using reverse sampling to train pretrained LLMs for MDLMs. \citet{lou2024discrete} propose estimating the cumulative distribution function (CDF) and \citet{liu2024copula} propose using copulas to train copulas. \citet{xu2024energy} propose using an energy-based model (EBM) to train energy-based generative models (EBM). Some works propose simplifying MDLMs by factorizing the noise model into categorical and Gaussian distributions.  \citet{rectorbrooks2024steering} propose steering MDLMs with discrete denoising posterior prediction. \citet{schiff2024simple} propose simplifying guided sampling for training MDLMs. \citet{sahoo2024simple} propose simplifying MDLMs by factorizing the noise model into categories and learning (a subset of) categories. \citet{ye2024beyond} propose augmenting existing language models for MDLMs and propose reverse planning to enhance MDLMs further. 
+
+\paragraph{Other Discrete Diffusion Models}
+\citet{hoogeboom2021argmax,hoogeboom2022autoregressive} propose autoregressive diffusion to address the degeneracy issue that occurs when training discrete models. \citet{chang2022maskgit} train discrete diffusion models (DDMs) for image modeling. \citet{wang2024diffusion} propose a LLM for MDMs. \citet{gong2024scaling} propose a scaling law for MDLMs. Some works propose a MDLM framework to enhance language modeling. \citet{ye2024beyond} propose a reverse path for MDLMs. \citet{peng2025path} propose a method that guides the next-token prediction with a given time path. \citet{liu2024copula} propose using copulas to train copulas.
+
+
+\section{Conclusion}
+
+We propose CoMD, a novel framework that extends Masked Language Diffusion to more efficiently and more effectively learn coherent and incoherent language. CoMD extends MLD with three novel ways: 1) a fixed mask matrix, 2) a coherent loss term, and 3) a variable time parameter. Both inference and training computation are constant with respect to the length of text. Empirically, CoMD outperforms existing methods on multiple coherent benchmarks and achieves 1.7x and 1.6x reduction in FLOPs per second than MLD and MDLM, respectively. \ours also achieves 1.8x lower perplexity than MLD's coherent model. \citet{kaplan2020scaling} shows that increasing model and training computation is required for performance to scale, which may be consistent with a fixed mask matrix and/or a variable time parameter. We note that CoMD learns similar properties (e.g., attention property) as existing autoregressive language models. 
+
+
+\section{Limitations and Future Works}
+
+CoMD is limited in its ability to expand the coherent model, since it requires tokens to be modeled as binary. Although CoMD learns the ``mask” as a $k$-lines binary random variable, a fixed ``mask” matrix is independent of the index of the token $t$, similar to existing autoregressive language models (e.g., autoregressive transformers). Similar to autoregressive language models, CoMD can be extended by adding additional layers, more attention heads, and a larger attention pool~\citep{ruder2017overview}. CoMD also introduces several additional parameters to the base model, including $p_\theta(x_t|z_t)$, which is trained to denoise $z_t$ (with the $k$ lines). Thus, CoMD also introduces additional parameters over the base model. Since CoMD is trained with a similar number of parameters as the base model, CoMD is limited in its ability to scale up and expand the coherent model. However, CoMD is much more sample efficient and compute efficient than existing autoregressive language models (see \citet{tripuraneni2022provablem}). We leave the scaling of CoMD and the augmentation of the coherent model to future work. 
+
+CoMD introduces a simple and fixed mask matrix that is independent of the token at the $t$-th index and the maximum length of text, while standard autoregressive language models require attention parameters that scale with the index of the token $t$ and the maximum length of text. Although CoMD is not able to scale as easily as existing autoregressive language models, CoMD enjoys several benefits over standard autoregressive framework: 1) more efficient and effective at learning coherent language, 2) more efficient at learning incoherent text, 3) more efficient at training and inference. Similar to standard autoregressive language models, CoMD requires a training dataset with natural text and is not able to generate tokens that are not in the training dataset. However, since CoMD is trained with a ``mask" matrix that is independent of the token at the $t$-th index, CoMD is more efficient at learning incoherent text than autoregressive frameworks. Although CoMD introduces several additional parameters to the base model, CoMD is a next-token prediction framework and is significantly more compute and parameter efficient than autoregressive models, consistent with standard autoregressive language models~\citep{ruder2017overview}. Since CoMD is trained with a similar number of parameters as the base model, CoMD faces the same limitations as the base model, including the ability to scale up the coherent model, and the ability to generate tokens that are not in the training dataset. We leave the scaling of CoMD and the augmentation of the coherent model to future work. 
+
+The coherent model is trained with the same tokens as $p_\theta(x_t|z_t)$, but with a loss function that is combined with the existing training loss. The coherent model is trained as a denoiser, which is used to guide the ``score" sampler. Although the coherent model is trained with the same tokens as $p_\theta(x_t|z_t)$, the coherent model is independent of the training objective and does not require additional samples at training time. Similar to existing works on coherent models, our coherent model is trained with tokens used in the standard language model. We leave the scaling of CoMD and the augmentation of the coherent model to future work. 
+
+The time-shift parameter $\gamma_\pi$ and $\gamma_\mathrm{coh}$ improve performance, especially for the coherent model. However, there is a minor decrease (1e-4) in BPC when $\gamma_\pi$ and $\gamma_\mathrm{coh}$ > 0. We leave the scaling of CoMD and the augmentation of the coherent model to future work. 
+
+
+
+% \section{Acknowledgement}
+
+% We acknowledge New York University (NYU) and Intel for providing computational resources to train our models. We thank Justin Chih-Yao Chen, Insoo Lee, and Xinyun Chen for their feedback and discussions. We thank Ahman Xue, Zeinab Khodajadi, and Aditya Bharti for their feedback on the coherent model. We thank Jiahui Song and aaaam Iqbal for their feedback on the experiments. We thank Michael A. McCallum, Aditya Bharti, Sainyam Jaiswal, Kevin Han, and Jacob Andrews for their feedback on the experiments and the paper. This project was partially supported by Intel, Oracle, and the Center for AI Research at the New York University Courtland Institute. 
+
+
+\bibliographystyle{plainnat}
+\bibliography{icais2025_conference}
+
+
+\appendix
+\section{Appendix}
+
+\begin{table}[!ht]
+    \centering
+    \caption{Summary of $\gamma_\pi,\gamma_\mathrm{coh}$ on Sudoku.}
+    \label{table:time_shift}
+    
+    \begin{tabular}{l c c c} 
+        \toprule
+        \textbf{Model} & \textbf{$\gamma_\pi, \gamma_\mathrm{coh}$} & \textbf{Coherent Acc.\% $\uparrow$} & \textbf{Perplexity $\downarrow$} \\ 
+        \midrule
+        1-MLD & (2, 0)  & 59.38 & 1.30 \\
+        1-MLD + $\gamma_\pi, \gamma_\mathrm{coh}$ & (2, 2) & 59.6 & 1.30  \\ 
+        \midrule
+        CoMD & (3, 0) & 74.28 & 1.01  \\
+        CoMD & (3, 2) & 75.08 & 1.00   \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[!ht]
+    \centering
+    \caption{Length 512 SlimPajama Validation}
+    \label{table:llm-test-llama}
+    \begin{tabular}{l c c c} 
+        \toprule
+        \textbf{Model} & \textbf{PPL} & \textbf{Train Time (s)} & \textbf{Total Time (s)} & \textbf{Speedup} \\ 
+        \midrule
+        7B-GPT \citep{touvron2023llama2} & 1.70 & 7.1E+7 & 729.0 & -  \\ 
+        7B-Llama 2 \citep{touvron2023llama2} & 1.27 & 7.2E+7 & 787.0 & -  \\ 
+        7B-MLD \citep{austin2023structured} & 1.72 & 7.2E+6 & 289.7 & 2.5x  \\ 
+        7B-MDLMs \citep{shih2022training}  & 1.18 & 2.5E+7 & 386.1 & 18.3x \\ 
+        7B-CoMD   & \textbf{1.16} & 7.2E+6 & 289.7 & 25.4x \\ 
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[!ht] \centering \caption{Length < 512 SlimPajama Validation} \label{table:llm-test} \resizebox{\textwidth}{!}{ \begin{tabular}{l c c c c} \toprule \textbf{Model} & \textbf{PPL} & \textbf{Train Time (s)} & \textbf{Total Time (s)} & \textbf{Speedup} \\ \midrule 4-GPT \citep{kitouni2024factorization} & 7.06 & 1.8E+6 & 7.1 & - \\ 4-Llama 2 \citep{touvron2023llama2} & 5.66 & 7.2E+6 & 29.0 & - \\ 4-MLD \citep{austin2023structured} & 5.95 & 7.2E+5 & 28.7 & 25.4x \\ 4-MDLMs \citep{shih2022training} & 5.13 & 2.5E+6 & 25.4 & 28.4x \\ 4-CoMD & \textbf{5.08} & 7.2E+5 & 28.7 & 28.4x \\ \bottomrule \end{tabular}} \end{table} \begin{table}[!ht] \centering \caption{Prefix Prompt (PPL)} \label{table:prompt} \resizebox{0.6\textwidth}{!}{ \begin{tabular}{l c c} \toprule \textbf{Model} & \textbf{Prefix Prompt PPL} & \textbf{Speedup} \\ \midrule MDLM \citep{shih2022training} & 5.28 & - \\ MDLM w/ 100 Prompts \citep{shih2022training} & 4.78 & - \\ CoMD & \textbf{4.63} & 10x \\ \bottomrule \end{tabular}} \end{table}
+
+\end{document}

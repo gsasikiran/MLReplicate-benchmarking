@@ -1,0 +1,158 @@
+{
+  "target": "Train for the Worst, Plan for the Best: Understanding Token Ordering in Masked Diffusions",
+  "source_papers": [
+    {
+      "reference": "Ho, J., Jain, A., and Abbeel, P. Denoising diffusion probabilistic models. Advances in neural information processing systems, 33:6840-6851, 2020.",
+      "rank": 1,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This foundational paper introduced the concept of denoising diffusion models, which serve as the methodological groundwork for further developments in generative models, including the current work on masked diffusion models (MDMs). It outlines the core principles behind diffusion processes that are pivotal to generating samples.",
+      "usage": "The principles established in this paper were adapted to formulate the noise processes employed in the MDM framework."
+    },
+    {
+      "reference": "Austin, J., Johnson, D. D., Ho, J., Tarlow, D., and van den Berg, R. Structured denoising diffusion models in discrete state-spaces. NeruIPS, 2021.",
+      "rank": 2,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper extends diffusion models to discrete state spaces, which is essential for applying diffusion processes to domains such as text and proteins. Its methodologies have influenced subsequent work on applying diffusion strategies in masked diffusion contexts.",
+      "usage": "Used to inform the structure of MDMs as they extend diffusion approaches to discrete settings."
+    },
+    {
+      "reference": "Nie, S., Zhu, F., Du, C., Pang, T., Liu, Q., Zeng, G., Lin, M., and Li, C. Scaling up masked diffusion models on text. arXiv preprint arXiv:2410.18514, 2024.",
+      "rank": 3,
+      "type": [
+        "component"
+      ],
+      "justification": "This work addresses the adaptation of masked diffusion models for text, offering concrete methodologies to scale MDMs effectively. It notably implements adaptive strategies which resonate with the strategies proposed in the current study.",
+      "usage": "It provided techniques for adapting MDMs that were integral to this research."
+    },
+    {
+      "reference": "Zheng, L., Yuan, J., Yu, L., and Kong, L. A reparameterized discrete diffusion model for text generation. arXiv preprint arXiv:2302.05737, 2023.",
+      "rank": 4,
+      "type": [
+        "component"
+      ],
+      "justification": "This paper introduces reparameterization techniques relevant to discrete diffusion, allowing for improved performance in text generation tasks. Its concepts have been integrated into the current work, enhancing the utility of MDMs within textual applications.",
+      "usage": "Informed the reparameterization strategies necessary for effective token generation in MDMs."
+    },
+    {
+      "reference": "Gong, S., Agarwal, S., Zhang, Y., Ye, J., Zheng, L., Li, M., An, C., Zhao, P., Bi, W., Han, J., et al. Scaling diffusion language models via adaptation from autoregressive models. arXiv preprint arXiv:2410.17891, 2024.",
+      "rank": 5,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper discusses how diffusion models can be effectively trained by leveraging autoregressive models, providing strategies that directly influence the training framework within the masked diffusion context.",
+      "usage": "The adaptation strategies described were referenced in training MDMs to enhance their performance."
+    },
+    {
+      "reference": "Shah, K., Dikkala, N., Wang, X., and Panigrahy, R. Causal language modeling can elicit search and reasoning capabilities on logic puzzles. arXiv preprint arXiv:2409.10502, 2024.",
+      "rank": 6,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This work explores the reasoning capabilities of language models applied to logic puzzles, offering insights into task dynamics and performance metrics that guided the exploration of adaptive inference strategies in MDMs.",
+      "usage": "Provided a conceptual framework that informed how reasoning tasks are approached with MDMs."
+    },
+    {
+      "reference": "Zheng, K., Chen, Y., Mao, H., Liu, M.-Y., Zhu, J., and Zhang, Q. Masked diffusion models are secretly time-agnostic masked models and exploit inaccurate categorical sampling. arXiv preprint arXiv:2409.02908, 2024.",
+      "rank": 7,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper provides insights into the time-agnostic properties of masked diffusion models, further confirming the broader applicability of these models beyond their original theoretical frameworks and informing their use in practical settings.",
+      "usage": "The insights contributed directly to the understanding of MDMs' operational capabilities."
+    },
+    {
+      "reference": "Liu, S., Mohanty, S., and Raghavendra, P. On statistical inference when fixed points of belief propagation are unstable. In 2021 IEEE 62nd Annual Symposium on Foundations of Computer Science (FOCS), pp. 395-405. IEEE Computer Society, 2022.",
+      "rank": 8,
+      "type": [
+        "component"
+      ],
+      "justification": "Discusses algorithmic insights relevant to inference in complex probabilistic models, which have consequences for understanding inference in masked diffusion models.",
+      "usage": "Contributed understanding regarding algorithm stability in probabilistic frameworks, aiding inference methods in MDMs."
+    },
+    {
+      "reference": "Liao, Y., Jiang, X., and Liu, Q. Probabilistically masked language model capable of autoregressive generation in arbitrary word order. In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics, pp. 263-274. Association for Computational Linguistics, 2020.",
+      "rank": 9,
+      "type": [
+        "component"
+      ],
+      "justification": "Explores probabilistic approaches to masked language modeling, providing additional methods that can be integrated into MDM frameworks for enhanced flexibility.",
+      "usage": "Influenced the design of token sampling mechanisms in the MDM architecture."
+    },
+    {
+      "reference": "Kim, J., Kwon, S., Choi, J. Y., Park, J., Cho, J., Lee, J. D., and Ryu, E. K. Task diversity shortens the icl plateau. arXiv preprint arXiv:2410.05448, 2024.",
+      "rank": 10,
+      "type": [
+        "component"
+      ],
+      "justification": "Addresses task diversity's impact on model performance, contributing insights into how diverse training data can improve generalization and robustness, key considerations in shaping adaptive strategies for MDMs.",
+      "usage": "Informed the training setup for enhancing reasoning capabilities and generalization in MDMs."
+    },
+    {
+      "reference": "Devlin, J., Chang, M.-W., Lee, K., and Toutanova, K. BERT: Pre-training of deep bidirectional transformers for language understanding. In Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1, pp. 4171-4186, 2019.",
+      "rank": 11,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "BERT introduces key pre-training dynamics that emphasize the importance of contextual token relationships, which inform approaches to token unmasking and ordering in MDMs.",
+      "usage": "The foundational concepts influenced the design of adaptive inference strategies in the current research."
+    },
+    {
+      "reference": "Alaoui, A. E. and Gamarnik, D. Hardness of sampling solutions from the symmetric binary perceptron. arXiv preprint arXiv:2407.16627, 2024.",
+      "rank": 12,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "Provides insights into computation hardness that parallels complexity challenges in masked diffusion models, underlining the difficulties in certain inference tasks.",
+      "usage": "Informed the theoretical groundwork regarding masked inference processes."
+    },
+    {
+      "reference": "Decelle, A., Krzakala, F., Moore, C., and Zdeborov\u00b4 a, L. Asymptotic analysis of the stochastic block model for modular networks and its algorithmic applications. Phys. Rev. E, 84:066106, Dec 2011.",
+      "rank": 13,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "Experiments on modular networks align with understanding the structural implications of masked diffusion modeling, highlighting similar behavioral dynamics.",
+      "usage": "The concepts shaped interpretations of performance dynamics within MDM applications."
+    },
+    {
+      "reference": "Zhang, P., Zeng, G., Wang, T., and Lu, W. Tinyllama: An open-source small language model. arXiv preprint arXiv:2401.02385, 2024.",
+      "rank": 14,
+      "type": [
+        "component"
+      ],
+      "justification": "Explores efficient model architectures, providing relevant insights that were adapted to enhance the performance and efficiency of MDMs.",
+      "usage": "Impacted architectural decisions in constructing the MDM framework."
+    },
+    {
+      "reference": "Shi, J., Han, K., Wang, Z., Doucet, A., and Titsias, M. K. Simplified and generalized masked diffusion for discrete data. NeurIPS, 2024.",
+      "rank": 15,
+      "type": [
+        "methodological"
+      ],
+      "justification": "Discusses variants of masked diffusion models that influence the operational flexibility and design of the current research, fostering nuanced adaptations in modeling.",
+      "usage": "Informed foundational aspects of model design in masked diffusion contexts."
+    }
+  ],
+  "authors": [
+    "Jaeyeon Kim",
+    "Kulin Shah",
+    "Vasilis Kontonis",
+    "Sham Kakade",
+    "Sitan Chen"
+  ],
+  "year": 2025,
+  "url": "http://arxiv.org/abs/2502.06768v3",
+  "abstract": "In recent years, masked diffusion models (MDMs) have emerged as a promising\nalternative approach for generative modeling over discrete domains. Compared to\nautoregressive models (ARMs), MDMs trade off complexity at training time with\nflexibility at inference time. At training time, they must learn to solve an\nexponentially large number of infilling problems, but at inference time, they\ncan decode tokens in essentially arbitrary order. In this work, we closely\nexamine these two competing effects. On the training front, we theoretically\nand empirically demonstrate that MDMs indeed train on computationally\nintractable subproblems compared to their autoregressive counterparts. On the\ninference front, we show that a suitable strategy for adaptively choosing the\ntoken decoding order significantly enhances the capabilities of MDMs, allowing\nthem to sidestep hard subproblems. On logic puzzles like Sudoku, we show that\nadaptive inference can boost solving accuracy in pretrained MDMs from $<7$% to\n$\\approx 90$%, even outperforming ARMs with $7\\times$ as many parameters and\nthat were explicitly trained via teacher forcing to learn the right order of\ndecoding.",
+  "venue": "Strategic Crisis Communication",
+  "venue_source": "Crossref",
+  "venue_lookup_time": "2025-10-20T15:42:46.492264",
+  "citations": 46,
+  "task1": "1. **Task Overview**: The model addresses the task of generating discrete data sequences, particularly focusing on solving logical puzzles such as Sudoku through a mechanism called masked diffusion.\n\n2. **Core Techniques/Algorithms**:\n   - **Masked Diffusion Models (MDMs)**: Utilizes a noise process for training where tokens are masked in random positions.\n   - **Neural Network Architecture**: Typically employs a denoising network similar to architectures used in language models (e.g., Transformer).\n   - **Adaptive Inference Strategies**: Develops methods to determine the order of unmasking tokens during inference, leveraging learned probabilities from the network.\n\n3. **Purpose and Function**:\n   - The **forward process** adds noise to inputs by randomly masking tokens. This helps the model learn to generate data by predicting missing components.\n   - The **reverse process**, implemented through a denoising network, is trained to reconstruct the original sequences from partially masked inputs.\n   - **Adaptive strategies** are implemented to improve inference efficiency by prioritizing which tokens to unmask, avoiding those that are likely to yield poor predictions.\n\n4. **Implementation Details**:\n   - **Training**:\n     - **Key Parameters**:\n       - Set noise schedule (e.g., \\( \\alpha_0 \\approx 1, \\alpha_1 \\approx 0 \\)).\n       - Use a suitable loss function based on ELBO (evidence lower bound) during training.\n     - **Input/Output Specifications**:\n       - Input: Original sequences with certain tokens masked.\n       - Output: Reconstructed sequences where missing tokens are predicted.\n   - **Inference**:\n     - Choose the maximum number of tokens to unmask at each step (e.g., \\( K \\)).\n     - The token selection strategy involves either random sampling or using a more structured approach (adaptive strategies).\n     - Use of top probability metrics to guide decisions on what to unmask next, such as evaluating \\( p_\\theta(x_i | x_t) \\).\n\n5. **Step-by-Step Interaction**:\n   - Begin with the **forward process** where a sequence is masked probabilistically during training.\n   - Train the **denoising network** to minimize the loss correlating with those masking problems.\n   - At inference, start with a fully masked input \\( x_t \\) and iteratively:\n     - Determine a subset \\( S \\) (tokens to unmasks) based on the adaptive strategy.\n     - For each \\( i \\in S \\), compute predictions \\( x_s \\) using the denoising network \\( p_\\theta(x_i | x_t) \\).\n   - Repeat the unmasking until all masked tokens are processed or to the predefined output length.\n\n6. **Critical Implementation Details**:\n   - The choice of noise schedule and the architecture of the denoising network directly influences model accuracy.\n   - The **adaptive inference strategy** should effectively reflect the uncertainty of predictions to improve overall performance (e.g., using top probability metrics may reduce errors).\n   - Monitor overall training dynamics to ensure that the model is capable of generalizing across various masking configurations, benefitting from exposure to diverse training examples. This can enhance its ability to solve logical puzzles or perform well on other unrelated tasks.",
+  "task2": "1. The primary task or problem domain the research tackles involves generative modeling in discrete domains using masked diffusion models (MDMs), specifically comparing their performance and training complexities to autoregressive models (ARMs) across various tasks, including reasoning and logic puzzles.\n\n2. Current limitations in existing approaches stem from the higher complexity of training MDMs, which must address an exponentially large number of masking subproblems, leading to inefficiencies and performance issues. This contrasts with the more straightforward sequential training approach of ARMs, which can outperform MDMs in tasks where a left-to-right data order is natural.\n\n3. Core challenges the researchers aim to overcome include the computational tractability issues faced by MDMs during training and the performance imbalances that arise from the diverse complexities of different masking subproblems. A significant focus is to find ways to mitigate these challenges during inference by adapting strategies that can exploit the flexible sampling capabilities of MDMs.\n\n4. Key objectives and intended contributions include providing a theoretical and empirical foundation for understanding the difficulties of training MDMs, demonstrating the potential benefits of adaptive inference strategies that allow MDMs to bypass challenging subproblems, and ultimately showing that these strategies can enhance performance on complex reasoning tasks beyond what ARMs can achieve, even in the absence of knowledge about optimal token generation orders during training.",
+  "instance_id": "token_counting"
+}
+

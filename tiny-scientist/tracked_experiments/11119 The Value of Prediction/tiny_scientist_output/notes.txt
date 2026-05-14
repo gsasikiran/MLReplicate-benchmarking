@@ -1,0 +1,14 @@
+Plot 1: `scatter_plot_sales_vs_profit.png`
+This scatter plot illustrates the relationship between sales and profit for a set of data points. Each point on the graph represents an individual transaction or data entry, where the x-axis denotes sales figures and the y-axis indicates profit margins. The plot is used to identify trends or correlations within the dataset, highlighting whether higher sales lead to increased profits or if there's variability. It can also suggest the presence of outliers or anomalies in the data.
+
+Plot 2: `bar_chart_region_sales.png`
+The bar chart presents the total sales figures segmented by different regions. Each bar represents a distinct geographical area with its height proportional to the total sales amount for that region. This visualization helps in comparing the performance of various regions, identifying which areas have the highest or lowest sales, and can be useful in resource allocation and strategic planning.
+
+Plot 3: `line_graph_monthly_revenue.png`
+This line graph depicts the trend of monthly revenue over a specified time period. The x-axis reflects the time in months, while the y-axis shows the revenue figures. The line connecting data points reveals patterns in revenue changes, such as growth, decline, or seasonality effects. It is instrumental in forecasting future revenues and assessing the impact of different business strategies over time.
+
+Plot 4: `pie_chart_product_distribution.png`
+A pie chart representing the distribution of sales across various product categories. Each slice of the pie corresponds to a product category, with its size indicating the proportion of total sales it constitutes. This chart provides a visual summary of the market share of each product category, facilitating an understanding of product performance and guiding inventory and marketing decisions.
+
+Plot 5: `histogram_customer_age.png`
+The histogram shows the distribution of customer ages within the dataset. The x-axis is divided into bins representing age ranges, while the y-axis displays the frequency or count of customers in each age bracket. This plot is useful for identifying the age demographics of the customer base, which can aid in targeting marketing efforts and tailoring products or services to meet the needs of specific age groups.

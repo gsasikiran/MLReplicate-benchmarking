@@ -1,0 +1,34 @@
+###################### TinyScientist Configuration ######################
+
+#################################### Core ####################################
+[core]
+# Base directory for storing experiments and results
+#workspace_base = "./experiments"
+
+# Name of the AI Scientist
+#name = "AI Scientist"
+
+# LLM Model
+model = "gpt-4o"
+
+# Temperature for controlling randomness in responses
+temperature = 0.75
+
+# Optional overall USD budget for a full TinyScientist run
+#budget = 1.0
+
+# API Key for general LLM API access
+llm_api_key = ""
+
+# S2 API Key for accessing scientific research data
+#s2_api_key = ""
+
+# GITHUB TOKEN for accessing GitHub repositories
+#github_token = ""
+
+# paper searching engine
+#engine = "semanticscholar"
+
+# Budget allocation preference for pipeline modules: balanced, write-heavy,
+# think-heavy, or review-heavy
+#budget_preference = "balanced"

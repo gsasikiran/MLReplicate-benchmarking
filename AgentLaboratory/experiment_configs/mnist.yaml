@@ -1,0 +1,82 @@
+# If you want to have user input or be a human-in-the-loop
+copilot-mode: True
+
+# Here is the research prompt. If num-papers-to-write > 1, you can treat this as a "research direction" otherwise it can be *very* specific and can be treated as a full research idea
+research-topic: "Your goal is to design reasoning and prompt engineering techniques to maximize accuracy for a simple mnist classification task."
+
+# Here you can put your OpenAI API key--if you don't have one or OpenAI doesn't work for you, you can also instead use `deepseek-api-key`
+api-key: "OPENAI-API-KEY-HERE"
+# or deepseek-api-key: "DEEPSEEK-API-KEY-HERE"
+# Agent Laboratory backend
+llm-backend: "o3-mini"
+# Literature review backend
+lit-review-backend: "o3-mini"
+
+# Base language
+language: "English"
+
+# Number of arxiv papers to lit review
+num-papers-lit-review: 5
+# Total number of papers to write in sequence
+num-papers-to-write: 1
+# Do you want to run multiple agent labs in parallel?
+parallel-labs: False
+
+# Total mle-solver steps per lab
+mlesolver-max-steps: 3
+# Total paper-solver steps per lab
+papersolver-max-steps: 1
+# The lab index for this lab (used for parallel runs)
+lab-index: 1
+# If you want to load an existing save
+load-existing: False
+# If fail, run exception?
+except-if-fail: False
+# Compile latex into PDFs during paper-solver
+compile-latex: False
+
+# Task notes
+task-notes:
+  plan-formulation:
+    - 'Design a single experiment that enables gpt-4o-mini to classify MNIST digits from pixel data using novel prompting techniques.'
+    - 'Assume access to MNIST images but only as text-representable arrays (e.g., ASCII or flattened pixel arrays).'
+    - 'Your goal is to maximize classification accuracy through clever prompt design, even though gpt-4o-mini is not trained for vision.'
+    - 'Do NOT use any external vision models or CNNs.'
+    - 'Explore prompt structures such as analogical reasoning, verbal pattern matching, or step-by-step logical deduction from patterns in the pixel grid.'
+    - 'Use few-shot prompting with exemplars representing pixel-to-digit mappings.'
+    - 'Keep system prompt consistent as: "You are a highly intelligent classifier that can read and interpret visual patterns from text-based image inputs."'
+    - "DO NOT PLAN FOR TOO LONG. Submit your plan soon."
+
+  data-preparation:
+    - 'Convert 28x28 MNIST grayscale images to simple ASCII or binary grid format (e.g., "⬛⬜⬛⬛⬜...").'
+    - 'Or flatten image into a 784-length vector, normalize to binary or 0-9 grayscale tokens.'
+    - 'For few-shot prompts, include 3–5 examples formatted consistently as:\nInput Image:\n<ASCII grid>\nDigit: <label>'
+    - 'Create a batch of 500 test samples using `datasets.load_dataset("mnist", split="test")`.'
+    - 'Ensure class balance in test samples.'
+    - 'Keep pixel compression formats consistent across all prompts.'
+
+  running-experiments:
+    - "Use only gpt-4o-mini to perform inference with ASCII/binary formatted image prompts."
+    - "Use triple quotes ''' for all prompt strings."
+    - 'Query gpt-4o-mini with:\n```response = query_gpt4omini(prompt=prompt, system=system_prompt)```'
+    - "Prompt format should include:\n1. Few-shot examples\n2. The current image as ASCII or flattened array\n3. A final question: 'What digit does this image represent? Answer with a single number.'"
+    - 'Test with and without chain-of-thought reasoning like: "First I will count the number of filled pixels in each row... Then compare to known patterns."'
+    - 'Run prompt variants such as:\n  - Grid-to-digit analogy: "This pattern looks similar to 3 because of its top and bottom rows..."\n  - Verbal rules: "If top row is mostly filled and middle is empty, then likely a 7..."'
+    - "Use concurrent.futures for parallelizing 500 inference calls to gpt-4o-mini."
+    - "Log predictions and compare against true labels using exact match."
+
+  results-interpretation:
+    - 'Report final classification accuracy across the 500 MNIST test samples.'
+    - 'Analyze per-digit performance. Where does gpt-4o-mini struggle (e.g., 3 vs 8)?'
+    - 'Visualize attention to prompt parts using token-level saliency (if possible).'
+    - 'Compare few-shot prompt strategies: Which exemplars or grid formats helped the most?'
+    - 'Discuss reasoning patterns gpt-4o-mini might be implicitly using from prompts.'
+
+  report-writing:
+    - 'Report the final accuracy, confusion matrix, and few-shot prompt templates used.'
+    - 'Include example prompts that succeeded and failed (with LLM’s reasoning steps).'
+    - 'Plot performance vs number of few-shot examples.'
+    - 'Discuss feasibility of using LLMs for "textified" vision tasks and implications for prompt-based perception.'
+    - 'Make the figures vivid: use color-coded ASCII digit renderings and grid similarity maps.'
+
+

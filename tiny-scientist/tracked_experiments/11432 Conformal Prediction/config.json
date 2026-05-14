@@ -1,0 +1,7 @@
+{
+  "intent": "The main research goal is to develop a Bayesian quadrature-based alternative to conformal prediction that provides interpretable guarantees and a richer representation of expected test-time losses. The main research question is how to overcome the limitations of frequentist probability in distribution-free uncertainty quantification methods for machine learning predictions in high-stakes settings.",
+  "model": "gpt-4o",
+  "budget": 10.0,
+  "timestamp": "20251026_225909",
+  "output_dir": "tracked_experiments/20251026_225909_The_main_research_goal_is_to_develop_a_Bayesian_qu"
+}

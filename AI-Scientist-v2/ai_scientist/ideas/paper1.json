@@ -1,0 +1,40 @@
+[
+    {
+        "Name": "bi_directional_peer_review_system",
+        "Title": "Revolutionizing AI Conference Peer Review: A Bi-Directional Feedback and Rewards Framework",
+        "Short Hypothesis": "Transforming the peer review process into a bi-directional feedback system with an integrated rewards mechanism will enhance review quality and accountability among reviewers.",
+        "Related Work": "Current literature discusses the challenges of high submission rates and reviewer accountability (e.g., Kim et al., 2025). However, existing proposals often overlook the integration of technology to create a two-stage bi-directional feedback loop that empowers authors while providing a transparent reward system for reviewers. This proposal distinguishes itself by incorporating blockchain technology to ensure the integrity of reviewer evaluations and rewards.",
+        "Abstract": "The rapid increase in submissions to AI conferences has led to a crisis in the peer review process, characterized by declining review quality and accountability. This position paper proposes a novel bi-directional feedback mechanism where authors can evaluate the quality of reviews while safeguarding against retaliation. Coupled with a blockchain-enabled reviewer rewards system, this framework aims to incentivize high-quality reviewing and create an accountability structure that benefits all stakeholders. By allowing authors to provide feedback on reviews and rewarding reviewers with transparent digital credentials, this system fosters a culture of quality and responsibility in the peer review process. We call upon the AI community to engage in this vital conversation and explore these transformative reforms for sustainable peer review practices.",
+        "Experiments": [
+            "Design a pilot study where a select group of AI conferences implements the bi-directional feedback system for a specific submission cycle, allowing authors to rate reviews anonymously.",
+            "Develop a blockchain-based digital badge system for reviewers that records their contributions and ratings over time, providing a quantifiable 'Reviewer Impact Score'.",
+            "Conduct surveys before and after implementation to assess changes in perceived review quality, author satisfaction, and reviewer engagement.",
+            "Analyze the correlation between reviewer ratings and the quality of subsequent submissions to evaluate the long-term effectiveness of the feedback and rewards system."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential for retaliatory behavior despite anonymity, which could skew feedback.",
+            "Challenges in garnering initial buy-in from reviewers and conference organizers.",
+            "Technical challenges in implementing a blockchain infrastructure.",
+            "Resistance to change from traditional review practices within the academic community."
+        ]
+    },
+    {
+        "Name": "ai_transparency_in_peer_review",
+        "Title": "Enhancing AI Conference Peer Review: Integrating AI Transparency and Accountability Mechanisms",
+        "Short Hypothesis": "Incorporating AI tools for transparency and feedback in the peer review process will elevate review quality while fostering accountability among reviewers.",
+        "Related Work": "Existing research highlights various challenges in peer review, including reliance on LLMs for feedback (Liang et al., 2023) and the importance of accountability in reviewer practices (Calamur & Ghosh, 2024). However, none have proposed a structured integration of AI insights that maintains human oversight and accountability. This proposal distinguishes itself by advocating for AI to provide real-time insights into reviewer performance and facilitating transparent feedback mechanisms between authors and reviewers.",
+        "Abstract": "The peer review process in AI conferences is strained due to overwhelming submission volumes and declining review quality. This position paper advocates for the integration of AI tools to enhance transparency and accountability in the peer review process. By employing AI-generated insights, reviewers can receive feedback on their reviewing practices, allowing for self-improvement while ensuring author evaluations are both constructive and anonymous. This proposal outlines a two-stage system: the first stage uses AI to analyze reviewer performance metrics and provide feedback, while the second stage encourages authors to evaluate the quality of reviews, thus establishing a bi-directional accountability loop. By implementing these AI-driven mechanisms, we aim to foster a culture of high-quality reviewing and sustainable practices in AI conferences. We urge the community to consider these essential reforms to strengthen the integrity of the peer review process.",
+        "Experiments": [
+            "Conduct a pilot study where AI tools analyze reviewer performance in real-time during a conference submission cycle, providing metrics to reviewers based on their feedback quality.",
+            "Implement a feedback system that allows authors to rate reviews, with AI summarizing these ratings to provide insights into reviewer performance trends.",
+            "Perform surveys pre- and post-implementation to assess shifts in reviewer engagement, perceived review quality, and author satisfaction.",
+            "Analyze the correlation between AI performance metrics and subsequent submission quality to evaluate the effectiveness of the feedback system."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential biases in AI-generated insights could lead to misinterpretation of reviewer performance.",
+            "Ensuring anonymity while providing transparent feedback might be challenging.",
+            "Technical challenges in integrating AI tools into existing peer review workflows.",
+            "Resistance from reviewers who may feel threatened by AI performance evaluations."
+        ]
+    }
+]

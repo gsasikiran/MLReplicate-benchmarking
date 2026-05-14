@@ -1,0 +1,8 @@
+{
+    "experiment_description": "Run 1: Baseline MLP model with TF-IDF features on AG News dataset.",
+    "run_number": 1,
+    "metrics": {
+        "avg_entropy": 0.34450575709342957,
+        "avg_novelty": 0.23906306306306307
+    }
+}

@@ -1,0 +1,90 @@
+[
+  {
+    "timestamp": "2025-10-15T08:38:34.224520",
+    "command": "uv run ai_lab_repo.py --yaml-location \"dataset/12176_Score_Matching_with_Miss.yaml\"",
+    "returncode": 0,
+    "wall_time_sec": 1759.1425378285348,
+    "ram_delta_MB": 0.0,
+    "disk_read_delta_MB": 304.41796875,
+    "disk_write_delta_MB": 1.12890625,
+    "gpu": [],
+    "output_file": "experiments/12176_Score_Matching_with_Miss.out"
+  },
+  {
+    "timestamp": "2025-10-15T08:58:50.548001",
+    "command": "uv run ai_lab_repo.py --yaml-location \"dataset/11119_The_Value_of_Prediction_.yaml\"",
+    "returncode": 0,
+    "wall_time_sec": 1216.3050862494856,
+    "ram_delta_MB": 0.0,
+    "disk_read_delta_MB": 23.8203125,
+    "disk_write_delta_MB": 20.1484375,
+    "gpu": [],
+    "output_file": "experiments/11119_The_Value_of_Prediction_.out"
+  },
+  {
+    "timestamp": "2025-10-15T09:15:46.530867",
+    "command": "uv run ai_lab_repo.py --yaml-location \"dataset/11432_Conformal_Prediction_as_.yaml\"",
+    "returncode": 0,
+    "wall_time_sec": 1015.9679989889264,
+    "ram_delta_MB": 0.0,
+    "disk_read_delta_MB": 14.84375,
+    "disk_write_delta_MB": 19.62109375,
+    "gpu": [],
+    "output_file": "experiments/11432_Conformal_Prediction_as_.out"
+  },
+  {
+    "timestamp": "2025-10-15T09:35:24.752007",
+    "command": "uv run ai_lab_repo.py --yaml-location \"dataset/1940_CollabLLM_From_Passive_Re.yaml\"",
+    "returncode": 0,
+    "wall_time_sec": 1178.205305526033,
+    "ram_delta_MB": 0.0,
+    "disk_read_delta_MB": 50.2265625,
+    "disk_write_delta_MB": 17.90234375,
+    "gpu": [],
+    "output_file": "experiments/1940_CollabLLM_From_Passive_Re.out"
+  },
+  {
+    "timestamp": "2025-10-15T09:53:30.738910",
+    "command": "uv run ai_lab_repo.py --yaml-location \"dataset/463_Position_AI_Safety_should_.yaml\"",
+    "returncode": 0,
+    "wall_time_sec": 1085.9726382847875,
+    "ram_delta_MB": 0.0,
+    "disk_read_delta_MB": 36.40625,
+    "disk_write_delta_MB": 41.125,
+    "gpu": [],
+    "output_file": "experiments/463_Position_AI_Safety_should_.out"
+  },
+  {
+    "timestamp": "2025-10-15T10:11:55.773158",
+    "command": "uv run ai_lab_repo.py --yaml-location \"dataset/14095_Train_for_the_Worst_Plan.yaml\"",
+    "returncode": 0,
+    "wall_time_sec": 1105.0173392631114,
+    "ram_delta_MB": 0.0,
+    "disk_read_delta_MB": 466.984375,
+    "disk_write_delta_MB": 11892.39453125,
+    "gpu": [],
+    "output_file": "experiments/14095_Train_for_the_Worst_Plan.out"
+  },
+  {
+    "timestamp": "2025-10-15T11:17:28.358589",
+    "command": "uv run ai_lab_repo.py --yaml-location \"dataset/53_Position_The_AI_Conference_.yaml\"",
+    "returncode": 1,
+    "wall_time_sec": 3932.568918077275,
+    "ram_delta_MB": 1.0,
+    "disk_read_delta_MB": 1.33203125,
+    "disk_write_delta_MB": 4933.58984375,
+    "gpu": [],
+    "output_file": "experiments/53_Position_The_AI_Conference_.out"
+  },
+  {
+    "timestamp": "2025-10-15T11:33:58.978698",
+    "command": "uv run ai_lab_repo.py --yaml-location \"dataset/12175_Roll_the_dice_look_befor.yaml\"",
+    "returncode": 0,
+    "wall_time_sec": 990.6035955362022,
+    "ram_delta_MB": 0.0,
+    "disk_read_delta_MB": 855.38671875,
+    "disk_write_delta_MB": 2144.0546875,
+    "gpu": [],
+    "output_file": "experiments/12175_Roll_the_dice_look_befor.out"
+  }
+]

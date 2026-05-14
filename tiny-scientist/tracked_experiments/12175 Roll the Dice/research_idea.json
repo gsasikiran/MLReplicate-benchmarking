@@ -1,0 +1,52 @@
+{
+  "Name": "Structured Seed-Conditioning for Creative Enhancement in LLMs",
+  "Title": "Beyond Randomness: Leveraging Structured Seed-Conditioning to Enhance Creative Diversity in Large Language Models",
+  "Problem": "Can structured seed-conditioning techniques significantly improve the creative diversity and originality of large language model (LLM) outputs in open-ended tasks without compromising computational efficiency and output quality? Despite technological advancements, LLMs often generate outputs lacking novelty due to biases toward high-probability sequences. Existing seed-conditioning methods remain underexplored, creating a gap in understanding their potential to enhance creativity.",
+  "Importance": "The capability of LLMs to generate diverse and original content is crucial in creative industries such as storytelling, design, and content creation. As LLMs increasingly contribute to these fields, addressing the limitations in their creative outputs is both timely and impactful. Recent studies, such as 'Wordcraft: Story Writing With Large Language Models', highlight the need for improved creativity in LLMs. Enhancing LLM creativity aligns with the AI community's broader goal of fostering innovation and supporting creative sectors.",
+  "Difficulty": "(1) LLMs inherently favor high-probability sequences, leading to outputs with limited novelty and diversity. (2) There is a lack of comprehensive research on the potential of structured seed-conditioning to enhance creative diversity. (3) Measuring creativity and diversity is inherently subjective, with no standardized evaluation benchmarks. (4) Balancing computational efficiency and high-quality output remains a complex challenge. Existing methods often require extensive resources without guaranteeing enhanced creativity.",
+  "NoveltyComparison": "Previous works, like 'Wordcraft: Story Writing With Large Language Models' and 'SurGE: Survey Generation Evaluation', have applied LLMs in specific domains but have not deeply explored optimizing creativity through seed-conditioning. These studies primarily focus on application outcomes without dissecting the mechanisms behind creativity enhancement. Our research distinguishes itself by systematically exploring how structured seed-conditioning can enhance creative diversity, addressing a gap in the methodological understanding of LLMs' creative processes. By focusing on the process rather than just outcomes, our work provides empirical insights into how structured seeds can lead to more original content. No prior work has attempted to integrate structured seed-conditioning with hybrid metrics for measuring creativity, making our approach unique and innovative.",
+  "Approach": "We propose a structured seed-conditioning framework designed to enhance the creative diversity of LLM outputs. Our approach includes: (1) Experimenting with diverse seed variations to systematically analyze their impact on output diversity, addressing repetition issues. (2) Utilizing advanced statistical models to explore the relationship between seed structures and output diversity, uncovering underlying mechanisms. (3) Introducing a hybrid metric combining entropy, novelty scores, and qualitative human assessments to measure creative diversity. This addresses the difficulty of subjective creativity evaluation by providing a more comprehensive and standardized framework. (4) Implementing optimization algorithms to ensure computational efficiency without compromising output quality, ensuring resource-efficient creativity enhancement. Our method aims to directly address the technical challenges posed by existing LLMs, pushing the boundaries of what's achievable in AI-driven creative processes.",
+  "Interestingness": 9,
+  "Feasibility": 8,
+  "Novelty": 9,
+  "IntentAlignment": 9,
+  "Score": 9,
+  "Experiment": {
+    "Model": {
+      "Architecture": "Shallow MLP with 2 hidden layers",
+      "Layers": [
+        {
+          "Type": "Dense",
+          "Units": 64,
+          "Activation": "relu",
+          "Input_Dim": 1000
+        },
+        {
+          "Type": "Dense",
+          "Units": 32,
+          "Activation": "relu"
+        },
+        {
+          "Type": "Dense",
+          "Units": 1000,
+          "Activation": "softmax"
+        }
+      ],
+      "Parameters": "Total trainable parameters ~80k"
+    },
+    "Dataset": {
+      "Name": "ag_news",
+      "Size": "5000 train, 2000 validation, 2000 test",
+      "Splits": "80% train, 10% validation, 10% test",
+      "Preprocessing": "Lowercase text, TF-IDF vectorization with max_features=1000",
+      "Load_Command": "datasets.load_dataset('ag_news')"
+    },
+    "Metric": {
+      "Primary": "Entropy of output distribution",
+      "Secondary": "Novelty score based on Jaccard similarity",
+      "Tertiary": "Qualitative human assessment",
+      "Self_Check": "Dataset size limits and model simplicity confirmed, no inline comments or expressions."
+    }
+  },
+  "ExperimentTable": "| Component             | Specification                                                                 | Justification / Rationale                                                                                                                                          | Status |\n|-----------------------|-------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|\n| Model Architecture    | Shallow MLP with 2 hidden layers: [64, 32] units, total parameters ~80k       | A lightweight architecture allows for efficient experimentation while maintaining enough complexity to model text data (Kim, 2014).                                                                      |        |\n| Dataset               | ag_news, 5000 train, 2000 validation, 2000 test                               | AG News is a standard text dataset suitable for language model tasks. It is available on HuggingFace and allows for TF-IDF preprocessing (Zhang et al., 2015).                                              |        |\n| Baselines             | Random seed, fixed high-probability seed, and structured seed-conditioning    | Baselines provide a comparison against random and traditional seeding methods, highlighting the impact of structured conditioning on creativity (Radford et al., 2019).                                    |        |\n| Training Setup        | Optimizer: Adam, learning rate: 0.001, batch size: 32, epochs: 10, CPU       | Standard training setup for small models ensures reproducibility and efficiency. Optimizer choice is well-supported in literature (Kingma and Ba, 2015).                                                   |        |\n| Evaluation Metrics    | Entropy, Novelty score, Qualitative assessment                                | Combining quantitative and qualitative metrics provides a comprehensive evaluation of creativity, addressing both statistical novelty and perceived originality (Amabile, 1983; Boden, 1998).               |        |\n| Hyperparameters       | Learning rate: 0.001, Batch size: 32, Epochs: 10                              | These hyperparameters are chosen to balance training speed and model performance, based on similar text classification tasks (Goodfellow et al., 2016).                                                   |        |\n| **Sanity Checks**     | Subsample dataset to \u22645,000 train / \u22642,000 val/test; model params \u2264100k       | Confirmed dataset and model size limits are met, ensuring computational feasibility and compliance with the experimental constraints. JSON contains no comments or expressions.                             |        |"
+}

@@ -1,0 +1,64 @@
+{
+  "Experiment_description": "The experiments aimed to investigate the trade-off between predictive accuracy and screening capacity in social welfare programs by implementing a basic PyTorch neural network trained on synthetic data. Each node evaluated the training process through metrics such as accuracy, loss, and Prediction-Access Ratio (PAR).",
+  "Significance": "These experiments are important as they lay the groundwork for understanding how simple machine learning models can be used in social welfare contexts to balance between accuracy and capacity. The findings highlight the model's current limitations and provide a basis for further exploration and refinement.",
+  "Description": "Each node involved setting up a simple neural network in PyTorch, generating synthetic data to simulate job seeker features and outcomes, and training the model while evaluating performance through accuracy, loss, and PAR metrics. The focus was on understanding the model's learning trajectory and identifying areas for improvement.",
+  "List_of_included_plots": [
+    {
+      "path": "experiments/2025-10-26_21-50-52_prediction_vs_capacity_tradeoff_attempt_0/logs/0-run/experiment_results/experiment_3be57275e1b047e2a0a4ca54f7c89fd7_proc_2538356/Training_Accuracy_Synthetic_Dataset.png",
+      "description": "This plot shows that training accuracy steadily improves as the number of epochs increases.",
+      "analysis": "The plot indicates a gradual improvement in accuracy, suggesting the model is learning, but the slow pace and low final accuracy highlight potential limitations in model or dataset complexity."
+    },
+    {
+      "path": "experiments/2025-10-26_21-50-52_prediction_vs_capacity_tradeoff_attempt_0/logs/0-run/experiment_results/experiment_3be57275e1b047e2a0a4ca54f7c89fd7_proc_2538356/Training_Loss_Synthetic_Dataset.png",
+      "description": "This plot illustrates a consistent decrease in training loss over epochs.",
+      "analysis": "The consistent decrease in loss indicates effective learning, but the slow rate of decrease highlights possible issues with learning rate or model architecture."
+    },
+    {
+      "path": "experiments/2025-10-26_21-50-52_prediction_vs_capacity_tradeoff_attempt_0/logs/0-run/experiment_results/experiment_7a839eaa768d4153a841e178274fe440_proc_2538353/Training_Accuracy_Synthetic_Dataset.png",
+      "description": "The training accuracy shows a consistent upward trend with some minor fluctuations early on.",
+      "analysis": "Despite fluctuations, the trend suggests learning, but the low final accuracy indicates limitations that need addressing in future iterations."
+    },
+    {
+      "path": "experiments/2025-10-26_21-50-52_prediction_vs_capacity_tradeoff_attempt_0/logs/0-run/experiment_results/experiment_7a839eaa768d4153a841e178274fe440_proc_2538353/Training_Loss_Synthetic_Dataset.png",
+      "description": "The training loss exhibits a steady decline over epochs.",
+      "analysis": "The decline in loss is promising but the high final value suggests room for optimization in model design or hyperparameters."
+    },
+    {
+      "path": "experiments/2025-10-26_21-50-52_prediction_vs_capacity_tradeoff_attempt_0/logs/0-run/experiment_results/experiment_211700fa2ba84235b42f2bcc346a88f8_proc_2538355/Training_Accuracy_Synthetic_Dataset.png",
+      "description": "This plot shows an upward trend in training accuracy over the epochs.",
+      "analysis": "The steady increase in accuracy indicates learning, though the low final accuracy suggests the need for further refinement in the model or dataset."
+    },
+    {
+      "path": "experiments/2025-10-26_21-50-52_prediction_vs_capacity_tradeoff_attempt_0/logs/0-run/experiment_results/experiment_211700fa2ba84235b42f2bcc346a88f8_proc_2538355/Training_Loss_Synthetic_Dataset.png",
+      "description": "This plot demonstrates a consistent decrease in training loss over the epochs.",
+      "analysis": "The smooth loss decrease indicates sound training dynamics, but high final loss values suggest further optimization is necessary."
+    }
+  ],
+  "Key_numerical_results": [
+    {
+      "result": 0.549,
+      "description": "Final training accuracy for nodes 3be57275e1b047e2a0a4ca54f7c89fd7 and 7a839eaa768d4153a841e178274fe440.",
+      "analysis": "This consistent final accuracy across nodes indicates a plateau in learning performance that requires addressing through model or dataset refinement."
+    },
+    {
+      "result": 0.6831,
+      "description": "Final training loss for node 3be57275e1b047e2a0a4ca54f7c89fd7.",
+      "analysis": "The low and consistent final loss suggests effective learning but highlights the need for enhanced model complexity or data representation to improve accuracy."
+    },
+    {
+      "result": 0.6842,
+      "description": "Final training loss for node 7a839eaa768d4153a841e178274fe440.",
+      "analysis": "The slightly higher final loss compared to node 3be57275e1b047e2a0a4ca54f7c89fd7 suggests subtle variations in training dynamics, potentially due to minor differences in setup or initialization."
+    },
+    {
+      "result": 0.557,
+      "description": "Final training accuracy for node 211700fa2ba84235b42f2bcc346a88f8.",
+      "analysis": "The slightly higher final accuracy indicates a marginal improvement in learning, yet still highlights the need for further development in model or data strategies."
+    },
+    {
+      "result": 0.6847,
+      "description": "Final training loss for node 211700fa2ba84235b42f2bcc346a88f8.",
+      "analysis": "This loss value, similar to others, underscores consistent learning but points to a requirement for more sophisticated approaches to achieve better accuracy."
+    }
+  ]
+}

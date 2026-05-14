@@ -1,0 +1,74 @@
+{
+  "Name": "Adaptive Training and Decoding for Masked Diffusion Models",
+  "Title": "Overcoming Computational Challenges in Masked Diffusion Models for Discrete Generative Tasks",
+  "Problem": "Masked Diffusion Models (MDMs) have shown significant promise in discrete generative tasks, such as solving complex puzzles like Sudoku, yet their training is hampered by computationally intractable subproblems. Can we develop efficient training methods and adaptive decoding strategies that allow MDMs to achieve or surpass the performance of autoregressive models (ARMs), while maintaining a lower parameter count? Addressing this problem would enhance the practical application of MDMs in scalable AI systems.",
+  "Importance": "The increasing demand for efficient and scalable generative models across various AI applications, such as game development and puzzle-solving, highlights the need for advancements in MDMs. Recent works like 'DLLMQuant' and 'Scaling up Masked Diffusion Models on Text' emphasize the potential of optimizing large models for efficiency and performance. Solving the computational inefficiencies in MDMs could lead to groundbreaking improvements that align with the trend towards more efficient and robust generative models across discrete tasks.",
+  "Difficulty": "(1) Training MDMs is challenged by computationally intractable subproblems that limit scalability. Existing methods often lead to prohibitive resource consumption. (2) Enhancing the decoding process without sacrificing performance demands novel algorithmic solutions and adaptive strategies, especially in non-causally ordered tasks. (3) Balancing training complexity with inference efficiency remains difficult, as traditional models struggle to accurately capture dependencies in these tasks.",
+  "NoveltyComparison": "Current research, like 'Steering Masked Discrete Diffusion Models via Discrete Denoising Posterior Prediction', primarily focuses on inference strategies within MDMs but neglects the computational challenges during training. Our proposal introduces innovative optimization techniques that combine adaptive sampling with dynamic decoding, significantly reducing computational intractability. Compared to existing methods, which often separate focus between training and inference, our dual-focus approach bridges a critical gap, ensuring both efficient training and enhanced inference performance. Moreover, papers such as 'Demystifying MaskGIT Sampler and Beyond' and 'From Linearity to Non-Linearity' highlight the limitations of current adaptive sampling methods, which our approach aims to overcome by leveraging task-specific feedback and real-time adjustments, setting a new precedent in MDM utilization for discrete tasks.",
+  "Approach": "Our strategy involves a two-pronged method. First, we introduce a novel optimization framework that minimizes the computational complexity of MDM training through a batch sampling technique, effectively approximating intractable subproblems (addresses difficulty (1)). This approach uses parallel computation to simulate multiple training trajectories, reducing resource consumption. Second, we develop an adaptive learning mechanism for inference, dynamically adjusting the decoding order based on real-time feedback (addresses difficulty (2)). This mechanism optimizes token selection, improving generative performance and flexibility, particularly in non-causally ordered tasks (addresses difficulty (3)). By integrating these elements, our approach ensures a balance between training complexity and inference efficiency, setting a new standard for MDM implementation in discrete generative tasks.",
+  "Interestingness": 9,
+  "Feasibility": 8,
+  "Novelty": 9,
+  "IntentAlignment": 9,
+  "Score": 8.9,
+  "Experiment": {
+    "Model": {
+      "Architecture": "Shallow CNN",
+      "Layers": [
+        {
+          "Type": "Conv2D",
+          "Filters": 16,
+          "Kernel_Size": 3,
+          "Activation": "relu",
+          "Input_Shape": [
+            28,
+            28,
+            1
+          ]
+        },
+        {
+          "Type": "MaxPooling2D",
+          "Pool_Size": 2
+        },
+        {
+          "Type": "Conv2D",
+          "Filters": 32,
+          "Kernel_Size": 3,
+          "Activation": "relu"
+        },
+        {
+          "Type": "Flatten"
+        },
+        {
+          "Type": "Dense",
+          "Units": 64,
+          "Activation": "relu"
+        },
+        {
+          "Type": "Dense",
+          "Units": 10,
+          "Activation": "softmax"
+        }
+      ],
+      "Output_Dimensions": 10,
+      "Total_Parameters": "<=100k"
+    },
+    "Dataset": {
+      "Name": "mnist",
+      "Size": {
+        "Train": 5000,
+        "Validation": 1000,
+        "Test": 1000
+      },
+      "Splits": "60% train, 20% validation, 20% test",
+      "Preprocessing": "Normalization to [0, 1]; Reshape to (28, 28, 1)",
+      "Load_Command": "datasets.load_dataset('mnist')"
+    },
+    "Metric": {
+      "Primary": "Accuracy",
+      "Secondary": "Inference Time",
+      "Rationale": "Accuracy measures model performance, while inference time evaluates computational efficiency, crucial for MDMs."
+    }
+  },
+  "ExperimentTable": "| Component         | Specification                                                                                                                                                           | Justification / Rationale                                                                                                                                                                 | Status |\n|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|\n| Model Architecture| Shallow CNN with two Conv2D layers (16 and 32 filters), followed by MaxPooling, Flatten, and Dense layers. Total parameters \u2264 100k.                                      | Shallow CNNs are computationally efficient and suitable for image data like MNIST; they provide a baseline to evaluate against complex diffusion models.                                    |        |\n| Dataset           | MNIST dataset with 5000 training, 1000 validation, and 1000 test examples. Loaded using `datasets.load_dataset('mnist')`. Preprocessed by normalization to [0, 1].       | MNIST is simple, widely used for benchmarking, and readily available. The dataset is suitable for evaluating discrete generative performance and computational efficiency.                   |        |\n| Baselines         | 1. Simple Autoregressive Model (AR) [Graves, 2013] 2. Logistic Regression 3. MLP with 2 hidden layers (\u2264128 units per layer)                                           | These baselines provide a comparative analysis to evaluate the performance of MDMs against established models in terms of accuracy and computational efficiency.                           |        |\n| Training Setup    | Optimizer: Adam, Learning Rate: 0.001, Batch Size: 32, Epochs: 20, Hardware: GPU                                                                                       | Adam optimizer and specified hyperparameters are standard for CNN training, ensuring stability and convergence. GPU accelerates the training process.                                       |        |\n| Evaluation Metrics| Primary: Accuracy; Secondary: Inference Time                                                                                                                            | Accuracy evaluates model performance on discrete tasks, while inference time assesses computational efficiency, essential for understanding trade-offs in MDMs.                            |        |\n| Hyperparameters   | Learning Rate: 0.001, Batch Size: 32, Epochs: 20                                                                                                                        | These hyperparameters are chosen based on common practices for training shallow neural networks on MNIST, ensuring effective learning and generalization.                                   |        |\n| **Sanity Checks** | Ensure dataset subsampling to \u22645000 train, \u22642000 validation/test. Model parameter count stays \u2264100k. JSON contains no inline comments or expressions.                     | Confirm constraints for feasible experimentation within time/resource limits, focusing on lightweight models and consistent evaluation.                                                     |        |"
+}

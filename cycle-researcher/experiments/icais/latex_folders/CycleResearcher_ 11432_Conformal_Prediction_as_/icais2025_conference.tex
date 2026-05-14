@@ -1,0 +1,603 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{icais2025_conference,times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=green!60!black,
+    urlcolor=red!60!black
+}
+\usepackage{url}
+
+\usepackage[T1]{fontenc}
+\usepackage{microtype}           % better kerning & font spacing
+\usepackage{graphicx}            % figures
+\usepackage{booktabs}            % nice tables
+\usepackage{amsmath, amssymb, amsthm, bm} % math & symbols
+\usepackage{mathtools}           % for cases, coloneqq, etc.
+\usepackage{xcolor}              % colors (for code/figures)
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{enumitem}            % better control of itemize/enumerate
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}          % subfigures
+\usepackage{hyperref}            % clickable refs
+\usepackage{cleveref}          % smart cross-referencing
+\usepackage{amsmath} 
+\usepackage{thmtools} 
+\usepackage{xspace}
+% \usepackage[numbers]{natbib}
+
+\newtheorem{definition}{Definition}[section]
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[section]  
+\declaretheorem[name=Theorem]{theorem}
+\theoremstyle{definition}      % upright text
+\newtheorem{assumption}{Assumption}[section]  % numbers by section
+
+\title{Risk control with Width-Sketching Algorithms}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  We introduce the notion of width-sketching algorithms, defined as algorithms with \emph{provably} bounded width (that is, probability of containing the randomness) for the induced coverage set. For algorithms that sketch the width, we prove a novel uniform upper bound and provide an instance where the width in expectation is twice as large as the optimal width. We then introduce the width-optimality notion and an approximate version termed mean-width optimality, which allows us to derive algorithms with the desired coverage while minimizing the mean width. We provide a high-level perspective on the relationship with depth-sketching algorithms, i.e., algorithms that sketch the depth of the induced sets with probability $1- \alpha$, and show that they provide complementary forms of coverage. Finally, we demonstrate the application of the framework to conformal prediction with Bayesian quadrature.
+\end{abstract}
+
+\section{Introduction}
+
+Machine learning plays an essential role in many aspects of our lives. While it is crucial to have models to make accurate predictions, it is also important to quantify the \emph{predictive uncertainty}. In this context, tolerance intervals and sets provide a simple way to quantify predictive uncertainty \citep[see, e.g.,][for an introduction]{guttman1970statistical}. For example, if we have a good enough model that, based on prior knowledge, we believe to have predictive uncertainty less than $0.1$ over a set of tasks or applications (e.g., application to new countries, with new distributions,  new years, etc.)), we may want the coverage sets to have a width of no more than $0.1$ with high probability. Therefore, the desired width of the set may be different than the desired depth. Obtaining coverage sets that are computationally efficient and have a given depth (or tolerance) with high probability has recently attracted considerable attention, and such sets are often derived using i.i.d. data. The notion of depth-sketch algorithms, introduced by \cite{barber2021limits}, defines algorithms that, given i.i.d. data, have guaranteed depth and coverage \citep[see, e.g.,][]{bates2021distributionfree,angelopoulos2024conformal}. However, depth-sketching algorithms are not necessarily efficient in terms of the width; in particular, they do not control the width in a uniform sense. In this work, we consider algorithms that control the expected width of the coverage sets. We focus on the setting of sequences of probability spaces, and the algorithms we consider take a tolerance parameter $\delta \in (0,1)$, obtain i.i.d. data (with their randomness encoded in a random variable $\xi$), and output a function $C: \mathcal{X} \subseteq \mathbb{R}^d \rightarrow \mathbb{R}^+ \times 2^{\mathbb{R}}$ such that for any $\bm{x} \in \mathcal{X}$, $C(\bm{x})$ is a \emph{tuple} of the predicted value $g(\bm{x}) \in \mathbb{R}^d$ and a predicted set $C(\bm{x}) \subseteq 2^{\mathbb{R}}$. For simplicity, we often consider functions $C: \mathcal{X} \rightarrow \mathbb{R}$ where $g(\bm{x})$ and $C(\bm{x})$ are in fact intervals with $g(\bm{x}) \in \mathbb{R}^d$. Our main focus will be on algorithms that control the width of $C(\bm{x})$ in a uniform sense, as defined below:
+\begin{definition}[Width-Sketching Algorithm (Informal)]
+    We say an algorithm $A$ is a width-sketching algorithm with tolerance $\delta$ if it controls the width of the induced set $C(\bm{x})$ uniformly over all $\bm x \in \mathcal{X}$.
+\end{definition}
+The classical algorithms of \cite{guttman1970statistical} and \cite{tukey1947nonparametric,tukey1948nonparametric} can be seen as width-sketching algorithms, controlling the width in expectation. More precisely, they produce an interval that contains the random variable with probability $\delta$, but the width is proportional to the number of samples (i.e., the sample size). More recently, \cite{barber2021limits} proved that, for a specific family of probability spaces (i.e., probability spaces for which $C(\bm{x})$ is convex), conformal prediction with polynomial-time wrappers (i.e., depth-sketching algorithms) can control the depth with high probability while sample size grows polynomially in dimension and log loss. However, in general, the conformal prediction framework does not control the width in a uniform sense.
+
+\paragraph{Contributions.} After introducing our problem, we consider the following question:
+\emph{How to control the expected width of $C(\bm{x})$ while achieving the desired coverage with high probability?} 
+@. 
+The first idea to control the expected width is to use a penalty term, which we call \emph{width-sketching penalty}. We start by introducing the width-sketching penalty in the convex setting, showing that the depth-sketching penalty of \cite{angelopoulos2024conformal} does not provide the desired guarantees in the non-convex case (otherwise we could control width in expectation with high probability, which we show is not possible for arbitrary tolerance $\delta$). We show that the width-sketching penalty allows us to derive algorithms for arbitrary tolerances $\delta$ that control the expected width with high probability, while reducing the depth with probability $1-\alpha$. We prove a novel uniform upper bound on the width of a width-sketching algorithm, and we show that, for arbitrary $\delta$, the vanilla depth-sketching algorithm of \cite{angelopoulos2024conformal} is in fact a width-sketching algorithm in the convex setting. However, we also show that there exists an instance of the problem where the width in expectation of the algorithm is twice as large as the optimal width. To address this limitation, we introduce the width-optimality notion and an approximate version termed mean-width optimality. We also highlight the relationship between depth- and width-sketching algorithms, showing that they provide complementary forms of coverage. Finally, we demonstrate the application of our framework to conformal prediction with Bayesian quadrature \citep[see, e.g.,][and many other works that follow]{diaconis1988bayesian, karvonen2017classical,cockayne2019bayesian,hennig2022probabilistic,hobbhahn2022fast}.
+
+\section{Problem setup}
+
+In this work, we consider sketching algorithms that, given a tolerance $\delta$ and i.i.d. data $\{ \bm z_i \}_{i=1}^{n} \subseteq \mathbb{R}^d$, produce predicted intervals $C(\bm{x})$ that cover a random variable in $d$-dimensional space with probability $\delta$ while keeping the width of the intervals small. Given the nature of the problem, our definition of width will be the length of an interval. Our setting is inspired by the Bayesian quadrature setting, but we consider the setting of general (not necessarily Bayesian) probability spaces, as the results for Bayesian quadrature readily follow. 
+\begin{definition}[Probability Spaces]\label{def:prob_space}
+  Let $(\Omega_n,\mathcal{F}_n,\mathbb{P}_n)$ be the probability space defined by the variables $\{ \bm z_i \}_{i=1}^{n}$. For any $\bm{x} \in \mathbb{R}^d$, define $(\Omega_x, \mathcal{F}_x,\mathbb{P}_x)$  the probability space of $u(\bm{x})$, the uniform distribution on the set of possible values $u(\bm{x}) \in \mathbb{R}^d$, the predictive random variable. 
+\end{definition}
+\begin{definition}[Width-Sketching Algorithm]\label{def:width_sketch_alg}
+  Let $W(1) : \mathbb{R}^d \rightarrow \mathbb{R}$ be a width measure (e.g., the $L^1$ norm) such that $W(\bm{x}) = 0$ for some  $\bm{x} \in \mathbb{R}^d$. Let $\{\mathcal{A}_n\}_{n \geq 1}$ be a sequence of algorithms, where $\mathcal{A}_n$ takes the i.i.d. data $\{ \bm z_i \}_{i=1}^{n} \subseteq \mathbb{R}^d$ and $\delta$ as input and produces a function $C_{\mathcal{A}_n}: \mathbb{R}^d \times (0,1) \rightarrow \mathbb{R}$ with the following properties: (i) For all $\bm{x} \in \mathbb{R}^d$, $C_{\mathcal{A}_n}(\bm{x},\delta)$ is an interval; (ii) For all $\delta$ such that $\mathbb{P}_n(C(\bm{x_*}) = \{u(\bm{x_*})\}) > \delta$  for some $\bm{x_*} \in \mathbb{R}^d$, 
+    \begin{align} \label{meas_width}
+      \mathbb{E}_{\bm{x}_*}\left[ \sup_{\mathbb{P}_n} \mathbb{E}_{u(\bm{x_*})}W(C_{\mathcal{A}_n}(\bm{x_*},\delta),u(\bm{x_*})) \right]  \leq W(\bm{x_*}) ~~~ \forall ~ n \geq 1.  
+  \end{align}
+    (iii) For all $n \geq 1$, for all $\bm{x} \in \mathbb{R}^d$,
+      \begin{align}\label{meas_depth}
+          \mathbb{E}_{\bm{x}_*}[\mathbb{P}_{u(\bm{x_*})}(\exists x \in u(\bm{x_*}) \setminus C_{\mathcal{A}_n}(\bm{x},\delta))]  \leq \alpha.
+      \end{align}
+  
+  We say that the sequence $\{A_n\}_{n \geq 1}$ is a \emph{width-sketching algorithm} if for all sequences $\{\delta_n\}$, $C_{\mathcal{A}_n}(\bm{x},\delta)$ is a tuple of $u(\bm{x})$ and an interval $M(u(\bm{x}))$ with probability $\delta$.
+\end{definition} 
+The width of a set of $\mathbb{R}^d$ can be measured in different ways; we focus on the $L^1$ norm $\|\cdot\|_{L^1}[0,1] := \int_0^1 |\cdot|$. For simplicity, we often consider intervals for $C(\bm{x})$, in which case $W(\bm{x}) = 0$ for some  $\bm{x} \in \mathbb{R}^d$, and $W(C(\bm{x})) = \int_0^1 |C(\bm{x}) - u(\bm{x})| =: W(\bm{x},C(\bm{x}))$. Condition (\ref{meas_depth}) is the standard requirement for the risk control in the distribution-free setting \citep[see, e.g.,][]{vovk2005algorithmic}. We consider the expectation in the limit of infinite randomness and with respect to the uniform distribution over the leaves of the \emph{tree} of possible realizations of the data. For probability $\delta$ smaller than the empirical fraction $\mathbb{P}_n(C(\bm{x}_n)) = \{ u(\bm{x}_n) \}$ (for some $\bm{x}_n \in \mathbb{R}^d$), the algorithm would guarantee an empty set as soon as $C(\bm{x}_n)$ is empty.  A simple algorithm achieving Condition (\ref{meas_depth}) is the \emph{empirical quantile algorithm}: take the empirical $1 - \delta$ quantile of $\{ \bm z_i \}_{i=1}^{n}$ and output the interval defined by the minimum and the quantile. On the other hand, if we directly apply the empirical quantile algorithm to the entire dataset, the width of the interval is typically not bounded. More precisely, there exists some $\bm{x}_* \in \mathbb{R}^d$ such that, for all $n > 0$, $\mathbb{E}_{u(\bm{x}_*)}\left[ W(\bm{x}_*,[C_{EQ}(\bm{x}_*, \delta)]) \right] = \Omega(\sqrt{n})$ \citep[see Sec. 1.3.1 in][]{shao2003mathematical}. The probability that the width is bounded is indeed very small, and thus it is not possible to achieve arbitrary width for arbitrary $\delta$. In particular, it is easy to see that for arbitrary $\delta < \frac{1}{2d}$, the width of $C(\bm{x})$ is not bounded with probability $1$ (consider a space that takes non-zero measure to only $0$ and $1$). Nevertheless, we can always control the width with high probability for $\delta \in [\delta_i,\delta_{i+1}]$ by increasing the desired depth $\alpha$. More precisely, for each $i \in \mathbb{N}$, $\delta_i,\delta_{i+1} \in (0,1)$ are the unary real number in $[2i,i+1]$, and we fix $\alpha_0 := 0.2$. At each iteration $i$, we increase $\alpha(\delta) := \min(\delta, \alpha_i)$, and we take the desired depth (with respect to the uniform distribution) to be $\alpha_i$ if $\delta \in [\delta_i,\delta_{i+1}]$. The desired depth in expectation (i.e., for any sequence $\{\delta_n \}$) does not change because it is bounded by $\alpha(\delta) + \alpha_n$ for any $n$, where $\alpha_n$ is the empirical probability of \emph{not} containing the random variable; that is,  $\mathbb{P}_n(C(\bm{x}_n) = \emptyset)$, for some $\bm{x}_n \in \mathbb{R}^d$. The depth will be controlled in expectation as soon as $n$ is sufficiently large. The problem setting is motivated by the need for computational efficiency. Otherwise, in the limit of very small $\delta$ (and arbitrary depth), it is trivial to construct width-sketching algorithms by running classical i.i.d. The width in expectation can be bounded by $\frac{2d}{\delta}$ by simply taking all possible values $u \in \mathbb{R}^d$  of $\mathbb{P}_n$, showing that at least one of them has width bounded by $\frac{2d}{\delta}$ (and thus controlling the depth). Nevertheless,  standard conformal prediction methods such as cross-validation with a quantile wrapper \citep[see, e.g., ][]{papadopoulos2002inductive} or support vectors machines (SVM) \citep[see, e.g., ][]{shafer2008tutorial} are also computationally expensive and may not even control the width in a uniform sense. The basic approach behind depth-sketching algorithms is to first lower-bound (or sketch) the depth and then increase the predicted value $g(\bm{x})$ to fill the gap between the sketch and the desired depth. The depth sketches may come from risk control algorithms or calibration (e.g., with conformal prediction). This allows us to achieve arbitrary depth in expectation as soon as $n$ is large enough (that is, the number of data points in the dataset). 
+
+We want to emphasize that depth- and width-sketching algorithms are complementary forms of coverage and are not meant to be competitive (see Tab.~\ref{tab:alg_summary} for a summary). In particular, the algorithm of \cite{angelopoulos2024conformal} is not efficient in the sense that it does not control the width in a uniform sense. In fact, we will show that their algorithm is also a width-sketching algorithm.
+The high-level idea behind width-sketching algorithms is to add a penalty term to control the width in expectation with high probability. 
+We can readily see that the empirical quantile algorithm can be seen as the case where the penalty term is zero. Indeed, it can be shown \citep[Sec. 13.3.1 in][]{shao2003mathematical} that the expected width $\bar{w}$ in the case of univariate data (i.e., $d=1$) is given by
+\begin{equation} \label{eq:width_bias}
+\begin{split}
+  \bar{w} &:= \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})} | C_{\mathcal{A}_{n}}(\bm{x_*},\delta) - u(\bm{x_*})|  = \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|\delta - \mathbb{P}_{u(\bm{x_*})}(\bm{x_*} \in C_{\mathcal{A}_{n}}(\bm{x_*},\delta))|]
+\end{split}
+\end{equation}
+
+In particular, the expected width in the univariate case is given by the distance between the desired coverage $\delta$ and the average depth achieved by the algorithm.  In the univariate case, the average depth and the width are necessarily complementary because they are the only possible widths. However, this is no longer true in the multivariate case. In particular, it is easy to see that the average depth can be increased in the univariate case without increasing the average width; however, this is no longer true in the multivariate case, where the average depth can increase arbitrarily and thus the average width will increase accordingly, as we show in Prop.~\ref{prop:counterexample}.  In general, the width and depth may not be complementary, even for univariate data. Nevertheless, we show that for convex predictive random variable (i.e., $u(\bm{x}) \in \bbr^{d}$, and $d \geq 2$), the average depth can be increased without increasing the average width, following the same argument of \cite{angelopoulos2024conformal}.
+
+\begin{restatable}[Counterexample]{theorem}{counterexample}\label{prop:counterexample}
+  There exists a sequence of data  $\{ \bm z_i \}_{i=1}^n$ such that the algorithm of~\cite{angelopoulos2024conformal}, for any $n \in \mathbb{N}$ large enough, achieves desired depth $R(\delta)$ but width in expectation $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[| C_{\mathcal{A}_{n}}(\bm{x_*},\delta) - u(\bm{x_*})|_1]$ is greater than $O(\sqrt{n})$, where the norm $|\cdot|_1$ is the usual $l_1$ norm.
+\end{restatable}
+\begin{remark}
+  \label{rem:counterexample}
+  The counterexample of \cite{angelopoulos2024conformal} can be univariate ($d=1$). 
+\end{remark}
+
+\subsection{Related Works} 
+
+In the literature, \emph{empiricaltical quantile} algorithm is used as the baseline approach to the problem \cite[see, e.g.,][]{tukey1947nonparametric,tukey1948nonparametric}. Alternatively, the classical i.i.d. This algorithm is not computationally efficient and thus does not fit into our framework. The algorithm we propose in Def. \ref{def:width_sketch_alg} effectively provides theoretical guarantees for the empirical quantile algorithm. This framework was introduced. We build on the literature of \emph{conditioned prediction sets} \citep[e.g.,][]{barber2021limits,bates2021distributionfree} and on the notion of \emph{depth-sketching algorithm} \citep{angelopoulos2024conformal}, building on the idea of \emph{penalty}. In particular,   \citet{angelopoulos2024conformal} introduced algorithms that control the depth (for arbitrary $\delta$) in expectation and with high probability. However, they do not control the width in a uniform sense. Their algorithm is a special case for convex predictive random variable (i.e., $u(\bm{x}) \in \bbr^{d}$, and $d \geq 2$). In the literature, tolerance sets and regions are also considered in the Bayesian setting, as pioneered by \citet{guttman1970statistical}, and this has inspired the development of \emph{Bayesian quadrature,} which is the problem of upper bounding the depth of a multivariate Bayesian credible interval. The Bayesian quadrature problem has been subject to extensive research \citet[see][and many other works that follow]{diaconis1988bayesian, karvonen2017classical,hobbhahn2022fast,hennig2022probabilistic}. At the core of this literature is the \emph{Ricci space} \citep{poincare1896calcul,diaconis1988bayesian} of probability distributions that admit an approximation w.r.t.~this space is considered. Bayesian quadrature has also been studied from the distribution-free point of view \citep[see][Sec. 2.4]{angelopoulos2023conformal}.
+
+\section{High-level perspective and depth-sketching algorithms}
+
+We consider a generalization of \Cref{def:width_sketch_alg} where, for any sequence $\{\alpha_n\}$, we can obtain arbitrary depth with high probability.
+
+\begin{definition}[$\alpha$-Depth Sketching Algorithm] \label{def:depth_sketch_alg}
+  Let $D(1) : \mathbb{R}^d \rightarrow \mathbb{R}$ be a depth measure such that $D(\bm{x}) = 0$ for some  $\bm{x} \in \mathbb{R}^d$. Let $\{\mathcal{A}_n\}_{n \geq 1}$ be a sequence of algorithms, where $\mathcal{A}_n$ 
+  takes the i.i.d. data $\{ \bm z_i \}_{i=1}^{n} \subseteq \mathbb{R}^d$ and a sequence $\{\alpha_n\}$ as input and produces a function $C_{\mathcal{A}_n}: \mathbb{R}^d \times (0,1) \rightarrow \mathbb{R}$ with the following properties: (i) For all $\bm{x} \in \mathbb{R}^d$, $C_{\mathcal{A}_n}(\bm{x},\delta)$ is interval; (ii) For all $\alpha,\delta$, with respect to $\mathbb{P}_n$, $\mathbb{E}_{\bm{x}_*}[\mathbb{P}_{u(\bm{x_*})}(\exists x \in u(\bm{x_*}) \setminus C_{\mathcal{A}_n}(\bm{x},\delta))]  \leq \alpha_n$ as soon as  $\mathbb{P}_n(C(\bm{x_*}) = \{u(\bm{x_*})\}) > \alpha_n$ for some $\bm{x_*} \in \mathbb{R}^d$ and $\mathbb{P}_n(C_{\mathcal{A}_n}(\bm{x_*},\delta) = \emptyset) \leq D(\bm{x_*}) + \alpha_n$. (iii) For all $n \geq 1$, for all $\bm{x} \in \mathbb{R}^d$,
+      \begin{align*}
+          \mathbb{E}_{\bm{x}_*}[\mathbb{P}_{u(\bm{x_*})}(\exists x \in u(\bm{x_*}) \setminus C_{\mathcal{A}_n}(\bm{x},\delta))]  \leq \alpha  ~~~ \forall n \geq 1.
+      \end{align*}
+
+  We say that the sequence $\{A_n\}_{n \geq 1}$ is an \emph{$\alpha$-depth sketching algorithm}.
+\end{definition}
+
+In this case, the algorithm may not control the width in a uniform sense, and in general it may not even control the width in expectation, as shown by the simple example below. We then define the notion of depth-sketching algorithm with guaranteed depth in expectation and high-probability width. However, similar to \cite{angelopoulos2024conformal}, this is only possible if we assume that the space of probability measures is convex.
+
+\begin{definition}[Depth Sketching Algorithm with Guaranteed Depth] \label{def:exp_depth_sketch_alg}
+  Let $D(1) : \mathbb{R}^d \rightarrow \mathbb{R}$ be a depth measure such that $D(\bm{x}) = 0$ for some  $\bm{x} \in \mathbb{R}^d$. Let $\{\mathcal{A}_n\}_{n \geq 1}$ be a sequence of depth-sketching algorithms. 
+  A sketching algorithm $\mathcal{A}_n$ provides \emph{expected depth control} if, for all $\delta$,
+  \begin{align}
+    \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[\mathbb{P}_{u(\bm{x_*})}(\exists x \in u(\bm{x_*}) \setminus C_{\mathcal{A}_n}(\bm{x},\delta))]  \leq D(\bm{x_*})   \forall n \geq 1.
+\end{align}
+A depth-sketching algorithm provides \emph{high-probability depth control} if for all $\delta$,
+\begin{align}
+  \mathbb{E}_{\bm{x}_*}[\mathbb{P}_{u(\bm{x_*})}(\exists x \in u(\bm{x_*}) \setminus C_{\mathcal{A}_n}(\bm{x},\delta))]  \leq D(\bm{x_*})  ~~~~ \forall n \geq 1.
+\end{align}
+We say that the sequence $\{A_n\}_{n \geq 1}$ is a depth sketching algorithm with guaranteed depth if it provides both expected and high-probability depth control.
+\end{definition}
+
+The standard approach to construct depth-sketching algorithms with guaranteed depth is to sketch the depth and increase $g(\bm{x})$ \citep[see, e.g.,][Sec. 5.2]{angelopoulos2024conformal}. This is also the case for the algorithm of  \citet{angelopoulos2024conformal}, but we will show that it does not control the width in expectation for arbitrary $\delta$. It is thus crucial to consider algorithms that control the width in a uniform sense, as we highlight in the following proposition.
+
+\begin{restatable}{theorem}{rembar}\label{prop:rem}
+  There exists a probability space $(\Omega_x, \mathcal{F}_x,\mathbb{P}_x)$ and some $\bm{x} \in \mathbb{R}^d$ such that the depth-sketching algorithm of~\cite{angelopoulos2024conformal} with guaranteed depth controls the width in expectation $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[\mathbb{P}_{u(\bm{x_*})}(C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*}))] > n$ for all $n > 0.$
+\end{restatable}
+
+\subsection{Depth-sketching algorithms}
+For depth-sketching algorithms, we consider the standard notion of depth measure as the concourse of the convex sets that cover the predictive random variable with probability $1 - \alpha$ \citep[see, e.g.,][]{lei2018distributionfree,barber2021limits,bates2021distributionfree}. Specifically, $D_s(x):= \inf_{M_s \text{\normalfont{\emph{disjoint}} }  \mathcal{P}_s} \mathrm{diam}(\bigcup_{P \in  \mathcal{P}_s})$, where $\mathrm{diam}(\cdot)$ denotes the diameter of its argument and $\bigcup_{P \in  \mathcal{P}_s}$ is the disjoint concourse of the set of probability measures $\mathcal{P}_s$  that take $(1 - \alpha)$ probability mass to cover $u(\bm{x})$ with respect to $\mathbb{P}_n$. Here, we consider the usual $l^{\infty}$ distance between sets; that is, the largest distance between two points in the space. Notice that the convexity assumption is key to link depth- and width-sketching algorithms, as shown in the following subsection. 
+
+\subsection{Link between depth- and width-sketching algorithms}
+We show that if the set of possible values of $u(\bm{x})$ is convex (i.e., its convex hull is a bounded set), then the average width is bounded if the depth is bounded. However, this is in general not true.
+\begin{restatable}{theorem}{rembar2}\label{prop:rem2}
+There exists a probability space $(\Omega_x, \mathcal{F}_x,\mathbb{P}_x)$ and some $\bm{x} \in \mathbb{R}^d$ such that the depth-sketching algorithm of \cite{angelopoulos2024conformal}, for any $n \in \mathbb{N}$ large enough, achieves desired depth $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[\mathbb{P}_{u(\bm{x_*})}(\exists x \in u(\bm{x_*}) \setminus C_{\mathcal{A}_n}(\bm{x},\delta))] \leq 0.4$, but the width in expectation is $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*}))|_1] > 0.5$.
+\end{restatable}
+\begin{remark}
+    \Cref{prop:rem,prop:rem2} can be seen as an $l^1$ norm version of the counterexample of \cite{angelopoulos2024conformal}. We can easily generalize the results in the multivariate case under convexity assumptions.
+\end{remark}
+
+We link depth- and width-sketching algorithms in the convex case as follows. Building on the idea of \cite{angelopoulos2024conformal}, we can sketch the depth by taking the convex hull of the i.i.d. data,
+which in turn provides a width sketch. However, a key requirement to do so is to assume that the set of possible values of $u(\bm{x})$ is convex.
+\begin{assumption}
+  Let $(\Omega_x,\mathcal{F}_x,\mathbb{P}_x)$ be the probability space defined by the random variable $u(\bm{x})$ and  for any $\bm{x} \in \mathbb{R}^d$, define $(\Omega_{\bm{x}},\mathcal{F}_{\bm{x}},\mathbb{P}_{\bm{x}})$ the corresponding probability space. Requiring the depth control, we have (A)  \label{ass:convex} The set $u(\mathbb{R}^d)$ is convex; (B) \label{ass:iid} The random variables $\{ \bm{z}_i \}_{i=1}^n$  are mutually independent conditioned on $\bm{x}_*$; (C) \label{ass:bounded} There exists $B < \infty$ such that  $\mathbb{P}_n(u(\bm{x}_*) \in [-B,B]) =1$.
+\end{assumption}
+The first two assumptions were already introduced by \citet{angelopoulos2024conformal}, while the third one is a standard assumption \citep[e.g., see][]{lei2018distributionfree,bates2021distributionfree}.
+We assume that the set $u(\mathbb{R}^d)$ is convex to link depth- and width control and to obtain a width sketch from the depth sketch, as introduced in the following assumption.
+\begin{assumption}[Convexity] \label{ass:convex}
+  Let $(\Omega_x,\mathcal{F}_x,\mathbb{P}_x)$ be the probability space defined by the random variable $u(\mathbb{R}^d)$ and  for any $\bm{x} \in \mathbb{R}^d$, define $(\Omega_{\bm{x}},\mathcal{F}_{\bm{x}},\mathbb{P}_{\bm{x}})$ the corresponding probability space. Requiring the depth control, we have \label{ass:convex1} $\frac{1}{n} \sum_{i=1}^n \mathds{1}_{u_i(\bm{x}) \in M_{s}(\bm{x},S_i)},\mathrm{diam}(\bigcup_{P \in  \mathcal{P}_s})$ where $S_i$ is the space of possible values of $\mathbb{P}_{u(\bm{x})}$ that put an $\alpha$-fraction of probability mass in $M_{s}(\bm{x},A_i)$, and the sets $A_i$ are chosen from the set of sets 
+$\{u(\bm{x}) : \bm{x} \in \mathbb{R}^d\}$ that are convex and such that, for all $\bm{x}_*\in \mathbb{R}^d$, $\mathbb{P}_n(u(\bm{x}_*) \in A_i) = \mathbb{E}_{\bm{x}_*}[ \mathbb{P}_n(u(\bm{x}) \in A_i |\bm{x}_*)].$
+\end{assumption}
+The following assumption is a standard requirement \citep[e.g., see][]{lei2018distributionfree,bates2021distributionfree}.
+As such, it does not affect the generality of the problem. 
+\begin{assumption}[i.i.d data] \label{ass:iid}
+  The random variables $\{ \bm{z}_i \}_{i=1}^n$  are mutually independent conditioned on $\bm{x}_*$.
+\end{assumption}
+The following assumption on the third moment is a weaker condition than the one of \cite{angelopoulos2024conformal} as it assumes bounded moments rather than a bounded random variable. It is a standard assumption \cite[Sec. 2]{angelopoulos2024conformal}; we show that it can be relaxed to an assumption on the second moment and thus it is not as strong as it may seem.
+\begin{assumption}[Bounded Moments] \label{ass:bounded}
+    For all $\delta$, there exists a function $\sigma_{\delta}: \mathbb{R}^d \to \mathbb{R}^+$ such that $\mathbb{E}_{u(\bm{x_*})}[\|u(\bm{x}) - u(\bm{x_*})\|_{L^2}[\sigma_\delta(\bm{x_*})]^2] \leq \sigma_\delta^2(\bm{x_*}) ~\forall ~n$ and for all $\mathbb{P}_n$ of $u(\bm{x_*)}$ . 
+  \end{assumption}
+\subsection{High-level perspective and link with depth-sketching algorithms}
+The following assumption generalizes the assumption of \cite{angelopoulos2024conformal} to the $s$-th moment. 
+\begin{assumption}{Moments} \label{ass:mom}
+  For all $\delta$, there exists a function $\sigma_{\delta}: \mathbb{R}^d \to \mathbb{R}^+$ such that $\mathbb{E}_{u(\bm{x_*})}[\|u(\bm{x}) - u(\bm{x_*})\|_{L^s}[\sigma_\delta(\bm{x_*})]^s] \leq \sigma_\delta^s(\bm{x_*}) ~\forall ~n$  and for all $\mathbb{P}_n$ of $u(\bm{x_*})$.
+\end{assumption}
+As we show in the following proposition, the $s$-th moment assumption of \Cref{ass:mom} can be relaxed to the $2$-th (and thus to a bounded variance assumption).
+\begin{restatable}{theorem}{rembar3}\label{prop:rem3}
+  Given a sequence $\{\delta_n\}$ and a sequence of functions $\{f_n: \mathbb{R}^d \rightarrow \mathbb{R}^+\}$, there exists a sequence $\{g_n: \mathbb{R}^d \rightarrow \mathbb{R}^+\}$ with $g_n \geq 0$, such that for all $\delta$,
+  \begin{equation}
+    \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1 f_n(u(\bm{x_*}))] \leq \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1] f_n(u(\bm{x_*}))] 
+  \end{equation} 
+  for all $n \geq 1$. 
+\end{restatable}
+\begin{remark}
+  \Cref{prop:rem3} shows that, for any function $\{f_n\}$, there exists a function $\{g_n\}$ such that we can control the width in expectation of $C_{\mathcal{A}_n}(\bm{x},\delta)$ by considering the depth of $g_n(u(\bm{x}_*))$. This is important, as it allows us to take $g_n$ of the form $\mathbb{E}_{u(\bm{x}_*)}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1 f_n(u(\bm{x_*}))]$, which is in turn equal to zero for some $f_n$. 
+\end{remark}
+
+\section{Main results}
+We introduce the notion of $\delta$-width sketch and a novel notion of width-optimality and approximate width-optimality. We prove a novel upper bound on the width of a width-sketching algorithm and we show a simple instance where the width in expectation of a vanilla width-sketching algorithm is twice the optimal width. Finally, we show how we can sketch the width and obtain width-sketching algorithms. We show how our results readily apply in the univariate case. Therefore, in this section, we use the $L^1$ norm to measure the width, i.e., $W(\bm{x},C(\bm{x})) = \int_0^1 |C(\bm{x}) - u(\bm{x})|$. Nevertheless, we can use any other norm to do so. In particular, this can be easily done by considering other convex sets, as we show in \Cref{sec:convex}. The results may also be generalized to intervals with points $g(\bm{x}) \in \mathbb{R}^d$, i.e., we can take the interval $[g(\bm{x}),C(\bm{x})]$. We reparameterize the problem in the following way: we take $v(\bm{x}) := \frac{u(\bm{x}) - a}{\sigma(\bm{x})}$, where $\sigma(\bm{x})$ is strictly positive, and $a$ is arbitrary \emph{known}. This way, we do not consider the possible values of $u(\bm{x})$ as a parameter, and we can assume that $u(\bm{x}) \in [0,1]$. The width and the depth can be thus reparameterized accordingly. We use the notation $\mathbb{E}_{\bm{x}_*}[\mathbb{P}_{v(\bm{x_*})}]$ to refer to the uniform probability measure over the possible values of the random variable $v(\bm{x_*})$. The notation can be implicit in the expectation, e.g., $\mathbb{E}_{\bm{x}_*}[\mathbb{P}_{v(\bm{x_*})}(v(\bm{x_*}) \in M)]$ to refer to the expectation of the probability that $v(\bm{x_*})$ is in a set $M$ (for any realization of $\bm{x_*}$). 
+Also, we use the notation $\mathbb{E}_{\bm{x}_*}[\int_{a}^{b} |v(\bm{x_*})|^{s}]$ to refer to the expectation of a function over the possible values of $\bm{x_*}$. 
+We consider a tuple $(u(\bm{x}), \sigma(\bm{x}))$, while in \Cref{sec:convex}, we consider a sequence of tuples $\{(u(\bm{x}), \sigma(\bm{x}))\}$. Hence, both \Cref{eq:width_bias,eq:width_sketch_bias} are \emph{implicitly introducing} the function $\sigma(\bm{x})$ in the equation and therefore also in the algorithm.
+
+\subsection{General setting} 
+We start by introducing empirical depth and width sketches and showing that they are depth- and width-sketching algorithm, respectively. We then show that they do not provide width-optimality and provide a counterexample where the width in expectation of the width-sketching algorithm is twice the optimal width. Finally, we show that we can obtain width- and depth-sketching algorithms by applying a width-sketching penalty.
+\subsubsection{Empirical Depth and Width Sketches} 
+To obtain an empirical depth and width sketch, we define a standard \emph{empirical depth} sketch,
+\begin{equation} \label{eq:width_sketch_bias}
+  M_s(\bm{x}, S)  =   \bigcap_{i=1}^{s} \underbrace{\left(\bigcap_{j=1}^{n} \left[a + \sigma(\bm{x}) z_{ij}\right] \bigcap_{j'=1}^{n} \left[a + \sigma(\bm{x_*}) z_{ij'}\right] \right)}_{\text{$s$-th empirical depth sketch, }L_s(\bm{x},\{ \bm{z}_i \})},  
+\end{equation}
+where $S$ is the space of possible values of $u(\bm{x})$ and we require that $\mathbb{P}_n[ u(\bm{x}) \in S] = 1$ and $S \subseteq \mathbb{R}^d$. Here, $z_{ij},z_{ij'}$ are i.i.d. samples from the empirical quantile of order $j$ (resp. $j'$); also, we take $s \in \mathbb{N}$ large enough so that $\binom{n}{s} = 1$ (i.e., is Donut problem in expectation). This way, $L_s(\bm{x},\{ \bm{z}_i \})$, is a random set that contains $u(\bm{x})$ (w.r.t.~$\mathbb{P}_n$) with probability at least $1 - \alpha$, i.e., 
+for all $\mathbb{P}_n$ of $u(\bm{x})$ 
+\begin{equation}
+  \mathbb{P}_n[ u(\bm{x}) \in L_s(\bm{x},\{ \bm{z}_i \})] \geq 1 - \alpha  ~~~~\forall ~n > 0,
+\end{equation}
+where $\alpha$ is a constant defined as $\alpha := 2s^{-2}$. 
+The empirical width sketch is defined similarly as the empirical depth sketch, but we consider an $s$-deep tree instead of an $s$-tuple. 
+Notice that we are taking the empirical depth and width sketches to be equal; however, this is not strictly necessary, and it is more common to take the empirical width sketch to be a tree, as done by \citet{guttman1970statistical}. 
+\begin{equation} 
+\label{eq:width_sketch_bias2}
+{ \mathbb{P}_{\mathbb{P}_{n}}[\mathbb{P}_{u(\bm{x_*})}(v(\bm{x_*}) \notin M_s(\bm{x},S) \mid \pi_s) ]~ \geq ~ \mathbb{P}_{\mathbb{P}_{n}}[\mathbb{P}_{u(\bm{x_*})}(\pi_{s+1} \subseteq \pi_{s}) \mid \pi_s}) ] = 1 - \frac{n-s}{s(n-1)}
+\end{equation}
+where the expectation is over $\mathbb{P}_n$ (in particular $\{ \bm {z}_i\}$, $\pi_s$ is a set of $s$ leaves of the tree, and $n-s$ the set of possible choices of the set $\pi_s$ of a tree of $s$ nodes). This way, the empirical width sketch is not efficient, as $\mathbb{E}_{\bm{x}_*}[\mathbb{P}_{u(\bm{x_*})}(C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*}))] = \Omega(n)$. 
+
+\subsubsection{$\delta$-width sketch}
+We consider a simple $\delta$-width sketching algorithm where the predicted value $g(\bm{x})$ is set to $a + \sigma(\bm{x}) q_i$ and the coverage set $C_{\mathcal{A}_n}(\bm{x},\delta)$ is equal to $M_s(\bm{x}, S_+)$, where we take $S_+ := \{ u(\bm{x}) : u(\bm{x}) \in [\frac{\delta}{1 - \alpha},1] \}$. More specifically,
+\begin{equation} 
+  g_{\mathcal{A}_n}(\bm{x},\delta) := a + \sigma(\bm{x}) q_i  ~~~ \text{\normalfont{ and }} ~~~~ C_{\mathcal{A}_n}(\bm{x},\delta) := M_s(\bm{x},S_+),
+\end{equation}
+where $q_i$ is the empirical $\delta$-quantile of $\{ \bm z_i \}_{i=1}^{n}$.
+\Cref{eq:width_sketch_bias} shows that this algorithm is a width-sketching algorithm w.r.t. the $L^1$ norm.
+This is because we can show that the expected width in the case of univariate data (i.e., $d=1$) is given by
+\begin{equation} \label{eq:width_bias}
+\begin{split}
+  \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1] &= \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|\delta - \mathbb{P}_{u(\bm{x_*})}(\delta) - \mathbb{P}_n(C_{\mathcal{A}_n}(\bm{x},\delta) = [a + \sigma(\bm{x}) q_i])|]  \\
+  &= \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|\delta - (1 - \alpha) - \mathbb{P}_n(\delta - \pi_* \mid \pi_*)|],
+\end{split}
+\end{equation}
+as both $\delta$ and $C_{\mathcal{A}_n}(\bm{x},\delta)$ are equal to $a + \sigma(\bm{x}) q_i$ with probability $1$ (as we take $s$ large enough), and $\mathbb{P}_n(\delta - \pi_* \mid \pi_*) := \mathbb{P}_n(\delta \leq z_i < \delta + \pi_*)$ is the probability mass of $\delta$ between nodes $\pi_*$ and $\pi_* \cup \{i\}$. 
+Here we use the notation $\mathbb{P}_n(\delta - \pi_* \mid \pi_*)$ to refer to the probability that $\delta$ is between $\delta$ and $\delta + \pi_*$, where $\pi_*$ is the set of leaves of the tree of depth $s$. Therefore, we can easily see that 
+\begin{equation}
+  \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1] = \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|\delta - (1 - \alpha) - \mathbb{P}_{u(\bm{x_*})}[ \delta \leq z_i < \delta + \pi_*] |u(\bm{x_*})|_1],
+\end{equation}
+and thus we have that for sufficiently large $n$ (i.e., when $\mathbb{P}_n[ u(\bm{x}) \in S_+] = 1$), we have that  
+\begin{equation} \label{eq:width_sketch_bias2}
+\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1] = \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|\delta - (1 - \alpha)|],
+\end{equation}
+and thus the algorithm is indeed a width-sketching algorithm. This width sketch can be derived in a similar way to the one of \cite{angelopoulos2024conformal} for depth sketches (we highlight the main differences below). In particular, from \cite{angelopoulos2024conformal} we have that the depth sketch is given by $M_s(\bm{x}, S_+) = \bigcap_{j=1}^{s} \underbrace{\left(\bigcap_{j=1}^{n} \left[a + \sigma(\bm{x}) Z_{j} \right]\bigcap_{j'=1}^{n} \left[a + \sigma(\bm{x_*}) Z_{j'} \right]\right)}_{\text{$s$-th empirical depth sketch, }L_s(\bm{x},\{ \bm{z}_i \})}$, where $Z_j,Z_{j'}$ are i.i.d. samples from an empirical depth sketch, e.g., the empirical $\delta$-quantile of $\{ \bm z_i \}_{i=1}^{n}$. Notice that the difference with the empirical width sketch are $Z_j,Z_{j'}$, which are not points selected from the $\delta$-quantile, and also the choice of the space of possible values of $u(\bm{x})$. In particular, in the case of \cite{angelopoulos2024conformal}, the space $S_+$ (or, equivalently, $\delta_{+}$) is selected so that the probability of not containing $u(\bm{x_*})$ is approximately equal to $\alpha$. This is shown in the following proposition.
+\begin{restatable}{proposition}{conformalwidth}\label{prop:conformal_width}
+  Let $(\Omega,\mathcal{F},\mathbb{P})$ the probability space defined by the variable $u(\bm{x_*})$, where $\bm{x_*} \in \mathbb{R}^d$ is arbitrary. Given the space $S_+ := \{\bm{x}: \bm{x} \in [\delta_+,1] ^d\}$, the algorithm given by 
+  \begin{equation} 
+  g_{\mathcal{A}_n}(\bm{x},\delta) = \mathbb{E}_{\bm{x}_*} \sigma(\bm{x_*}),~~\delta_{+} := \delta - \alpha,~~~C_{\mathcal{A}_n}(\bm{x},\delta) = L_s(\bm{x},S_+),
+\end{equation}
+is a width-sketching algorithm and
+\begin{equation}
+\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1]  \leq \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|\delta - \mathbb{P}_{u(\bm{x_*})}[u(\bm{x_*}) \in L_s(\bm{x},S_+)]|_1] \leq \alpha,
+\end{equation}
+where $\alpha$ is defined as $\alpha :=\alpha(\delta) + \alpha_n$, and $\alpha_n :=\mathbb{P}_n[C_{\mathcal{A}_n}(\bm{x}_n,\delta) = \emptyset]$, for any $\bm{x}_n \in \mathbb{R}^d$. 
+\end{restatable}
+
+\subsubsection{The non-optimality of width sketches} \label{sec:optimize}
+We want to highlight the fact that width sketches do not provide width-optimality due to the following simple instance where the width in expectation is twice the optimal width. 
+\begin{restatable}{theorem}{counterexample2}\label{prop:counterexample2}
+  There exists a probability space $(\Omega_x, \mathcal{F}_x,\mathbb{P}_x)$ and some $\bm{x} \in \mathbb{R}^d$ such that the algorithm of \cite{angelopoulos2024conformal}, for any $n > 0$, achieves desired depth $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[\mathbb{P}_{u(\bm{x_*})}(\exists x \in u(\bm{x_*}) \setminus C_{\mathcal{A}_n}(\bm{x},\delta))]  \leq \alpha$ for any $\alpha \in (0,1)$, but the width in expectation $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1]$ is is at least four times smaller than the optimal width, which is given by the width of the interval $[\delta_{+},\delta_{+}+0.5]$.
+
+\end{restatable}
+
+We also show that the width-sketching algorithm of \cite{angelopoulos2024conformal} is not near width-optimality due to the following instance.
+
+\begin{restatable}{theorem}{counterexample3}\label{prop:counterexample3}
+  There exists a probability space $(\Omega_x, \mathcal{F}_x,\mathbb{P}_x)$ and some $\bm{x} \in \mathbb{R}^d$ such that the algorithm of \cite{angelopoulos2024conformal}, for any $n \in \mathbb{N}$ large enough, achieves desired depth $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[\mathbb{P}_{u(\bm{x_*})}(\exists x \in u(\bm{x_*}) \setminus C_{\mathcal{A}_n}(\bm{x},\delta))]  \leq 0.1$ for all $\delta \in (0,1)$, but the width in expectation $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1]$ is at least four times smaller than the optimal width, 0.6.
+
+\end{restatable}
+
+We show that the width-sketching algorithm of \cite{angelopoulos2024conformal} is not near width-optimality due to the following instance.
+\begin{restatable}{theorem}{counterexample4}\label{prop:counterexample4}
+  There exists a probability space $(\Omega_x, \mathcal{F}_x,\mathbb{P}_x)$ and some $\bm{x} \in \mathbb{R}^d$ such that the algorithm of \cite{angelopoulos2024conformal}, for any $n \in \mathbb{N}$, achieves desired depth $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[\mathbb{P}_{u(\bm{x_*})}(\exists x \in u(\bm{x_*}) \setminus C_{\mathcal{A}_n}(\bm{x},\delta))]  \leq 0.2$ for all $\delta \in (0,1)$, but the width in expectation $\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}[|C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*})|_1]$ is at least four times smaller than the optimal width, 0.4.
+\end{restatable}
+\begin{remark}
+  \Cref{prop:counterexample2,prop:counterexample3,prop:counterexample4} show that the algorithm of \cite{angelopoulos2024conformal} does not come close to width-optimality even for a specific tolerance $\delta$. Indeed, this is easy to see: if the algorithm were near $\delta$-width-optimal for a single $\delta$, then it is easy to construct simple instances (e.g., two-dimensional Brownian motion) where the depth sketch is empty and $\delta$ is the probability of containing $\mathbb{P}[u(\bm{x_*}) \in C_{\mathcal{A}_n}(\bm{x},\delta)]=\delta_{+}$.  
+\end{remark}
+
+\subsubsection{Width sketches with penalty}
+Similar to \citep{angelopoulos2024conformal}, we take $g_{\mathcal{A}_n}$ as the empirical depth sketch of order $1 - \delta_+$. 
+However, we take a different approach for the selection of $\delta_+$, which we introduce below.
+\begin{definition}[Width sketches with penalty] \label{eq:width_sketch_penalty}
+  Let $\mathcal{A}_n$ be an algorithm that takes as input 
+  a parameter $\delta \in (0,1)$ and the i.i.d data $\{ \bm z_i \}_{i=1}^n$, and produces a tuple $(g(\bm{x}),C(\bm{x}))$ such that, for any $\bm{x}_* \in \mathbb{R}^d$, $C_{\mathcal{A}_n}(\bm{x},\delta)$ is the set of all values $u(\bm{x})$ (with respect to $\mathbb{P}_n$) that achieve the minimum distance to a set $M_s(\bm{x},S_{\delta_+})$, where $\delta_+ := \delta - \lambda$, $s$ is the empirical depth sketch order (i.e., the number of leaves selected in the tree of the empirical depth sketch), and we take 
+  \begin{equation} \label{eq:width_penalty}
+    \lambda :=\lambda_n(\delta) := \left\{\frac{(\sqrt{n} - \sqrt{n \log 2n})^2}{n - 1 - \log 2n} + \frac{1}{n - 1 - \log 2n}\right\}.
+  \end{equation}
+  Then, if for all $\mathbb{P}_n$, 
+  \begin{equation}
+\begin{split} 
+    &\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}\Big[
+        \mathbb{P}_{u(\bm{x_*})}\big(C_{\mathcal{A}_n}(\bm{x},\delta) - u(\bm{x_*}) \geq 0 \mid \pi_0\big)
+    \Big] \\
+    &\leq \mathbb{P}_n\Big[ \delta_+ \leq z_{i} < \delta + \pi_0 \mid \pi_0 \Big], 
+    \quad \forall \pi_0, \pi_1, \pi_2 \text{ such that } \pi_2 \subseteq \pi_1, \, \pi_1 \subseteq \pi_0 \subseteq \{ i \}, \\
+    &\text{where } \sigma(\bm{x_*}) (\delta + \pi'_1) \leq \sigma(\bm{x_*}) \delta_+ 
+    \text{ for any } \pi'_1 \text{ as close as desired to } \pi'_0 \subseteq \pi_1 \setminus \{i\}.
+\end{split} 
+\end{equation}
+  then $\mathcal{A}_n$ is called $\lambda$-width algorithm.
+\end{definition}
+
+The width-sketching penalty in \Cref{def:width_sketch_penalty} is the difference between the desired depth and the desired coverage $\delta$. It takes a finer-grained approach, which rely on an i.i.d. cover for the construction of the algorithm; in particular, they do not exploit the possibility of taking an arbitrary point as the predicted value $g(\bm{x})$. Rather, we take $g_{\mathcal{A}_n}(\bm{x},\delta)$ as the empirical quantile of $M_s(\bm{x},S_+)$, and we reparameterize all quantities accordingly. This way, we effectively reparameterize the problem as follows: if we start with a random variable $u(\bm{x})$ and parameterize the algorithm with the tuple $(u(\bm{x}),\sigma(\bm{x}))$, then we equivalently reparameterize the problem with $(v(\bm{x}),\sigma(\bm{x}))$. 
+This reparameterization effectively allows us to ignore the possible values of $u(\bm{x})$ and to take $g_{\mathcal{A}_n}(\bm{x},\delta)$ as an arbitrary point (notice that this can always be done as we can always take  $g_{\mathcal{A}_n}(\bm{x},\delta)$ as the empirical quantile of $M_s(\bm{x},S_{\delta_+})$). 
+The penalty term also implicitly depends on the choice of the set $S_{\delta_+} = \{\bm{x} \in \mathbb{R}^d : \bm{x} \in [\delta_+,1]\}$. This choice allows us to control both width and depth simultaneously, as it is selected to effectively increase the depth with respect to $\mathbb{P}_n$ while simultaneously decreasing the width. Also, it is easy to show that the terms $n - 1 - \log 2n, \sqrt{n} - \sqrt{n \log 2n}$ are upper bounded by $n$ and $\sqrt{n}$ respectively. This is a well-known technique for constructing the quantile of order $\delta$ \cite[see, e.g.,][]{wilks1941determination}. Compared to the depth-sketching algorithm of \cite{angelopoulos2024conformal}, we effectively take an additional point $g_{\mathcal{A}_n}(\bm{x},\delta)$ that stretches $M_s(\bm{x},S_{\delta_+})$ into the interval $[\delta,\delta+0.5]$. This way, we effectively increase the width in the hope that the added stretch is compensated by an increase in depth. This way, we can effectively control the width in a uniform sense. This is also the case of \cite{farzaneh2024quantile} for hyperparameter optimization; however, they do not provide any depth control with high probability. 
+\subsection{Width sketches in the multivariate case}  \label{sec:convex}
+In this section, we introduce the notion of $\delta$-width-optimality and width-sketching algorithms with guaranteed width for multivariate data and under the assumption of convexity of $u(\bm{x})$. 
+We first introduce a novel width-sketching algorithm with width-optimality. 
+We then show that width-optimality does not hold for arbitrary $\delta$ and width-sketching algorithms with guaranteed width.
+Finally, we show that width-sketching algorithms can be constructed with a width-sketching penalty and a convex set of possible values of $u(\bm{x})$. 
+For simplicity, we consider interval-valued functions $C: \mathbb{R}^d \rightarrow \mathbb{R}^+ \times 2^{\mathbb{R}}$.
+\subsubsection{$\delta$-width-optimality}
+We define the width of $K: \mathbb{R}^d \rightarrow \mathbb{R}^+$ as $W_{K}(x) = \sup_{y \in \mathbb{R}^d} K(x,y)$ for any $x \in \mathbb{R}^d$. We also consider the norm $\mathbb{E}_{y \sim K(x)}[]|\cdot|$, for any $x \in \mathbb{R}^d$, where $y \sim K(x)$ is the uniform random variable on $K(x,\cdot)$. We then define width-optimality as follows
+\begin{definition}[Width-optimality ($\delta$-width-optimal)]
+\begin{enumerate}[label=\arabic*),labelindent=0pt,itemsep=0pt,topsep=0pt]
+
+\item For any sequence of width-sketching algorithms $\mathcal{A}_n$, we say it is \emph{$\delta$-width-optimal} if for any sequences $\{\delta_n\}$ and $\{\bm{x}_n\}$:
+\begin{equation}
+\limsup_{n \to \infty} 
+\frac{
+\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}\big[\mathbb{P}_{u(\bm{x_*})}(C_{\mathcal{A}_n}(\bm{x}_n, \delta_n) \subseteq W_K(\bm{x}_n))\big]
+}{
+\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}\big[\mathbb{P}_{u(\bm{x_*})}(C_{\mathcal{A}_n}(\bm{x}_n, \delta_n) \subseteq W_K(\bm{x}_n))\big]
+-
+\mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}\big[\mathbb{P}_{u(\bm{x_*})}(C_{\mathcal{A}_n}(\bm{x}_n, \delta_n) \subseteq W_K(x_n))\big]
+} 
+\le 1.
+\end{equation}
+\end{enumerate}
+\end{definition}
+
+Notice that in the univariate case, where $W_{K}(x) := |K(x)|_1$ for any $x \in \mathbb{R}$, optimality is equivalent to width-optimality. We then show that there exists an instance where width-sketching algorithms with guaranteed width are not $\delta$-width-optimal for arbitrary $\delta$. 
+We then show that width optimality cannot be achieved due to the limitation on the complexity of the algorithms considered and then a simple construction around this limitation.
+\begin{restatable}{theorem}{counterexample5}\label{prop:counterexample5}
+  There exists a probability space $(\Omega_x, \mathcal{F}_x,\mathbb{P}_x)$ and some $\bm{x} \in \mathbb{R}^d$ such that the width-sketching algorithm with guaranteed width is not $\delta$-width-optimal for any $\delta$ in $[0.1,1]$. 
+\end{restatable}
+
+\begin{restatable}{theorem}{counterexample6}\label{prop:counterexample6}
+  Given a sequence $\{\delta_n\}$, if the width-sketching algorithms with guaranteed width have polynomial complexity, there exists a probability space $(\Omega_x, \mathcal{F}_x,\mathbb{P}_x)$ and some $\delta \in [0.9,1)$ in which the width-sketching algorithms with guaranteed width are not $(1 - \delta)$-width-optimal. 
+\end{restatable}
+
+\subsection{Width sketches with penalty} \label{sec:width_penalty}
+We consider a simple algorithm to construct width-sketching algorithms with guaranteed width. This algorithm closely follows the construction of \cite{angelopoulos2024conformal}, but we take an additional point that stretches the convex set $M_s(\bm{x},S_+)$, similarly to the univariate case. 
+\begin{definition}[Width Sketching Algorithms with Penalty] \label{def:width_sketch_penalty}
+  Let $W(1) : \mathbb{R}^d \rightarrow \mathbb{R}^+$ be a width measure such that $W(\bm{x}) = 0$ for some  $\bm{x} \in \mathbb{R}^d$. Let $\{\mathcal{A}_n\}_{n \geq 1}$ be a sequence of algorithms, where $\mathcal{A}_n$  takes the i.i.d. data $\{ \bm z_i \}_{i=1}^{n} \subseteq \mathbb{R}^d$, $\delta$ and a parameter $\lambda$ as input and produces a function $C_{\mathcal{A}_n}: \mathbb{R}^d \times (0,1) \rightarrow \mathbb{R}^+ \times 2^{\mathbb{R}}$ with the properties (i) For all $\bm{x} \in \mathbb{R}^d$, $C_{\mathcal{A}_n}(\bm{x},\delta)$ is an interval; (ii)  For all $\delta, \lambda > 0$ and for all $\bm{x}_\alpha \in \mathbb{R}^d$ such that $\mathbb{P}_n[ C(\bm{x}_\alpha,\delta) = \emptyset] \leq \alpha$, 
+    \begin{align}\label{meas_width_pen}
+      \mathbb{E}_{\bm{x}_*} \mathbb{E}_{u(\bm{x_*})}\left[W(\bm{x}_*,[C_{\mathcal{A}_n}(\bm{x}_\alpha,\delta),C^+_{\mathcal{A}_n}(\bm{x}_\alpha,\delta,\lambda)]) \right]  \leq W(\bm{x}_*) + \lambda ~ \forall n \geq 1,
+\end{align}
+
+where $C^+_{\mathcal{A}_n}(\bm{x}_\alpha,\delta,\lambda)$ is the set of all values $u(\bm{x})$ (with respect to $\mathbb{P}_n$) that achieve the minimum distance to a convex set $M_s(\bm{x},S^+_{\delta_{+}})$, 
+where $S^+_{\delta_{+}} = \{\bm{x} \in \mathbb{R}^d : \bm{x} \in [\delta_+,1]\}$, and we take $\delta_+ := \delta - \lambda$ and 
+\begin{equation}
+  W^+(\bm{x},C) = \sup_{\bm{x} \in \mathbb{R}^d} W(\bm{x},\bm{x}) - \inf_{\bm{x} \in C} W(\bm{x},\bm{x}) ~~~~ \forall C = [a_1,a_2] \subseteq \mathbb{R}.
+\end{equation}
+\end{definition}
+
+Notice that \Cref{def:width_sketch_penalty} readily generalizes \Cref{def:width_sketch_alg} and is thus a more high-level perspective on the two notions of sketching algorithm. Notice that for depth sketching, we typically have $W^{\plus}(x) = \frac{1}{2}$, hence $W^+(\bm{x},C) = \sup_{a_1,a_2 \in \bm{x}} \inf_{b_1,b_2 \in C} |a_{b_1} - a_{b_2}|$. We then show that the width-sketching penalty allows us to derive algorithms that control the width in a uniform sense, while reducing the depth with probability $\alpha$.
+\begin{theorem}[Width control]\label{thm:width_control}
+  Let $\mathcal{A}_n$ be a sequence of algorithms that take $\delta,\lambda$ as input and satisfies \Cref{def:width_sketch_penalty}. Then if
+  \begin{equation}
+    \lambda :=\lambda_n(\delta) := \left\lceil \frac{(\sqrt{n} - \sqrt{n \log 2n})^2}{n - 1 - \log 2n} + \frac{1}{n - 1 - \log 2n}\right \rceil + 1,
+  \end{equation}
+  the algorithm satisfies for all $\alpha,\alpha_n \geq 0$ such that $\alpha + \alpha_n \leq \delta$ and for all $\delta \in (0,1)$,  
+  \begin{align}
+    \mathbb{E}_{\bm{x}_*}\mathbb{E}_{u(\bm{x_*})}\left[W(\bm{x_*},[C_{\mathcal{A}_n}(\bm{x},\delta),\mathbb{R}])\right] \leq & \mathbb{P}_n[C_{\mathcal{A}_n}(\bm{x}_n,\delta) = \emptyset] + \lambda_n(\delta) ~~~~ \forall n, \\
+    \mathbb{E}_{\bm{x}_*}\mathbb{E}_{u(\bm{x_*})}\left[W(\bm{x_*},[C_{\mathcal{A}_n}(\bm{x},\delta),\mathbb{R}])\right] \leq & \mathbb{P}_n[C_{\mathcal{A}_n}(\bm{x}_n,\delta) = \emptyset] + \lambda_n(\delta)  ~~~~ \forall n \geq 1,
+  \end{align} 
+  where $\mathbb{P}_n$ is the probability measure over the possible values of $u(\bm{x})$.
+\end{theorem}
+
+
+
+
+\section{From univariate to multivariate data}
+
+In this section, we show that the results in one-dimensional space can be easily extended to multivariate data. We first introduce \Cref{def:width_sketch_alg} in the multivariate case and then show that it generalizes the notion of $\delta$-width-sketching algorithm in the univariate case. Then, we show that the width-sketching penalty can also be easily extended to multivariate data. Finally, we show that, as soon as the set of possible values of $u(\bm{x})$ is convex, width-optimality can be achieved.
+\subsection{Setup} We consider probability spaces $(\Omega,\mathcal{F},\mathbb{P})$,  $(\Omega_x,\mathcal{F}_x,\mathbb{P}_x)$, $(\Omega_y,\mathcal{F}_y,\mathbb{P}_y)$ the probability space defined by the variables $u,v$, the random vector $u(\bm{x})$, and  $v(\bm{x}) = \frac{u(\bm{x}) - a}{\sigma(\bm{x})}$, where $\sigma(\bm{x})$ is strictly positive, and $a$ is arbitrary, respectively. We consider the case where $a = 0$, as it suffices to take $g(\bm{x}) = 0$ and to reparameterize everything accordingly. We then define width and depth measures as follows.
+\begin{definition}[Width and Depth Measures] \label{def:w_d}
+    For a probability space $(\Omega,\mathcal{F},\mathbb{P})$, $W(1) : \mathbb{R}^d \rightarrow \mathbb{R}^+$ is the width measure such that $W(\bm{x}) = 0$ for some  $\bm{x} \in \mathbb{R}^d$, and $D(s) : \mathbb{R}^d \rightarrow \mathbb{R}^+$ the depth measure such that $D(\bm{x})= 0$ for some  $\bm{x} \in \mathbb{R}^d$.
+\end{definition}
+Notice that we use different notations for width and depth because they are different measures on different spaces. We also use different parameters because we want to highlight that the width and the depth have different meanings, and thus they are different measures in different spaces. We reparameterize all quantities with respect to $v(\bm{x})$. 
+\begin{lemma}[Width and Depth Sketches]
+\label{lem:w_d}
+  For any depth sketch $D_s$, consider the univariate case where $d=1$, with 
+  \begin{equation}
+    g_{\mathcal{A}_n}(\bm{x},\lambda) := \mathbb{E}_{\bm{x}_*} g(\bm{x}_*),~~\lambda_{n}(\delta) := \left\lceil \frac{(\sqrt{n} - \sqrt{n \log 2n})^2}{n - 1 - \log 2n} \right\rceil
+\end{equation}
+\end{lemma}
+
+\begin{thebibliography}{29}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Aitchison \& Dunsmore(1975)Aitchison and
+  Dunsmore]{aitchison1975statistical}
+Aitchison, J. and Dunsmore, I.~R.
+\newblock \emph{Statistical Prediction Analysis}.
+\newblock New York: Cambridge University Press, 1975.
+
+\bibitem[Angelopoulos \& Bates(2023)Angelopoulos and
+  Bates]{angelopoulos2023conformal}
+Angelopoulos, A.~N. and Bates, S.
+\newblock Conformal prediction: A gentle introduction.
+\newblock \emph{Foundations and Trends in Machine Learning}, 16\penalty0
+  (4):\penalty0 494--591, 2023.
+
+\bibitem[Angelopoulos et~al.(2024)Angelopoulos, Bates, Fisch, Lei, and
+  Schuster]{angelopoulos2024conformal}
+Angelopoulos, A.~N., Bates, S., Fisch, A., Lei, L., and Schuster, T.
+\newblock Conformal risk control.
+\newblock In \emph{The Twelfth International Conference on Learning
+  Representations}, 2024.
+
+\bibitem[Barber et~al.(2021)Barber, Cand{\`e}s, Ramdas, and
+  Tibshirani]{barber2021limits}
+Barber, R.~F., Cand{\`e}s, E.~J., Ramdas, A., and Tibshirani, R.~J.
+\newblock The limits of distribution-free conditional predictive inference.
+\newblock \emph{Information and Inference: A Journal of the IMA}, 10\penalty0
+  (2):\penalty0 455--482, June 2021.
+\newblock ISSN 2049-8772.
+\newblock \doi{10.1093/imaiai/iaaa017}.
+
+\bibitem[Bates et~al.(2021)Bates, Angelopoulos, Lei, Malik, and
+  Jordan]{bates2021distributionfree}
+Bates, S., Angelopoulos, A., Lei, L., Malik, J., and Jordan, M.
+\newblock Distribution-free, risk-controlling prediction sets.
+\newblock \emph{Journal of the {ACM}}, 68\penalty0 (6), 2021.
+
+\bibitem[Cockayne et~al.(2019)Cockayne, Oates, Sullivan, and
+  Girolami]{cockayne2019bayesian}
+Cockayne, J., Oates, C.~J., Sullivan, T.~J., and Girolami, M.
+\newblock Bayesian probabilistic numerical methods.
+\newblock \emph{SIAM Review}, 61\penalty0 (3):\penalty0 756--789, 2019.
+
+\bibitem[Diaconis(1988)]{diaconis1988bayesian}
+Diaconis, P.
+\newblock Bayesian numerical analysis.
+\newblock In Berger, J. and Gupta, S. (eds.), \emph{Statistical Decision Theory
+  and Related Topics IV}, volume~1, pp.\  163--175. Springer-Verlag, 1988.
+
+\bibitem[Farzaneh et~al.(2024)Farzaneh, Park, and
+  Simeone]{farzaneh2024quantile}
+Farzaneh, A., Park, S., and Simeone, O.
+\newblock Quantile learn-then-test: Quantile-based risk control for
+  hyperparameter optimization.
+\newblock \emph{IEEE Signal Processing Letters}, 2024.
+
+\bibitem[Gibbs et~al.(2024)Gibbs, Cherian, and Cand{\`e}s]{gibbs2024conformal}
+Gibbs, I., Cherian, J.~J., and Cand{\`e}s, E.~J.
+\newblock Conformal {{Prediction With Conditional Guarantees}}, September 2024.
+
+\bibitem[Guttman(1970)]{guttman1970statistical}
+Guttman, I.
+\newblock \emph{Statistical Tolerance Regions: Classical and {{Bayesian}}}.
+\newblock Griffin's Statistical Monographs and Courses, No. 26. Griffin, 1970.
+
+\bibitem[Hennig et~al.(2022)Hennig, Osborne, and
+  Kersting]{hennig2022probabilistic}
+Hennig, P., Osborne, M.~A., and Kersting, H.~P.
+\newblock \emph{Probabilistic Numerics: Computation as Machine Learning}.
+\newblock Cambridge University Press, 2022.
+
+\bibitem[Hobbhahn et~al.(2022)Hobbhahn, Kristiadi, and
+  Hennig]{hobbhahn2022fast}
+Hobbhahn, M., Kristiadi, A., and Hennig, P.
+\newblock Fast predictive uncertainty for classification with {{Bayesian}} deep
+  networks.
+\newblock In \emph{Proceedings of the Thirty-Eighth Conference on Uncertainty
+  in Artificial Intelligence}, 2022.
+
+\bibitem[Karvonen \& S{\"a}rkk{\"a}(2017)Karvonen and
+  S{\"a}rkk{\"a}]{karvonen2017classical}
+Karvonen, T. and S{\"a}rkk{\"a}, S.
+\newblock Classical quadrature rules via {{Gaussian}} processes.
+\newblock In \emph{2017 {{IEEE}} 27th International Workshop on Machine
+  Learning for Signal Processing ({{MLSP}})}, 2017.
+
+\bibitem[Kot(2014)]{kot2014first}
+Kot, M.
+\newblock \emph{A First Course in the Calculus of Variations}.
+\newblock American Mathematical Society, 2014.
+
+\bibitem[Lei et~al.(2018)Lei, G'Sell, Rinaldo, Tibshirani, and
+  Wasserman]{lei2018distributionfree}
+Lei, J., G'Sell, M., Rinaldo, A., Tibshirani, R.~J., and Wasserman, L.
+\newblock Distribution-free predictive inference for regression.
+\newblock \emph{Journal of the American Statistical Association}, 113\penalty0
+  (523):\penalty0 1094--1111, July 2018.
+
+\bibitem[Lin et~al.(2014)Lin, Maire, Belongie, Hays, Perona, Ramanan,
+  Doll{\'a}r, and Zitnick]{lin2014microsoft}
+Lin, T.-Y., Maire, M., Belongie, S., Hays, J., Perona, P., Ramanan, D.,
+  Doll{\'a}r, P., and Zitnick, C.~L.
+\newblock Microsoft {COCO}: Common objects in context.
+\newblock In \emph{13th European Conference on Computer Vision}, pp.\
+  740--755. Springer, 2014.
+
+\bibitem[Ng et~al.(2011)Ng, Tian, and Tang]{ng2011dirichlet}
+Ng, K.~W., Tian, G.-L., and Tang, M.-L.
+\newblock \emph{Dirichlet and Related Distributions: Theory, Methods and
+  Applications}.
+\newblock Wiley, 2011.
+
+\bibitem[O'Hagan(1991)]{ohagan1991bayes}
+O'Hagan, A.
+\newblock Bayes--{{Hermite}} quadrature.
+\newblock \emph{Journal of Statistical Planning and Inference}, 29\penalty0
+  (3):\penalty0 245--260, November 1991.
+
+\bibitem[Papadopoulos et~al.(2002)Papadopoulos, Proedrou, Vovk, and
+  Gammerman]{papadopoulos2002inductive}
+Papadopoulos, H., Proedrou, K., Vovk, V., and Gammerman, A.
+\newblock Inductive confidence machines for regression.
+\newblock In Elomaa, T., Mannila, H., and Toivonen, H. (eds.), \emph{{{ECML}}
+  2002}, volume 2430, pp.\  345--356. Springer Berlin Heidelberg, 2002.
+
+\bibitem[Poincar{\'e}(1896)]{poincare1896calcul}
+Poincar{\'e}, H.
+\newblock \emph{Calcul des Probabilit{\'e}s}.
+\newblock Georges Carr{\'e}, 1896.
+
+\bibitem[Shafer \& Vovk(2008)Shafer and Vovk]{shafer2008tutorial}
+Shafer, G. and Vovk, V.
+\newblock A tutorial on conformal prediction.
+\newblock \emph{Journal of Machine Learning Research}, 9\penalty0
+  (12):\penalty0 371--421, 2008.
+
+\bibitem[Shao(2003)]{shao2003mathematical}
+Shao, J.
+\newblock \emph{Mathematical Statistics}.
+\newblock Springer, 2003.
+
+\bibitem[Shorack(2000)]{shorack2000probability}
+Shorack, G.
+\newblock \emph{Probability for Statisticians}.
+\newblock Springer-Verlag, 2000.
+
+\bibitem[Shorack \& Wellner(2009)Shorack and Wellner]{shorack2009empirical}
+Shorack, G.~R. and Wellner, J.~A.
+\newblock \emph{Empirical Processes with Applications to Statistics}.
+\newblock Society for Industrial and Applied Mathematics, 2009.
+
+\bibitem[Snell et~al.(2023)Snell, Zollo, Deng, Pitassi, and
+  Zemel]{snell2023quantile}
+Snell, J.~C., Zollo, T.~P., Deng, Z., Pitassi, T., and Zemel, R.
+\newblock Quantile risk control: A flexible framework for bounding the
+  probability of high-loss predictions.
+\newblock In \emph{The Eleventh International Conference on Learning
+  Representations}, 2023.
+
+\bibitem[Tukey(1947)]{tukey1947nonparametric}
+Tukey, J.~W.
+\newblock Nonparametric estimation {II}. {S}tatistically equivalent blocks and
+  tolerance regions--the continuous case.
+\newblock \emph{The Annals of Mathematical Statistics}, pp.\  529--539, 1947.
+
+\bibitem[Tukey(1948)]{tukey1948nonparametric}
+Tukey, J.~W.
+\newblock Nonparametric estimation, {III}. {S}tatistically equivalent blocks
+  and multivariate tolerance regions--the discontinuous case.
+\newblock \emph{The Annals of Mathematical Statistics}, pp.\  30--39, 1948.
+
+\bibitem[Vovk et~al.(2005)Vovk, Gammerman, and Shafer]{vovk2005algorithmic}
+Vovk, V., Gammerman, A., and Shafer, G.
+\newblock \emph{Algorithmic Learning in a Random World}.
+\newblock Springer Science \& Business Media, 2005.
+
+\bibitem[Wilks(1941)]{wilks1941determination}
+Wilks, S.~S.
+\newblock Determination of sample sizes for setting tolerance limits.
+\newblock \emph{The Annals of Mathematical Statistics}, 12\penalty0
+  (1):\penalty0 91--96, 1941.
+
+\end{thebibliography}
+
+
+
+\appendix
+\section*{Appendix}
+\addcontentsline{toc}{section}{Appendix}
+
+\begin{table*}[h]
+    \centering
+    \resizebox{0.6\textwidth}{!}{
+    \begin{tabular}{|l|c|c|c|}
+      \hline
+      Algorithm & Expected width  & High-probability depth \\
+      \hline\hline
+      Empirical quantile & $\Omega(\sqrt{n})$ & $\mathbb{P}[C(\bm{x}_*) = \emptyset] \geq \delta$ \\
+      \hline
+      Deep sketch & $\Omega(n)$ &  $R(\delta)$ \\
+      \hline
+      VC & $O(n^{d-\frac{1}{2}})$ & $R(\delta)$ \\
+      \hline
+      Width sketch & $O(n^{d-1})$ & $R(\delta)$ \\
+      \hline
+    \end{tabular}}
+    \caption{Summary of depth-sketching (Deep sketch, VC), width-sketching (Width sketch), and the empirical quantile algorithm. The desired width of the empirical quantile algorithm is arbitrary but, for some $\bm{x}_* \in \mathbb{R}^d$, $\mathbb{E}_{u(\bm{x}_*)}\left[ W(\bm{x}_*,[C_{EQ}(\bm{x}_*, \delta)]) \right] = \Omega(\sqrt{n})$. The desired depth of the width-sketching algorithm is arbitrary, and $R(\delta)$ is arbitrarily small. The complexity of each is assumed to be polynomial in the data size $n$.}
+    \label{tab:alg_summary}
+\end{table*}
+
+\end{document}

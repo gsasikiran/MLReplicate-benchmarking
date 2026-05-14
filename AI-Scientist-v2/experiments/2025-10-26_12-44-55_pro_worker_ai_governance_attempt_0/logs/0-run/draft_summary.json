@@ -1,0 +1,49 @@
+{
+  "Experiment_description": "The experiments aimed to establish a baseline for evaluating AI's impact on workers using synthetic datasets and feedforward neural networks. They involved predicting Worker Impact Scores based on features like job displacement and economic changes.",
+  "Significance": "These experiments are crucial for understanding how AI affects workers, providing a foundational benchmark for future research. The insights gained can guide policy-making and the development of AI systems that better align with pro-worker frameworks.",
+  "Description": "Each experiment used a synthetic dataset to simulate AI's impact on workers, training a feedforward neural network to predict Worker Impact Scores (WIS). The datasets included features such as job displacement, wage changes, and worker satisfaction. Models were evaluated based on training and validation losses and WIS metrics.",
+  "List_of_included_plots": [
+    {
+      "path": "experiments/2025-10-26_12-44-55_pro_worker_ai_governance_attempt_0/logs/0-run/experiment_results/experiment_edd601834d0e47bc9429313f57510c22_proc_2527260/simple_nn_training_validation_loss.png",
+      "description": "This plot demonstrates the training and validation loss over 50 epochs.",
+      "analysis": "The close alignment of training and validation loss curves suggests effective model learning and good generalization without overfitting."
+    },
+    {
+      "path": "experiments/2025-10-26_12-44-55_pro_worker_ai_governance_attempt_0/logs/0-run/experiment_results/experiment_84f9855ada964224be10ec010bdfc7e2_proc_2527262/synthetic_dataset_training_validation_loss.png",
+      "description": "This plot shows the training and validation loss over 50 epochs.",
+      "analysis": "The steady decrease and convergence of losses indicate effective learning, although the small gap between curves suggests room for refinement."
+    },
+    {
+      "path": "experiments/2025-10-26_12-44-55_pro_worker_ai_governance_attempt_0/logs/0-run/experiment_results/experiment_17ca7fa3f56e452fbc27e2059cf4f4e7_proc_2527261/synthetic_worker_data_predictions_vs_truth.png",
+      "description": "The scatter plot shows the relationship between the predictions and the ground truth.",
+      "analysis": "Good prediction accuracy is indicated by alignment with the ideal line, though increased spread at higher values suggests challenges in handling complex interactions."
+    },
+    {
+      "path": "experiments/2025-10-26_12-44-55_pro_worker_ai_governance_attempt_0/logs/0-run/experiment_results/experiment_cdda8e4c48844268ac8e14d88728074a_proc_2527262/synthetic_worker_data_predictions_vs_truth.png",
+      "description": "This scatter plot compares the model's predictions against the ground truth values.",
+      "analysis": "The model shows reasonable accuracy, but the spread at higher values indicates potential degradation in performance for complex scenarios."
+    }
+  ],
+  "Key_numerical_results": [
+    {
+      "result": 0.0008,
+      "description": "Final training and validation loss in Node 17ca7fa3f56e452fbc27e2059cf4f4e7.",
+      "analysis": "These low values suggest effective learning and generalization across training and validation datasets."
+    },
+    {
+      "result": 0.9992,
+      "description": "Final validation WIS in Node 17ca7fa3f56e452fbc27e2059cf4f4e7.",
+      "analysis": "High WIS indicates strong model performance, although slight prediction errors at higher values warrant further investigation."
+    },
+    {
+      "result": 0.0002,
+      "description": "Final training and validation loss in Node cdda8e4c48844268ac8e14d88728074a.",
+      "analysis": "Extremely low loss values suggest highly effective learning and robust model performance."
+    },
+    {
+      "result": 0.9998,
+      "description": "Final validation WIS in Node cdda8e4c48844268ac8e14d88728074a.",
+      "analysis": "The high WIS reflects strong model predictions, though performance at extreme values should be monitored."
+    }
+  ]
+}

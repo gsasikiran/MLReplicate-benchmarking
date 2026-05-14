@@ -1,0 +1,14 @@
+{
+  "run_1": {
+    "avg_entropy": 0.3149310350418091,
+    "avg_novelty": 0.2306086086086086
+  },
+  "run_2": {
+    "avg_entropy": 0.34450575709342957,
+    "avg_novelty": 0.23906306306306307
+  },
+  "run_3": {
+    "avg_entropy": -Infinity,
+    "avg_novelty": 0.22790690690690685
+  }
+}

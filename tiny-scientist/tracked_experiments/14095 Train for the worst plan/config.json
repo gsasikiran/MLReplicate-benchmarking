@@ -1,0 +1,7 @@
+{
+  "intent": "The main goal of this research is to evaluate the effectiveness of masked diffusion models (MDMs) in generative modeling over discrete domains by exploring their training challenges and decoding flexibilities. The main research question is: How do MDMs, despite their computationally intractable training subproblems, achieve significant performance improvements in tasks like Sudoku compared to autoregressive models (ARMs) with more parameters?",
+  "model": "gpt-4o",
+  "budget": 10.0,
+  "timestamp": "20251026_214026",
+  "output_dir": "tracked_experiments/20251026_214026_The_main_goal_of_this_research_is_to_evaluate_the_"
+}

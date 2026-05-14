@@ -1,0 +1,17 @@
+Figure 1: "temperature_trends.png"
+This plot displays the trend of average global temperatures from the year 1900 to 2020. The x-axis represents the years, while the y-axis shows the average global temperature anomalies compared to a baseline average. The graph highlights the increasing trend in temperatures over the past century, with notable fluctuations and peaks corresponding to specific years. This visualization is crucial for understanding the long-term pattern of rising temperatures and can be used to correlate human activities and natural events with temperature changes.
+
+Figure 2: "co2_emissions.png"
+This figure illustrates the annual global CO2 emissions from 1950 to 2020. The x-axis denotes the years, and the y-axis quantifies CO2 emissions in gigatons. A significant upward trend is evident, particularly from the late 20th century onwards, indicating an acceleration in emissions. This plot is instrumental in demonstrating the correlation between industrial activities and increased greenhouse gas emissions, providing a visual representation of the data correlating emissions with industrial growth and energy consumption.
+
+Figure 3: "sea_level_rise.png"
+The plot presents the changes in global mean sea level from 1880 to 2020. The x-axis shows the years, while the y-axis indicates the sea level change in millimeters. The data is plotted as a line graph, highlighting a persistent rise in sea levels over the period, with more rapid increases observed in recent decades. This visualization is essential for emphasizing the impact of climate change on sea levels, helping to connect the dots between melting ice caps, thermal expansion, and rising sea levels.
+
+Figure 4: "renewable_energy_growth.png"
+This plot compares the growth of renewable energy sources from 2000 to 2020. The x-axis represents the years, and the y-axis displays the energy production in terawatt-hours. The plot includes data for various renewable energy sources like solar, wind, and hydroelectric power, each represented by different colors or patterns. The graph shows a significant increase in the adoption of renewable energy, reflecting global efforts to transition to sustainable energy sources. This figure is crucial for showcasing progress in renewable energy technology and policy impacts.
+
+Figure 5: "forest_cover_change.png"
+This figure depicts the change in global forest cover from 1990 to 2020. The x-axis represents the years, and the y-axis shows the area in million hectares. The plot indicates both deforestation and reforestation trends, with a general decline in forest cover, especially in certain regions. This visualization aids in understanding the global impact of deforestation and efforts towards reforestation, providing insights into biodiversity loss and carbon cycle impacts.
+
+Figure 6: "species_extinction_rates.png"
+This plot illustrates the estimated rates of species extinction from 1900 to 2020. The x-axis denotes the years, while the y-axis represents the number of species extinct per decade. The graph shows an alarming increase in extinction rates, particularly in recent decades, highlighting the biodiversity crisis. This plot is significant for conveying the urgency of conservation efforts and the need for measures to protect endangered species and their habitats.

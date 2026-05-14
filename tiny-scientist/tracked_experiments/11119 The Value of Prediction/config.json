@@ -1,0 +1,7 @@
+{
+  "intent": "The main research goal is to analyze the welfare impacts of using machine learning predictions in equity-driven government programs. The main research question is how these impacts compare to alternative policy measures, such as expanding bureaucratic capacity, in contexts like long-term unemployment in Germany.",
+  "model": "gpt-4o",
+  "budget": 10.0,
+  "timestamp": "20251027_071839",
+  "output_dir": "tracked_experiments/20251027_071839_The_main_research_goal_is_to_analyze_the_welfare_i"
+}

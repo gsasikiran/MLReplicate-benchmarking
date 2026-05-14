@@ -1,0 +1,1 @@
+This diagram illustrates the proposed method architecture for enhancing peer review quality through anonymized feedback, an adaptive reward system, and machine learning techniques.

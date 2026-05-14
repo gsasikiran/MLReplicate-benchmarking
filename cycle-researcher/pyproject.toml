@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cycle-researcher-uv"
+version = "0.1.0"
+description = "AI-powered research paper generation and review"
+authors = [
+  { name = "AI Research Team", email = "zhuminjun@westlake.edu.cn" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+urls = { "Homepage" = "https://github.com/zhu-minjun/Researcher" }
+
+dependencies = [
+  "transformers>=4.48.2",
+  "vllm>=0.7.2",
+  "bibtexparser",
+  "datasets>=4.1.1",
+  "matplotlib>=3.9.4",
+  "scikit-learn>=1.6.1",
+  "nvidia-ml-py>=13.580.82",
+  "pypdf2>=3.0.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.uv.sources]
+cycle-researcher-uv = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "cycle-researcher-uv",
+]

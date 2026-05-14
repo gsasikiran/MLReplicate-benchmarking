@@ -1,0 +1,57 @@
+
+TINY-SCIENTIST RUN SUMMARY
+================================================================================
+
+Configuration:
+  Intent: The main research goal is to develop a Bayesian quadrature-based alternative to conformal prediction that provides interpretable guarantees and a richer representation of expected test-time losses. The main research question is how to overcome the limitations of frequentist probability in distribution-free uncertainty quantification methods for machine learning predictions in high-stakes settings.
+  Model: gpt-4o
+  Budget: $10.0
+  Timestamp: 20251026_225909
+
+Timing:
+  Total Duration: 2773.0 seconds (46.2 minutes)
+  
+  Stage Breakdown:
+    Think: 218.1s
+    Code: 520.6s
+    Write: 1988.7s
+
+API Costs:
+  Total Cost: $1.2233
+  Budget: $10.0
+  Used: 12.2%
+
+  Module Breakdown:
+    - Writer: $0.9154
+    - Coder: $0.1671
+    - Thinker: $0.1356
+    - Safety Checker: $0.0052
+    - Reviewer: $0.0000
+
+Resource Usage (Average):
+  CPU: 0.2%
+  Memory: 9.0%
+  GPU Load: 0.0%
+  GPU Memory: 0.0%
+
+Tokens:
+Input tokens: 420,458
+Output tokens: 17,218
+Total tokens: 437,676
+
+Outputs:
+  All files: tracked_experiments/20251026_225909_The_main_research_goal_is_to_develop_a_Bayesian_qu/
+  Research Idea: research_idea.json
+  GitHub Code Search: github_code_search.json (if available)
+  Method Diagram: tiny_scientist_output/method_diagram.svg (if generated)
+  Experiments: tiny_scientist_output/
+  Paper (LaTeX): tiny_scientist_output/latex/
+  Terminal Log: terminal_output.log
+  Detailed Metrics: metrics.json
+  Resource Samples: resource_samples.json
+
+Next Steps:
+  1. Check tiny_scientist_output/ for all generated files
+  2. Review tiny_scientist_output/latex/acl_latex.tex for the paper
+  3. Check tiny_scientist_output/experiment.py for experiment code
+  4. View metrics.json for detailed resource usage

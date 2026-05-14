@@ -1,0 +1,29 @@
+1. Figure Filename: `figure1.png`
+   Description: This plot illustrates the trend of average monthly temperatures over a decade. The x-axis represents the months from January to December, while the y-axis shows the average temperature in degrees Celsius. The plot highlights seasonal variations and long-term climate patterns, with specific emphasis on identifying any anomalies or significant changes in temperature trends over the years.
+
+2. Figure Filename: `figure2.png`
+   Description: This figure shows a comparative analysis of annual rainfall across three different regions. The x-axis lists the years under study, and the y-axis denotes the total annual rainfall in millimeters. Each region is represented with a distinct color or line style, allowing for easy comparison of rainfall patterns and variability between the regions over time.
+
+3. Figure Filename: `figure3.png`
+   Description: This bar chart represents the distribution of energy consumption by sector for a specific year. The x-axis categorizes sectors such as residential, commercial, industrial, and transportation, while the y-axis measures energy consumption in terawatt-hours. The plot provides insight into which sectors consume the most energy and potential areas for efficiency improvements.
+
+4. Figure Filename: `figure4.png`
+   Description: This scatter plot examines the relationship between population growth and urbanization rate. Each point on the plot corresponds to a different city, with the x-axis representing the population growth percentage and the y-axis representing the urbanization rate percentage. The plot can reveal correlations or trends indicating how population changes might influence urban development.
+
+5. Figure Filename: `figure5.png`
+   Description: This line graph displays the historical stock prices of a major technology company over a five-year period. The x-axis denotes time in years, while the y-axis represents stock price in USD. Key events that influenced stock price fluctuations are annotated, providing context for significant spikes or drops in value.
+
+6. Figure Filename: `figure6.png`
+   Description: This heatmap visualizes the distribution of internet usage across different countries. The countries are listed on the y-axis, while the x-axis corresponds to years. The intensity of color in each cell indicates the percentage of the population with internet access, allowing for quick identification of trends and disparities in internet usage globally.
+
+7. Figure Filename: `figure7.png`
+   Description: This pie chart breaks down the market share of various smartphone manufacturers. Each slice of the pie represents a different company, with the size proportional to its market share percentage. The chart provides a clear view of the competitive landscape and the relative dominance of leading manufacturers in the market.
+
+8. Figure Filename: `figure8.png`
+   Description: This histogram depicts the frequency distribution of product ratings in an online store. The x-axis categorizes ratings from 1 to 5 stars, while the y-axis shows the number of products receiving each rating. The chart helps identify consumer satisfaction levels and the overall quality perception of products offered.
+
+9. Figure Filename: `figure9.png`
+   Description: This box plot compares the salaries of employees in different departments within a company. The x-axis lists the departments, and the y-axis shows salary in USD. The box plot visualizes the median, quartiles, and potential outliers, providing insights into salary distribution and equity among departments.
+
+10. Figure Filename: `figure10.png`
+    Description: This radar chart compares the performance of various athletes across multiple sports metrics. Each axis represents a different metric, such as speed, endurance, or strength, and the plotted lines show the performance scores of each athlete. The chart allows for a comprehensive comparison of strengths and weaknesses across different dimensions of athletic performance.

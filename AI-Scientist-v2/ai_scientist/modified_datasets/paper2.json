@@ -1,0 +1,189 @@
+[
+    {
+        "Name": "pro_worker_ai_governance",
+        "Title": "Reimagining AI Safety: A Pro-Worker Framework for the Future of Work",
+        "Short Hypothesis": "Current AI safety discussions neglect the systemic risks posed by generative AI on labor markets, necessitating a shift towards pro-worker governance frameworks that prioritize economic justice.",
+        "Related Work": "While existing literature addresses job displacement and policy interventions related to AI's impact on the labor market, few studies propose a cohesive governance framework focused on worker rights and economic justice. This proposal distinctly integrates these aspects into a comprehensive model for AI governance.",
+        "Abstract": "As artificial intelligence, particularly generative AI, continues to reshape labor markets, traditional AI safety frameworks prioritize existential and technical risks while overlooking critical human-centric challenges. This position paper advocates for a paradigm shift towards a pro-worker governance framework that addresses the systemic risks posed by AI on economic justice and labor rights. We identify six key risks, including the exacerbation of technical debt, disproportionate job displacement, and the monopolistic tendencies of AI firms. By proposing actionable interventions such as collective licensing for AI-generated content, mandatory AI watermarking, and robust retraining policies, we aim to enhance the resilience of labor markets. This paper calls for an inclusive dialogue among stakeholders, emphasizing the need for policies that not only safeguard against the adverse effects of AI but also promote shared prosperity. Our framework aims to establish a sustainable relationship between AI and labor that empowers workers and fosters equitable growth.",
+        "Experiments": [
+            "Conduct a series of surveys and interviews with workers and industry leaders to assess perceptions of generative AI's impact on job security and skills.",
+            "Simulate labor market scenarios using agent-based modeling to evaluate the effects of proposed interventions (e.g., collective licensing, retraining programs) on job displacement and economic outcomes.",
+            "Test the effectiveness of AI watermarking techniques in reducing the prevalence of low-quality AI-generated content and its impact on creative labor markets."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential resistance from major AI firms to adopt pro-worker policies.",
+            "Challenges in designing and implementing collective licensing frameworks across different jurisdictions.",
+            "The complexity of accurately measuring the long-term impacts of proposed interventions on labor markets."
+        ]
+    },
+    {
+        "Name": "worker_centric_ai_safety",
+        "Title": "Reimagining AI Safety: A Worker-Centric Approach to the Future of Work",
+        "Short Hypothesis": "AI safety discussions should shift from a narrow focus on existential risks to encompass the broader, systemic risks generative AI poses to labor markets and worker rights, advocating for frameworks that prioritize economic justice.",
+        "Related Work": "Existing literature discusses job displacement and the need for policy interventions but often lacks a cohesive framework that integrates proactive worker protections and rights within AI governance. This proposal distinguishes itself by advocating for a comprehensive, worker-centric approach that encompasses economic justice and the long-term implications of generative AI.",
+        "Abstract": "The rapid advancement of generative AI technologies presents both opportunities and challenges for the future of work. Current AI safety frameworks predominantly focus on existential risks, neglecting the critical human-centered concerns that arise from AI's integration into labor markets. This position paper advocates for a paradigm shift towards a worker-centric approach to AI safety, emphasizing the need for comprehensive frameworks that prioritize economic justice and worker rights. We identify systemic risks such as job displacement, the concentration of power in AI firms, and the erosion of worker bargaining power. We propose actionable interventions, including collective licensing for AI-generated content, mandatory AI watermarking, and robust retraining programs, to mitigate these risks. By promoting an inclusive dialogue among stakeholders, we aim to establish policies that not only safeguard against adverse impacts but also foster shared prosperity and equitable growth. Our framework seeks to create a sustainable and just relationship between AI technologies and labor, empowering workers in an increasingly automated world.",
+        "Experiments": [
+            "Conduct qualitative interviews with workers across various industries to gather insights on their perceptions of generative AI's impact on job security and the adequacy of current protections.",
+            "Develop agent-based models to simulate labor market dynamics under different scenarios of AI adoption, assessing the effects of proposed interventions on job displacement and economic equity.",
+            "Implement a pilot study evaluating the effectiveness of AI watermarking techniques in preserving creative labor's integrity and compensation, measuring the impact on content quality and worker satisfaction."
+        ],
+        "Risk Factors and Limitations": [
+            "Resistance from powerful AI corporations to adopt comprehensive worker-centric policies.",
+            "Challenges in implementing collective licensing frameworks that are legally enforceable across jurisdictions.",
+            "Difficulty in quantifying the long-term impacts of proposed interventions on labor markets and worker outcomes."
+        ]
+    },
+    {
+        "Name": "ai_worker_protection_framework",
+        "Title": "Redefining AI Governance: Integrating Worker Protections in the Age of Generative AI",
+        "Short Hypothesis": "To effectively mitigate the risks of generative AI on labor markets, we must develop a governance framework that inherently integrates worker protections, focusing on adaptive labor laws and proactive reskilling policies.",
+        "Related Work": "While much of the existing literature emphasizes job displacement and economic implications of AI, our proposal distinctly highlights the need for adaptive legal frameworks that specifically address the rapid changes in labor dynamics due to generative AI. This integration of legal adaptation and worker protection is less explored, making our approach unique.",
+        "Abstract": "As generative AI technologies rapidly reshape labor markets, the urgency for a robust governance framework that prioritizes worker protections becomes paramount. This position paper advocates for a transformative approach to AI governance, integrating adaptive labor laws and proactive reskilling initiatives to address the systemic risks associated with job displacement, power concentration, and economic inequality. We identify key challenges, including the inadequacy of current labor regulations in the face of technological advancements, and propose actionable interventions that involve collaboration between policymakers, labor organizations, and AI firms. Our research will assess the effectiveness of these interventions through empirical analysis, including surveys and case studies, to ensure that worker rights are enshrined in the governance of AI technologies. By prioritizing a human-centric approach in AI development, we aim to foster a sustainable and equitable future for labor in the age of automation.",
+        "Experiments": [
+            "Conduct a series of interviews with policymakers and labor organizations to identify gaps in current labor laws regarding AI technologies.",
+            "Implement case studies analyzing how different jurisdictions are adapting their labor laws in response to AI advancements and their impact on worker protections.",
+            "Evaluate the effectiveness of reskilling programs in various industries through pre- and post-implementation surveys to measure worker satisfaction and economic outcomes."
+        ],
+        "Risk Factors and Limitations": [
+            "Resistance from established industries to adapt labor laws and practices.",
+            "Challenges in measuring the effectiveness of proposed interventions due to varying regional laws and industry standards.",
+            "Potential delays in policy implementation due to bureaucratic processes and differing political agendas."
+        ]
+    },
+    {
+        "Name": "worker_experiences_with_ai",
+        "Title": "Understanding Worker Perspectives: Generative AI's Impact on the Future of Work",
+        "Short Hypothesis": "To effectively address the challenges posed by generative AI, it is crucial to understand workers' firsthand experiences and perceptions, which can inform policies and frameworks that prioritize their rights and needs.",
+        "Related Work": "While numerous studies have explored the theoretical implications of generative AI on labor markets, few focus on the subjective experiences of workers themselves. This proposal seeks to fill that gap by engaging directly with workers to gather qualitative insights that can inform more effective governance frameworks.",
+        "Abstract": "As generative AI technologies become increasingly integrated into various industries, the need to understand their impact on the workforce is paramount. This research proposal aims to conduct qualitative studies that gather firsthand accounts from workers across different sectors regarding their experiences with generative AI. Through interviews and focus groups, we will explore how workers perceive the risks and opportunities associated with these technologies, including their concerns about job security, skill requirements, and the adequacy of current protections. By centering the voices of those directly affected, our research will contribute valuable insights that can inform pro-worker policies and frameworks for responsible AI governance. We anticipate that understanding workers' perspectives will lead to more equitable outcomes in the evolving landscape of work, ensuring that human agency remains at the forefront of technological advancement.",
+        "Experiments": [
+            "Conduct in-depth interviews with workers across various sectors to gather qualitative data on their experiences with generative AI technologies.",
+            "Organize focus groups to facilitate discussions among workers about their perceptions of job security and workplace dynamics in the context of AI integration.",
+            "Analyze the qualitative data using thematic analysis to identify common themes and concerns expressed by workers regarding generative AI."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential biases in participant selection may affect the generalizability of findings.",
+            "Workers may be hesitant to share their honest opinions due to fear of repercussions from employers.",
+            "The subjective nature of qualitative data may pose challenges in drawing broad conclusions."
+        ]
+    },
+    {
+        "Name": "generative_ai_labour_rights",
+        "Title": "Collective Bargaining in the Age of Generative AI: A Framework for Worker Rights",
+        "Short Hypothesis": "The integration of generative AI in workplaces necessitates a reimagining of collective bargaining frameworks to ensure that worker rights are protected and enhanced amidst rapid technological change.",
+        "Related Work": "While literature discusses the impacts of AI on labor markets, few studies have focused on how collective bargaining frameworks can evolve in response to these changes. This proposal aims to fill that gap by specifically analyzing the intersection of generative AI and collective labor rights, providing a novel perspective on governance frameworks.",
+        "Abstract": "As generative AI technologies become increasingly prevalent in the workplace, they pose significant challenges and opportunities for labor rights and collective bargaining. This position paper advocates for a redefined framework of collective bargaining that is responsive to the shifts induced by generative AI. By identifying the potential for AI to disrupt traditional labor dynamics, we propose a set of guidelines and best practices to empower workers and enhance their bargaining power. Our framework emphasizes adaptive mechanisms that facilitate real-time negotiations over wages, working conditions, and AI-related job security. We will explore case studies of industries where generative AI is already in use, analyzing the implications for labor relations and collective agreements. Through empirical research, including surveys and interviews with labor representatives and workers, we aim to gather insights that can inform policy recommendations. This research seeks to contribute to the discourse on AI governance by ensuring that the voices of workers are prioritized in the evolving landscape of work.",
+        "Experiments": [
+            "Conduct interviews with labor union leaders and workers in industries currently using generative AI to assess their perspectives on collective bargaining and labor rights.",
+            "Analyze existing collective bargaining agreements to identify gaps related to AI technologies and propose amendments that reflect the needs of workers.",
+            "Implement a pilot program in collaboration with a labor union to test adaptive bargaining techniques that incorporate AI considerations, measuring worker satisfaction and negotiation outcomes."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential resistance from employers to adopt new collective bargaining frameworks.",
+            "Challenges in ensuring participation from a diverse range of workers to gather comprehensive insights.",
+            "The dynamic nature of AI technologies may outpace the development of policies, making timely interventions difficult."
+        ]
+    },
+    {
+        "Name": "participatory_ai_governance",
+        "Title": "Empowering Workers: A Participatory Governance Model for AI in the Future of Work",
+        "Short Hypothesis": "To effectively mitigate the challenges posed by generative AI on labor markets, it is essential to establish participatory governance frameworks that actively involve workers in decision-making processes, ensuring their rights and needs are prioritized.",
+        "Related Work": "While existing literature highlights the risks and implications of AI on labor markets, few studies emphasize the importance of participatory governance that includes workers in shaping AI policies. This proposal offers a fresh perspective by focusing on worker engagement as a critical component of AI governance, distinguishing it from previous discussions that primarily address technical and existential risks.",
+        "Abstract": "As generative AI technologies increasingly permeate labor markets, the need for effective governance frameworks that prioritize worker rights becomes paramount. This paper advocates for a participatory governance model that engages workers in the decision-making processes surrounding AI deployment in the workplace. By incorporating the voices and experiences of workers, we aim to identify systemic risks associated with generative AI, including job displacement, power imbalances, and the erosion of labor rights. We propose actionable interventions such as worker councils, inclusive policy dialogues, and feedback mechanisms to ensure that AI governance frameworks reflect the needs and concerns of the workforce. Through qualitative research methods, including interviews and focus groups with workers across diverse industries, we will gather insights that inform the development of these participatory frameworks. Our research seeks to contribute to the discourse on AI governance by emphasizing the importance of empowering workers as active stakeholders in shaping the future of work.",
+        "Experiments": [
+            "Conduct focus groups with workers in various sectors to gather qualitative insights on their perceptions of generative AI's impact and their desired involvement in governance processes.",
+            "Develop a pilot worker council model in collaboration with a labor organization to explore how worker engagement can influence AI policy decisions and governance.",
+            "Analyze case studies of existing participatory governance models in other sectors to identify best practices and potential challenges in implementing similar frameworks for AI governance."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential resistance from employers to adopt participatory governance structures.",
+            "Challenges in ensuring diverse representation of workers in focus groups and councils.",
+            "The complexity of balancing worker input with organizational efficiency and strategic goals."
+        ]
+    },
+    {
+        "Name": "worker_feedback_in_ai_governance",
+        "Title": "Integrating Worker Feedback Mechanisms in AI Governance for the Future of Work",
+        "Short Hypothesis": "Effective AI governance frameworks must incorporate structured feedback mechanisms from workers to ensure that generative AI technologies are aligned with labor rights and economic justice.",
+        "Related Work": "Existing literature discusses the implications of AI on labor markets, but few studies focus on the systematic inclusion of worker feedback in AI governance. This proposal uniquely emphasizes establishing formal feedback channels that empower workers to influence AI policy decisions, differentiating it from traditional governance models.",
+        "Abstract": "As generative AI technologies increasingly permeate labor markets, the need for effective governance frameworks that prioritize worker rights becomes paramount. This position paper advocates for the establishment of structured feedback mechanisms that actively involve workers in the decision-making processes surrounding AI deployment in the workplace. By centering the voices and experiences of workers, we aim to identify systemic risks associated with generative AI, including job displacement and erosion of labor rights. We propose actionable interventions such as regular worker consultations, feedback loops, and participatory policy dialogues to ensure that AI governance frameworks reflect the needs and concerns of the workforce. Through qualitative research methods, including interviews and focus groups with workers across diverse industries, we will gather insights that inform the development of these feedback mechanisms. Our research seeks to contribute to the discourse on AI governance by emphasizing the importance of empowering workers as active stakeholders in shaping the future of work.",
+        "Experiments": [
+            "Conduct focus groups with workers in various sectors to gather insights on their perceptions of generative AI's impact and how they envision their involvement in governance processes.",
+            "Develop a pilot feedback mechanism in collaboration with a labor organization to assess the effectiveness of worker input in shaping AI policies, measuring satisfaction and policy alignment.",
+            "Analyze case studies of existing feedback mechanisms in other sectors to identify best practices and potential challenges in implementing similar frameworks for AI governance."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential resistance from employers to adopt feedback mechanisms that allow workers to influence AI policy.",
+            "Challenges in ensuring diverse representation of workers in feedback processes.",
+            "The dynamic nature of AI technologies may outpace the development of feedback mechanisms, making timely interventions difficult."
+        ]
+    },
+    {
+        "Name": "co_creative_ai_labor_solutions",
+        "Title": "Co-Creating Solutions: Practical Approaches to Generative AI in the Workplace",
+        "Short Hypothesis": "To effectively navigate the challenges posed by generative AI, organizations must implement co-creative workshops that engage workers in developing practical solutions that enhance labor rights and job security.",
+        "Related Work": "While previous literature has focused on governance frameworks and worker rights, few studies emphasize the importance of collaborative, hands-on approaches that directly involve workers and employers in the adoption and adaptation of AI technologies. This proposal uniquely addresses this gap by facilitating interactive workshops.",
+        "Abstract": "As generative AI technologies increasingly influence labor markets, it is essential to explore practical interventions that empower workers and enhance their rights. This proposal advocates for the establishment of co-creative workshops that involve workers, employers, and AI developers in collaboratively designing practical solutions to mitigate the risks associated with generative AI. By engaging stakeholders in hands-on sessions, we aim to address concerns related to job security, skill development, and ethical AI use. These workshops will explore how AI can augment human labor rather than replace it, fostering a collaborative relationship between technology and the workforce. Empirical data will be collected through participant feedback and assessments of proposed solutions' effectiveness, focusing on job satisfaction, perceived job security, and the quality of AI-generated outputs. By prioritizing worker input in the AI integration process, we seek to create a more equitable labor environment that recognizes and enhances human agency in the age of automation.",
+        "Experiments": [
+            "Conduct pilot co-creative workshops across various industries to gather qualitative data on worker insights and collaboratively develop practical AI integration strategies.",
+            "Implement feedback mechanisms to assess the effectiveness of proposed AI solutions on job security and satisfaction through pre- and post-workshop surveys.",
+            "Analyze case studies of organizations that have successfully integrated generative AI while maintaining worker involvement to identify best practices and lessons learned."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential resistance from employers to adopt collaborative approaches due to perceived time and resource constraints.",
+            "Challenges in ensuring diverse representation of workers in workshops to gather comprehensive insights.",
+            "The rapidly evolving nature of generative AI may outpace workshop findings, necessitating continuous adaptation of strategies."
+        ]
+    },
+    {
+        "Name": "collaborative_ai_worker_governance",
+        "Title": "Collaborative Governance: Integrating Worker Perspectives in Generative AI Policy Frameworks",
+        "Short Hypothesis": "To effectively address the systemic risks posed by generative AI on labor markets, governance frameworks must actively include worker perspectives through collaborative mechanisms, ensuring that policies prioritize worker rights and economic justice.",
+        "Related Work": "While existing literature discusses the risks of AI on labor markets and the need for worker protections, few studies emphasize collaborative governance models that directly incorporate worker feedback and insights into AI policy decisions. This proposal distinguishes itself by advocating for active worker involvement in shaping AI governance, addressing a critical gap in the literature.",
+        "Abstract": "As generative AI technologies reshape labor markets, the need for governance frameworks that prioritize worker rights and economic justice becomes increasingly urgent. This position paper advocates for a collaborative governance model that integrates worker perspectives into AI policy frameworks. By identifying systemic risks associated with generative AI\u2014such as job displacement, power imbalances, and erosion of labor rights\u2014we propose actionable interventions that facilitate worker engagement in decision-making processes. Our research aims to establish empirical mechanisms for collecting worker feedback, including focus groups, participatory workshops, and regular consultations with labor representatives. By centering the voices of workers, we seek to develop policies that not only mitigate the adverse effects of AI but also empower workers in an increasingly automated economy. This collaborative approach aims to foster a sustainable relationship between technology and labor that ensures equitable outcomes for all stakeholders.",
+        "Experiments": [
+            "Conduct focus groups involving workers from various sectors to explore their perceptions of generative AI and gather insights on desired governance structures.",
+            "Develop and pilot a worker advisory council model in collaboration with labor organizations to evaluate the effectiveness of worker input in shaping AI policies.",
+            "Analyze case studies of organizations that have successfully integrated worker perspectives into AI governance to identify best practices and lessons learned."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential resistance from employers to adopt collaborative governance structures.",
+            "Challenges in ensuring diverse representation of workers in focus groups and councils.",
+            "The rapidly evolving nature of generative AI may necessitate continuous adaptation of governance frameworks, making timely policy actions challenging."
+        ]
+    },
+    {
+        "Name": "economic_theories_in_ai_governance",
+        "Title": "Integrating Economic Theory into AI Governance: A Framework for Worker-Centric Policies",
+        "Short Hypothesis": "To effectively address the systemic risks posed by generative AI on labor markets, governance frameworks must incorporate economic theories that prioritize worker rights, ensuring a balance between technological advancement and labor protection.",
+        "Related Work": "While there is substantial literature on AI's impact on labor markets and worker rights, few studies explicitly integrate economic theories into governance frameworks for AI. This proposal distinguishes itself by applying economic principles to develop actionable policies that enhance worker agency and rights in the context of generative AI.",
+        "Abstract": "As generative AI technologies increasingly shape labor markets, the need for governance frameworks that prioritize worker rights and economic justice becomes crucial. This position paper advocates for a novel approach that integrates economic theories into AI governance, focusing on enhancing worker productivity while safeguarding their rights. By identifying systemic risks associated with generative AI, including job displacement and power imbalances, we propose actionable interventions grounded in economic principles. These interventions include adaptive labor policies influenced by economic theories of labor supply and demand, retraining programs that align with market needs, and collaborative frameworks that ensure fair compensation for content generated by AI. Through empirical research, including pilot studies and simulations, we aim to evaluate the effectiveness of these frameworks in promoting equitable outcomes. By prioritizing economic justice in AI governance, we seek to empower workers and foster a sustainable relationship between technology and labor.",
+        "Experiments": [
+            "Conduct pilot studies in various industries where generative AI is implemented to assess the effectiveness of economic theory-driven policies on worker productivity and rights.",
+            "Develop simulations to model labor market scenarios influenced by different governance frameworks, evaluating outcomes in terms of job security and economic equity.",
+            "Implement feedback mechanisms to gather qualitative insights from workers regarding the perceived effectiveness of economic theory-driven policies in their workplaces."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential resistance from corporations and policymakers to adopt economically driven governance frameworks.",
+            "Challenges in aligning diverse economic theories with practical governance applications in various sectors.",
+            "The dynamic nature of AI technologies may necessitate continuous adaptation of governance frameworks, making timely policy actions challenging."
+        ]
+    },
+    {
+        "Name": "ai_economic_rights_in_governance",
+        "Title": "Navigating Economic Rights: Enhancing AI Governance Through Worker-Centric Policies",
+        "Short Hypothesis": "Integrating economic rights into AI governance frameworks is essential for addressing the systemic risks posed by generative AI on labor markets, ensuring that workers' rights and economic justice are prioritized.",
+        "Related Work": "While existing literature discusses the impact of AI on labor markets and worker rights, there is a scarcity of studies that specifically focus on the integration of economic rights into AI governance frameworks. This proposal uniquely addresses this gap by advocating for economic rights as a cornerstone of AI policy, differentiating it from previous work that primarily emphasizes technical and existential risks.",
+        "Abstract": "As generative AI technologies reshape labor markets, it is increasingly critical to develop governance frameworks that center on workers' economic rights. This position paper advocates for a comprehensive approach that integrates economic rights into AI governance, recognizing the systemic risks associated with job displacement, power imbalances, and income inequality. By identifying actionable interventions\u2014such as legal recognition of digital labor rights, adaptive labor policies influenced by economic theories, and enhanced collective bargaining frameworks\u2014we aim to empower workers in the evolving landscape of work. Through empirical research, including pilot studies and qualitative interviews, we will assess the effectiveness of these frameworks in promoting equitable outcomes and enhancing worker agency. This research seeks to contribute to the discourse on AI governance by ensuring that economic justice is prioritized, fostering a sustainable relationship between technology and labor that benefits all stakeholders.",
+        "Experiments": [
+            "Conduct qualitative interviews with labor representatives and workers to identify gaps in current labor laws regarding economic rights in the context of AI.",
+            "Implement pilot studies in various industries to evaluate the effectiveness of proposed economic rights-driven policies on job security and worker satisfaction.",
+            "Analyze case studies of organizations that have successfully integrated economic rights into their AI governance frameworks to identify best practices and lessons learned."
+        ],
+        "Risk Factors and Limitations": [
+            "Potential resistance from corporations and policymakers to adopt frameworks that prioritize economic rights.",
+            "Challenges in ensuring compliance with newly proposed economic rights across different jurisdictions and sectors.",
+            "The dynamic nature of AI technologies may necessitate continuous adaptation of governance frameworks, making timely implementation challenging."
+        ]
+    }
+]

@@ -1,0 +1,7 @@
+{
+  "intent": "The main research goal is to evaluate and enhance the creative capabilities of language models through minimal algorithmic tasks that abstract real-world problems. The main research question is how different training methods and input manipulations, like seed-conditioning, affect the ability of language models to generate diverse and original outputs in open-ended tasks.",
+  "model": "gpt-4o",
+  "budget": 10.0,
+  "timestamp": "20251026_221931",
+  "output_dir": "tracked_experiments/20251026_221931_The_main_research_goal_is_to_evaluate_and_enhance_"
+}

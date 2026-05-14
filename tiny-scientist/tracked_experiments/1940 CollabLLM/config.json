@@ -1,0 +1,7 @@
+{
+  "intent": "The main research goal is to adapt score matching techniques for datasets with incomplete data. The main research question is how to effectively handle missing data in score matching using importance weighting and variational methods across various data dimensions and complexities.",
+  "model": "gpt-4o",
+  "budget": 10.0,
+  "timestamp": "20251026_210246",
+  "output_dir": "tracked_experiments/20251026_210246_The_main_research_goal_is_to_adapt_score_matching_"
+}

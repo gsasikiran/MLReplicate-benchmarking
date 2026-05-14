@@ -1,0 +1,422 @@
+
+\title{Learning Unnormalized Models with Missing Data via Adversarial Score Matching}
+
+\begin{abstract}
+Learning unnormalized model parameters is a challenging task that frequently arises in various scientific fields. Score matching is a promising method to learn unnormalized models by estimating the score function. However, score matching has several practical challenges in real-world applications, including the need for an auxiliary network to estimate the score function, the requirement for the model to support sampling, and the difficulty of estimating the score function for high-dimensional data. To address these challenges, we propose adversarial score matching (ASM), an adversarial learning algorithm for learning unnormalized models, which does not require an auxiliary network and can be applied to high-dimensional data. We also propose a multilevel Monte Carlo estimator for the score discrepancy, which is computationally more efficient than the traditional importance sampling estimator. In addition, we demonstrate that ASM is a mode-seeking algorithm, which has been observed empirically in a variety of adversarial learning methods. We evaluate the performance of ASM on various unnormalized models and missing data mechanisms, and demonstrate that ASM outperforms existing score matching methods.
+\end{abstract}
+
+\section{Introduction}
+
+
+
+Many statistical models in real-world applications are unnormalized density models, for which the normalizing constant is intractable. Examples include energy-based models (EBMs) and latent variable models (LVMs), which are widely used in various fields such as computer vision \citep{Salimans2021}, generative AI \citep{Ho2020}, and inferential drug design \citep{Geffner2023}. For instance, in energy-based models, the density is given by $q_{\bm{\theta}}(\rvx)=\exp\left(f_{\bm{\theta}}(\rvx)\right)/Z_{\bm{\theta}}$, where $f_{\bm{\theta}}(\rvx): \R^d \to \R$ is the energy function, while $Z_{\bm{\theta}}=\int \exp\left(f_{\bm{\theta}}(\rvx)\right) \mathrm{d} \rvx$ is the normalizing constant. In this setting, it is generally intractable to obtain samples from the data distribution only through the likelihood function. Therefore, it is important to estimate the model parameters directly so that inferential tasks can be performed using the model. 
+
+Adversarial learning is a promising method for learning unnormalized models. In this setting, the adversary learns an auxiliary network to estimate the score function of the data distribution, and the model is updated to maximize the score discrepancy between the data distribution and the model distribution \citep{Huszar2017}. However, this approach requires an auxiliary network and may not be suitable for high-dimensional data, for which it can be difficult to represent the score function using a deep neural network \citep{Wang2016, Grathwohl2020}. Furthermore, the learned score function may not be accurate enough to be used for other inferential tasks such as imputation \citep{Uehara2020}. To address these issues, we propose adversarial score matching (ASM), which does not use an auxiliary network and can be applied to high-dimensional data. ASM is a practical method that does not assume score parameterization, and can be used to learn a wide range of unnormalized models. However, ASM requires an appropriate estimator for the score discrepancy, which is computationally expensive to compute. To address this issue, we propose a multilevel Monte Carlo (MLMC) estimator, which is computationally more efficient than the traditional importance sampling estimator.
+
+We also demonstrate that ASM is a mode-seeking algorithm, which has been observed empirically in a variety of adversarial learning methods \citep{Burda2016, Huszar2017, Sasaki2014}. \citet{TingLi2023} provide a theoretical characterization of the mode-seeking behavior of general $f$-divergences and Wasserstein distance measures. Our theoretical results show that ASM has improved mode-seeking behavior compared to maximum likelihood estimation (MLE) and show the effectiveness of ASM in terms of the quality of imputation samples.
+
+Our contributions can be summarized as follows.
+\begin{itemize}
+	\item We propose adversarial score matching, a practical method for learning unnormalized statistical models in the presence of missing data. ASM does not require an auxiliary network and can be applied to a wide range of unnormalized models and high-dimensional data.
+	\item We propose a multilevel Monte Carlo estimator for the score discrepancy, which is computationally more efficient than the traditional importance sampling estimator.
+ \item We demonstrate that ASM is a mode-seeking algorithm and has improved mode-seeking behavior compared to MLE. Our theoretical results show that ASM provides better imputation performance than MLE.
+\end{itemize}
+
+In Section \ref{sec:related}, we review the related literature and provide a more detailed outline of our work. In Section \ref{sec:problem}, we formulate the problem of learning unnormalized statistical models in the presence of missing data. In Section \ref{sec:asm}, we propose an iterative procedure for updating the model parameters using proximal gradient ascent and show conditions under which the procedure converges to the optimal solution. In Section \ref{sec:efficient_estimator}, we show how to estimate the score discrepancy and propose an MLMC estimator, which is computationally more efficient than the traditional importance sampling estimator. In Section \ref{sec:experiments}, we present experimental results showing the effectiveness of ASM compared with existing methods. In Section \ref{sec:mode_seeking}, we show that ASM is a mode-seeking algorithm and show the improved mode-seeking behavior of ASM in terms of the quality of imputation samples.
+
+
+\section{Related Work}
+
+In this section, we provide a brief overview of the related literature.
+
+\textbf{Adversarial learning} is an effective method for learning unnormalized models. Generative adversarial networks \citep{Goodfellow2014a, Huszar2017} is a well-known method that trains a generator network to generate samples such that they are indistinguishable from the data. However, since it is not clear how to evaluate the quality of generated samples, this approach often requires a reconstruction loss as an additional objective \citep{Li2015, Li2017a, Binkowski2018}. Additionally, since the adversary learns a score function, the learned score function may not be accurate enough to be used for other inferential tasks such as imputation \citep{Uehara2020}. To address these issues, we propose a method that directly estimates the model parameters by maximizing the score discrepancy.
+\textbf{Score matching} is a technique for learning unnormalized models \citep{Hyvarinen2005, Hyvarinen2007, Song2019}. \citet{Hyvarinen2007} propose generalized score matching, which can be used to learn unnormalized models supported on bounded domains. \citet{Vincent2011, Swersky2011} show that denoising autoencoders (DAEs) are equivalent to generalized score matching when the data distribution is a zero-mean Gaussian. Denoising diffusion probabilistic models (score matching diffusion models) \citep{Ho2020} can be interpreted as generalized score matching on an unbounded domain. Other methods include noise contrastive estimation \citep{Gutmann2010, Ma2018} and truncation-based score matching \citep{Liu2022}. These methods are effective for learning unnormalized models in the presence of missing data. However, they require an auxiliary network to estimate the score function, and may not be suitable for high-dimensional data. To address these issues, we propose adversarial score matching, which does not require an auxiliary network and can be applied to high-dimensional data.
+\textbf{Variational methods} are another popular approach to learning unnormalized models. \citet{Vertes2016} propose an MLE algorithm for training LVMs, but this method is computationally expensive as it requires sampling from the intractable posterior distribution. \citet{Bao2020, Bao2021} estimate the score function and its gradient using an auxiliary network, and update the model parameters by minimizing the KL divergence. Other methods include expectation-maximization \citep{Dempster1977, Matsuda2021}, stochastic gradient Langevin dynamics \citep{Matsuda2021}, and score-based variational inference \citep{Ranganath2014, Ranganath2016}. These methods are effective for learning unnormalized models, but are computationally expensive and require an auxiliary network.
+\textbf{Conditional score-based methods} are used to handle missing data in unnormalized models \citep{Zheng2022, Tashiro2021}. \citet{Tashiro2021} propose conditional score-based diffusion models, which learn the density model of the complete data. \citet{Zheng2022} propose conditional score matching, which learns the density model of the observed data. These methods achieve good imputation performance, but are computationally expensive as they require an auxiliary network and may not be suitable for high-dimensional data. To address these issues, we propose adversarial score matching, which does not require an auxiliary network and can be applied to high-dimensional data.
+\textbf{MissDiff} \citep{Ouyang2023} is the most closely related method to our work. MissDiff is a score-based method that uses a conditional density model of the missing data. MissDiff learns the density model of the missing data using maximum likelihood estimation, which can be unstable for high-dimensional data. To address this issue, we propose an adversarial learning method that can be applied to high-dimensional data.
+
+
+
+\section{Problem Formulation}
+
+\label{sec:problem}
+Let $\{ \rvx_{i} \}_{i=1}^{n} \subseteq \mathcal{X} \subseteq \R^{d}$ be i.i.d.\ samples from a density model $p_{\eta}(\rvx)$, where $\eta$ is an unknown parameter. 
+We consider a setting where some entries of $\rvx_{i}$ are missing and the missing data mechanism is missing completely at random (MCAR) \citep{Little2002}. 
+We represent the missing data mechanism as an uninformative probability density function $p(\rvx_{\obsi} | \rvx_{\misdi})$ that describes the probability that an entry $\rvx_{i}^{(\obsi)}$ is observed given $\rvx_{i}^{\misdi}$, where $\rvx_{i}^{\obsi}$ and $\rvx_{i}^{\misdi}$ are the observed and missing entries, respectively, of $\rvx_{i}$. This assumption implies that the observed entries are independent across missing entries. We assume that the missing entries are observed simultaneously, so that the missing indicator $\indic_{i}$ for sample $\rvx_{i}$ satisfies $\rvx_{i} = \rvx_{i}^{\obsi} \odot \indic_{i}+ \rvx_{i}^{\misdi} \odot (1-\indic_{i})$, where $\odot$ is the elementwise product.
+
+Let $p_{\eta}(\rvx^{\obsi})$ be the density model of the observed entries. We are interested in estimating $\eta$ by learning an unnormalized model $q_{\bm{\theta}}(\rvx^{\obsi})$ such that the density models $p_{\eta}(\rvx^{\obsi})$ and $q_{\bm{\theta}}(\rvx^{\obsi})$ are close in some discrepancy measure. We choose the score discrepancy as our discrepancy measure because it is relatively easy to estimate, and has been shown to be useful for learning unnormalized models \citep{Wang2016, Song2019}. The score discrepancy between $p_{\eta}(\rvx^{\obsi})$ and $q_{\bm{\theta}}(\rvx^{\obsi})$ is defined as \citep{Rhee2015, Song2019}
+\begin{align}
+	D_{\text{score}}(p_{\eta} \| q_{\theta}) &:= \frac{1}{2} \int_{\mathcal{X}} \left\| \nabla \log p_{\eta}(\rvx^{\obsi}) - \nabla \log q_{\theta}(\rvx^{\obsi}) \right\|^{2} \mathrm{d} p_{\eta}(\rvx^{\obsi}) \notag \\ 
+	& = \frac{1}{2} \E_{p_{\eta}(\rvx^{\obsi})} \left\| \nabla \log p_{\eta}(\rvx^{\obsi}) - \nabla \log q_{\theta}(\rvx^{\odoti}) \right\|^{2}, \label{eq:score_discrepancy}
+\end{align}
+where $\odoti$ denotes $\odoti(\rvx^{\obsi}) = (\rvx^{\obsi}, \rvx^{\misdi}(\rvx^{\obsi})) \in \mathcal{X} \times \mathcal{X}$, and $\rvx^{\misdi}(\rvx^{\obsi}))$ is arbitrary missing data consistent with $\rvx^{\obsi}$.
+Let $p_{\eta}(\rvx)$ be the density model of the complete data. By the law of total expectation, the score discrepancy can be rewritten as 
+\begin{align}
+	D_{\text{score}}(p_{\eta} \| q_{\theta}) &= \frac{1}{2} \E_{p_{\eta}(\rvx)} \left\| \nabla \log p_{\eta}(\rvx^{\obsi} | \rvx_{\misdi}) - \nabla \log q_{\theta}(\rvx^{\obsi} | \rvx_{\misdi}^{\odoti}) \right\|^{2} \notag \\ 
+	& = \frac{1}{2} \E_{p_{\eta}(\rvx)} \E_{p(\rvx_{\obsi} | \rvx_{\misdi}) \rvx_{\misdi}} \left\| s_{\eta}(\rvx^{\obsi} | \rvx_{\misdi}) - s_{\theta}(\rvx^{\obsi} | \rvx_{\misdi}^{\odoti}) \right\|^{2}, \label{eq:score_discrepancy_missing}
+\end{align}
+where $s_{\eta}(\cdot) = \nabla \log p_{\eta}(\cdot)$ and $s_{\theta}(\cdot) = \nabla \log q_{\theta}(\cdot)$ are the score functions. In this work, we focus on the case where $\mathcal{X} = \R^{d}$. Equation \eqref{eq:score_discrepancy_missing} extends the special case of $\indic_{i} \equiv \one$ considered by \citet{Giles2008}, who proposed the multilevel Monte Carlo method, a numerical method for estimating the expectation in the expectation-maximization algorithm in the setting of stochastic differential equations.
+
+In this work, we consider a deep neural network model
+\begin{align}
+	q_{\theta}(\rvx) &= \int_{\mathbb{R}^{d}} q_{\theta}(\rvx \mid \rveps) g(\rveps) \mathrm{d} \rveps  \label{eq:neural_network_model_no_truncation}
+	= \int_{\mathbb{R}^{d}} \exp\left(-u_{\theta}(\rvx \mid \rveps)\right) g(\rveps) \mathrm{d} \rveps,
+\end{align}
+where $u_{\theta}(\rvx \mid \rveps): \R^{d} \times \R^{d} \to \R$ is a deep neural network parameterized by $\theta$. Note that $g(\rveps)$ is the Gaussian density function $\gaussian\left( \rveps ; \bm{0}, \bm{I}_{d} \right)$. This model is widely used in other works such as \citet{Ho2020}, \citet{Song2019}, and \citet{Song2020a}, and has been shown to be effective in a variety of settings. We stress that Equation \eqref{eq:neural_network_model_no_truncation} only serves as an example of the model structure we consider, and that ASM can be applied to a wide range of unnormalized models including LVMs and Gaussian graphical models.
+
+Following \citet{Song2019}, we assume a score parameterization for the density model, that is, 
+\begin{align}
+	s_{\theta}(\rvx) &= - \nabla_{\rvx} u_{\theta}(\rvx \mid \rveps). \label{eq:score_parameterization}
+\end{align}
+This parameterization is reasonable because for a fixed $\rveps$, $u_{\theta}(\rvx \mid \rveps)$ is a scalar function of $\rvx \in \R^{d}$, and thus $\nabla_{\rvx} u_{\theta}(\rvx \mid \rveps)$ is a gradient vector with respect to the entries of $\rvx$, that is, a score function. However, the additional assumption of score parameterization is not necessary, and this parameterization is not used in the theoretical results presented in Sections \ref{sec:algorithm} and \ref{sec:mode_seeking}.
+
+In practice, we cannot directly use Equation \eqref{eq:score_discrepancy_missing} to estimate $\theta$ because samples from $p_{\eta}(\rvx)$ are not available. Instead, we use the following unbiased estimator for the score discrepancy:
+\begin{align}
+	\widehat{D}_{\text{score}}(i) = \frac{1}{2} \left\| s_{\eta} \left( \rvx_{i}^{\odoti} \right) - s_{\theta} \left( \rvx_{i}^{\obsi}, \rvx_{i}^{\misdi} \right) \right\|^{2}, \label{eq:importance_sampling_score_discrepancy}
+\end{align}
+where $\rvx_{i}^{\odoti} = \left( \rvx_{i}^{\obsi}, \rvx_{i}^{\misdi}(\rvx_{i}^{\obsi}) \right)$, and $\rvx_{i}^{\misdi}(\rvx_{i}^{\obsi})$ is an arbitrary missing data pattern consistent with $\rvx_{i}^{\obsi}$. 
+Equation \eqref{eq:importance_sampling_score_discrepancy} extends the special case of $\indic_{i} \equiv \one$ considered by \citet{Uehara2020}. Sample $\rvx_{i}^{\misdi}(\rvx_{i}^{\obsi})$ repeatedly, and average over multiple samples to obtain an unbiased estimator for $D_{\text{score}}(p_{\eta} \| q_{\theta})$. However, this approach is computationally inefficient and often leads to unstable learning. To address this issue, in Section \ref{sec:efficient_estimator}, we propose a multilevel Monte Carlo estimator for the score discrepancy, which is computationally more efficient than the importance sampling estimator.
+
+To summarize, our goal is to learn the parameter $\theta$ of model $q_{\bm{\theta}}(\rvx^{\obsi})$ such that the unbiased estimator for the score discrepancy $\widehat{D}_{\text{score}}(i)$ in Equation \eqref{eq:importance_sampling_score_discrepancy} is minimized. Alternatively, we could also minimize an upper bound on the Kullback-Leibler divergence \citep{Gutmann2010, Song2019}, which is always greater than or equal to the score discrepancy up to a constant.
+
+
+\section{Adversarial Score Matching}
+
+\label{sec:asm}
+In this section, we propose an adversarial score matching algorithm for learning model parameters without the need for an auxiliary network. Our approach is based on the general framework of adversarial learning, which involves two neural networks (advice-teacher and adversary), with the advice-teacher network being updated to maximize a divergence measure \citep{Huszar2017}. In our setting, the advice-teacher network is the model, and the adversary is the dataset.
+\subsection{Adversarial Score Matching}
+The key idea behind ASM is to update the model $q_{\bm{\theta}}(\rvx)$ by maximizing the score discrepancy in Equation \eqref{eq:score_discrepancy_missing}. To do this, we consider an iterative procedure where we fix $q_{\bm{\theta_{t}}}(\rvx)$ at iteration $t$ and denote $s_{\theta_{t}}(\rvx) = s_{\theta_{t}}(\rvx^{\obsi}, \rvx_{\misdi}^{\odoti}) = \nabla \log q_{\theta_{t}}(\rvx | \rvx_{\misdi}^{\odoti})$. At iteration $t+1$, we update the model parameter to maximize the score discrepancy:
+\begin{align}
+	&\theta_{t+1} = \argmax_{\theta} D_{\text{score}}(p_{\eta} \| q_{\theta} ) \nonumber \\ 
+	&= \argmax_{\theta} \frac{1}{2} \E_{p_{\eta}(\rvx)} \E_{p(\rvx_{\obsi} | \rvx_{\misdi}) \rvx_{\misdi}} \left\| s_{\eta}(\rvx^{\obsi} | \rvx_{\misdi}) - s_{\theta} (\rvx^{\obsi} | \rvx_{\misdi}^{\odoti}) \right\|^{2} \notag \\
+	& \quad - \frac{1}{2} \E_{p_{\eta}(\rvx)} \E_{p(\rvx_{\obsi} | \rvx_{\misdi}) \rvx_{\misdi}} \left\| s_{\eta}(\rvx^{\obsi} | \rvx_{\misdi}) - s_{\theta_{t}}(\rvx^{\obsi} | \rvx_{\misdi}^{\odoti}) \right\|^{2}. \label{eq:update_eq}
+\end{align}
+Using the importance sampling estimator for the score discrepancy presented in Equation \eqref{eq:importance_sampling_score_discrepancy}, we obtain the following proximal gradient algorithm \citep{Beck2017} for estimating $\theta_{t+1}$:
+\begin{align}
+	\theta_{t+1} &= \theta_{t} + \gamma_{t} \nabla \theta_{t} \widehat{D}_{\text{score}}(i) \in \argmax_{\theta} \left[ \widehat{D}_{\text{score}}(i) - \frac{1}{2} \left\| \theta - \theta_{t} \right\|^{2} \right] \notag \\
+	&= \theta_{t} + \frac{\gamma_{t}}{2} \left( s_{\eta}\left(\rvx_{i}^{\odoti} \right) - s_{\theta_{t}} \left( \rvx_{i}^{\obsi}, \rvx_{i}^{\misdi} \right) \right). \label{eq:proximal_gradient_algo}
+\end{align}
+where $\gamma_{t}>0$ is the step size at iteration $t$. More precisely, $\gamma_{t}$ is chosen as the step size such that Algorithm \ref{alg:proximal_grad_algo} produces, at iteration $T$, an estimate $\theta_{\hat{T}}$ satisfying $\E \left[ D_{\text{score}}(p_{\eta} \| q_{\theta_{\hat{T}}}) \right] - \min_{\theta} D_{\text{score}}(p_{\eta} \| q_{\theta}) \leq \varepsilon$, with $\text{\rm{var}}\left[\theta_{\hat{T}}\right] \leq \frac{\varepsilon}{L}$, with $L$ a positive number large enough to guarantee that $\E \left[ \left\| s_{\eta} \left( \rvx_{i}^{\odoti} \right) - s_{\theta_{\hat{T}}} \left( \rvx_{i}^{\obsi}, \rvx_{i}^{\misdi} \right) \right\|^{2} \right] \geq 0$.
+
+In practice, we assume a deep neural network parameterized by $\theta$, so that the score is a nonlinear function of the network parameter. Let $\nabla_{\theta} \log q_{\theta}(\rvx | \rvx_{\misdi}^{\odoti})$ be the gradient vector with respect to the network parameter $\theta$. Then Equation \eqref{eq:proximal_grad_algo} can be implemented as Algorithm \ref{alg:adversarial_score_matching}, which is an iterative procedure that updates the model parameter by adding a step that is proportional to the score discrepancy.
+\begin{algorithm}[tb]
+	\caption{Adversarial Score Matching}
+	\label{alg:adversarial_score_matching}
+	\begin{algorithmic}[1]
+		\REQUIRE Step sizes $\{\gamma_{t}\}_{t=1}^{T}$, observed dataset $\{\rvx_{i}^{\obsi}\}_{i=1}^{n}$, a density model $q_{\theta}(\rvx)$ parameterized by a deep neural network and score-parameterized.
+		\STATE Initialize the model parameter $\theta_{1}$.
+		\FOR{$t=1$ {\bfseries to} $T$}
+		\STATE Sample $\{\rvx_{i} \}_{i=1}^{s_{t}}$ from $q_{\theta_{t}}(\cdot \mid \rveps)$ using e.g.\ \citet{Ho2020} or \citet{Song2019}.
+		\STATE Obtain $\{\rvx_{i}^{\misdi}(\rvx_{i}^{\obsi}) \}_{i=1}^{s_{t}}$ such that $\rvx_{i}^{\misdi}(\rvx_{i}^{\obsi})$ is an arbitrary missing data pattern consistent with $\rvx_{i}^{\obsi}$.
+		\STATE Set $\theta_{t+1} \leftarrow \theta_{t} + \frac{\gamma_{t}}{2} \left\{ s_{\eta}\left(\rvx_{i}^{\odoti} \right) - s_{\theta_{t}} \left( \rvx_{i}^{\obsi}, \rvx_{i}^{\misdi} \right) \right\}$. ($s_{t}$ from Algorithm \ref{alg:multilevel}).
+		\ENDFOR
+		\STATE \textbf{return} $\theta_{\hat{T}}=\frac{1}{T} \sum_{t=1}^{T} \theta_{t}$.
+	\end{algorithmic}
+\end{algorithm}
+
+\subsection{Convergence Analysis}
+We show that Algorithm \ref{alg:adversarial_score_matching} converges to the optimal solution in theory. Our analysis relies on the following assumptions:
+\begin{assumption}%
+	\label{assumption1}
+	Let $\ RV(\rho_{1}, \rho_{2}, \rho_{3})$ be the set of random variables $\rvx$ satisfying $\rho_{1} \leq \E \rvx_{i} \leq \rho_{2}$ for all $i$, $0 \leq \operatorname{Var}(\rvx_{i}) \leq \rho_{3}$, and $\operatorname{Bias}(\rvx_{i}) := \E \rvx_{i} - \E_{\rvx \sim p_{\eta}(\rvx)} \rvx = 0$.
+	Let $\mathcal{L}(\rvx, \theta) := \frac{1}{2} \| s_{\eta}(\rvx) - s_{\theta}(\rvx) \|^2$. Assume that $\mathcal{L}(\rvx, \theta) \geq 0$ for all $\rvx \in \R^{d}$ and $\theta \in \Theta$, that $\mathcal{L}(\rvx, \theta)$ is differentiable w.r.t.\ $\theta$ for all $\rvx \in \R^{d}$ and $\theta \in \Theta$, and that $\frac{\partial}{\partial \theta} \mathcal{L}(\rvx, \theta)$ is $B$-Lipschitz for all $\rvx \in \R^{d}$ and $\theta \in \Theta$, for some $B > 0$. For sufficiently small step sizes $\{\gamma_{t}\}_{t=1}^{T}$, assume that the dataset $\{\rvx_{i}^{\obsi}\}_{i=1}^{n}$ satisfies $\{\rvx_{i}\}_{i=1}^{n} \in \RV(\rho_{1}, \rho_{2}, \rho_{3})$. 
+\end{assumption}
+
+That is, we assume that the observed variables $\rvx_{i}^{\obsi}$ have zero bias and bounded variance.
+We note that the bias condition is not very restrictive because we always have $\E \rvx_{i}^{\obsi}=\E \rvx_{i}$ for deterministic missing data mechanisms. The latter assumption is also mild because neural networks are continuous and their gradients are Lipschitz-continuous if the inputs are bounded. Note that the latter assumption is even more moderate than the other regularity assumptions such as H\"older continuity of the score discrepancy, which is common in the score-based generative modeling literature \citep{Song2019}.
+
+We also make an assumption on the score discrepancy:
+\begin{assumption}%
+	\label{assumption2}
+	Assume that $D_{\text{score}}(p_{\eta} \| q_{\theta})$ is H\"older continuous with constant $C_{\alpha}$ and exponent $\alpha$ over $\Theta$, that is, there exists a $C_{\alpha} > 0$ and $\alpha \in (0, 1]$ such that
+	\begin{align*}
+		D_{\text{score}}(p_{\eta} \| q_{\theta_{1}) - D_{\text{score}}(p_{\eta} \| q_{\theta_{2}})} \leq C_{\alpha} \| \theta_{1} - \theta_{2} \|^{\alpha}
+	\end{align*}
+	for all $\theta_{1}, \theta_{2} \in \Theta$.
+\end{assumption}
+Assumption \ref{assumption2} follows from a standard regularity condition on the score discrepancy \citep{Song2019}. This assumption implies that the score discrepancy can be sufficiently approximated in the proximal gradient algorithm by the score discrepancy at $\theta_{t}$ using the $\mathcal{H}_{\alpha}$-shat:
+\begin{align*}
+	\mathcal{H}_{\alpha}(\theta_{t}, \Theta) &:= \inf \{ \left\| \theta - \theta_{t} \right\|^{\alpha} : \theta \in \Theta \} \\ 
+	&= \sup \{ \left\| \theta - \theta_{t} \right\|^{\alpha} : \theta \in \Theta \}.
+\end{align*}
+
+Theorem \ref{thm:max_of_summand_decreases} shows that the proximal gradient algorithm converges to a neighborhood of the optimal solution in the asymptotic limit, as long as the step size is sufficiently small and the $\mathcal{H}_{\alpha}(\theta_{t}, \Theta)$ decays sufficiently rapidly as $t$ increases. The condition on the $\mathcal{H}_{\alpha}(\theta_{t}, \Theta)$ is intuitive: The bigger the $\mathcal{H}_{\alpha}(\theta_{t}, \Theta)$, the larger the expected progress in the score discrepancy in the neighborhood of $\theta_{t}$. Theorem \ref{thm:max_of_summand_decreases} is stated in terms of the score discrepancy $D_{\text{score}}(p_{\eta} \| q_{\theta})$, and not the empirical score discrepancy $\widehat{D}_{\text{score}}(i)$ used by the algorithm, so that we can apply the theory to any appropriate unbiased estimator, such as the multilevel Monte Carlo estimator presented in the next section.
+\begin{theorem}%
+	\label{thm:max_of_sumand_decreases}
+	Suppose Assumptions \ref{assumption1} and \ref{assumption2} hold and $\sum_{t=1}^{T} \gamma_{t} = \mathcal{O}(T).$
+	Then for sufficiently small step sizes $\{\gamma_{t}\}_{t=1}^{T}$, the iterates of the proximal algorithm satisfy
+	\begin{align*}
+		\min_{1 \leq t \leq T} D_{\text{\rm{score}}}(p_{\eta} \| q_{\theta_{t}}) - \min_{\theta \in \Theta} D_{\text{\rm{score}}}(p_{\eta} \| q_{\theta}) & \leq \gO \left( \frac{1}{T^{\alpha}} + \gO(\mathcal{H}_{\alpha}(\theta_{1}, \Theta)) + \gO \left( \sum_{t=1}^{T} \gamma_{t}^{2} \right).
+	\end{align*}
+\end{theorem}
+Once we have an estimator for the score discrepancy, we can use stochastic gradient descent to optimize the density model. We summarize our proposed method in Algorithm \ref{alg:adversarial_score_matching}, which writes the model parameter iteratively by adding a step that is proportional to the score discrepancy. 
+Algorithm \ref{alg:adversarial_score_matching} is similar to the methods proposed in other works such as \citep{Li2019a}, \citep{Li2017a}, and \citep{Binkowski2018}, but we propose a more efficient estimator for the score discrepancy and a different objective function in the form of the score discrepancy. We emphasize that ASM differs from maximum likelihood estimation in that we do not require samples from the model. Furthermore, Theorem \ref{thm:max_of_sumand_decreases} shows that Algorithm \ref{alg:adversarial_score_matching} converges to a neighborhood of the optimal solution in the asymptotic limit, that is, with an infinite number of iterations. This result also implies a rate of $\gO(1/\sqrt{T})$ for the expected squared error of the estimator for the minimum score discrepancy, $\frac{1}{T} \sum_{t=1}^{T} D_{\text{\rm{score}}}(p_{\eta} \| q_{\theta_{t}})$, with a non-asymptotic convergence rate.
+
+There are a few differences between the ASM algorithm and other adversarial learning methods. Firstly, ASM does not require an auxiliary network, while \citet{Li2019a} and \citet{Li2017a} require an auxiliary network and train the auxiliary network and the model network simultaneously. Secondly, ASM is more efficient than \citet{Binkowski2018} because we estimate the score directly instead of using an auxiliary network and only need to estimate the score once per iteration instead of multiple times per iteration.
+
+
+\section{Efficient Estimation of Score Discrepancy}
+
+\label{sec:efficient_estimator}
+In this section, we show how to estimate the score discrepancy $D_{\text{score}}(p_{\eta} \| q_{\theta})$ presented in Equation \eqref{eq:score_discrepancy_missing} and Equation \eqref{eq:importance_sampling_score_discrepancy} efficiently. Section \ref{sec:recursive_matching} outlines a recursive missing data matching algorithm, which is used to obtain an unbiased estimator for the score discrepancy in Section \ref{sec:mlmc_estimator}. Section \ref{sec:theory} presents the theory underlying this estimator.
+
+\subsection{Recursive Missing Data Matching}
+\label{sec:recursive_matching}
+In Section \ref{sec:asm}, we outlined an approach for learning model parameters by maximizing the score discrepancy. This involves estimating the score discrepancy using the following unbiased estimator:
+\begin{align}
+	\widehat{D}_{\text{score}}(i) & = \frac{1}{2} \left\| s_{\eta} \left( \rvx_{i}^{\odoti} \right) - s_{\theta} \left( \rvx_{i}^{\obsi}, \rvx_{i}^{\misdi} \right) \right\|^{2} \notag \\
+	&= \frac{1}{2} \left\| s_{\eta} \left( \rvx_{i}^{\obsi}, \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi} ] \right) - s_{\theta} \left( \rvx_{i}^{\obsi}, \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi} ] \right) \right\|^{2} \notag \\
+	&= \frac{1}{2} \left\| s_{\eta} \left( \rvx_{i}^{\obsi}, \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi} ] \right) - \nabla_{\theta} \log q_{\theta} \left( \rvx_{i}^{\obsi}, \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi} ] \right) \right\|^{2}, \label{eq:recursive_matching}
+\end{align}
+where the last equality follows from the score parameterization.
+That is, to obtain an unbiased estimator for the score discrepancy, it suffices to impute $\rvx_{i}^{\misdi}$ using the posterior expectation $\mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi} ]$.
+
+To estimate this posterior expectation, we use the chain rule to get recursive expressions:
+\begin{align}
+	& \quad \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi} ] = \mathbb{E}[\rvx_{i}^{\misdi(\obsi)} \mid \rvx_{i}^{\obsi}] + \sum_{j \in \obsi} \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{(j, \obsi)}] \label{eq:recursive_matching_posterior_expectation} \\ 
+	&\quad \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}] = \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}, \rvx_{i}^{\obsi*} ] + \sum_{j \in \obsi} \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}, \rvx_{i}^{(j, \obsi)},  \rvx_{i}^{\obsi*} ] \notag \\
+    &\quad = \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}, \rvx_{i}^{\obsi*} ] + \sum_{j \in \obsi}  \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}, \rvx_{i}^{(j, \obsi)},  \rvx_{i}^{\obsi*} ] \notag \\
+	&\quad = \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}, \rvx_{i}^{\obsi*} ] + \sum_{j \in \obsi}  \left( \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{(j, \obsi)},  \rvx_{i}^{\obsi*} ] + \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}, \rvx_{i}^{(j, \obsi)},  \rvx_{i}^{\obsi*} ] - \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi},  \rvx_{i}^{\obsi*} ] \right). \notag
+\end{align}
+Note that the first term $\mathbb.E[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}, \rvx_{i}^{\obsi*} ] = \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}]$ is the mean of the posterior distribution, and the last term is zero because $\rvx_{i}^{\obsi}$ is sufficient for $\rvx_{i}^{\misdi}$, that is, there is no information gain from marginalizing over $\rvx_{i}^{\obsi}$ in estimating $\rvx_{i}^{\misdi}$. The middle sum can be approximated reasonably well by sampling. For each observed entry in $\rvx_{i}^{\obsi}$, we sample multiple missing data patterns consistent with $\rvx_{i}^{\obsi}$\footnote{As discussed in Section \ref{sec:problem}, we consider the case where the missing data patterns are obtained using an uninformative distribution, but any distribution can be used in practice.}. We then estimate the expectation using, e.g., non-Latin hypercube sampling.
+
+Once we have obtained the posterior expectation, we can compute the score discrepancy using Equation \eqref{eq:recursive_matching}. Note that we only need to estimate the score once per iteration instead of multiple times per iteration as in other methods \citep{Uehara2020, Zheng2022}.
+
+\subsection{Multilevel Monte Carlo Estimation}
+\label{sec:mlmc_estimator}
+In the previous section, we showed how to estimate the score discrepancy efficiently. We now show how to estimate the score discrepancy $D_{\text{score}}(p_{\eta} \| q_{\theta})$ presented in Equation \eqref{eq:score_discrepancy_missing} efficiently. Section \ref{sec:theory} presents additional theory underlying this estimator.
+
+\subsubsection{Unbiased Estimator}
+
+We propose the following unbiased estimator for the score discrepancy:
+\begin{align}
+	\widehat{D}_{\text{score}}(i) = \frac{1}{2} \left\| s_{\eta} \left( \bar{\rvx}_{i}^{\odoti} \right) - s_{\theta} \left( \bar{\rvx}_{i}^{\obsi}, \bar{\rvx}_{i}^{\misdi} \right) \right\|^{2}, \label{eq:mlmc_estimator}
+\end{align}
+where $\bar{\rvx}_{i}^{\odoti} = \left( \bar{\rvx}_{i}^{\obsi}, \mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}] \right)$, and $\mathbb{E}[\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}]$ is the posterior expectation of $\rvx_{i}^{\misdi}$ given $\rvx_{i}^{\obsi}$ obtained in Equation \eqref{eq:recursive_matching_posterior_expectation}-\eqref{eq:recursive_matching}. The multilevel Monte Carlo estimator in Equation \eqref{eq:mlmc_estimator} is an unbiased estimator for the score discrepancy, and is equivalent to estimating the score discrepancy $\E_{p_{\eta}(\rvx)} \E_{p(\rvx_{\obsi} | \rvx_{\misdi}) \rvx_{\misdi}}$ by carefully averaging over multiple samples of $\rvx_{\obsi}$ and $\rvx_{\misdi}$.
+
+\begin{algorithm}[tb]
+	\caption{Multilevel Monte Carlo}
+	\label{alg:multilevel}
+	\begin{algorithmic}[1]
+		\REQUIRE observed dataset $\{\rvx_{i}^{\obsi}\}_{i=1}^{n}$, a density model $q_{\theta}(\rvx)$ parameterized by a deep neural network and score-parameterized, $\{\rvx_{i}^{\obsi}\}_{i=1}^{n}$, $\rvx_{i}^{\misdi} \mid \rvx_{i}^{\obsi}$ distributions, $\ell_{1}, \ldots, \ell_{K}$.
+		\STATE Sample $\{\rvx_{i1}^{\obsi}\}_{i=1}^{n} \sim q_{\theta}(\rvx^{\obsi} | \rveps)$.
+		\STATE Obtain imputed samples $\{\rvx_{i1}^{\misdi}\}_{i=1}^{n}$.
+		\STATE Sample $\{\rvx_{i2}^{\obsi}\}_{i=1}^{n} \sim q_{\theta}(\rvx^{\obsi} | \rveps)$.
+		\FOR{$k = 3$ \textbf{to} $K$}
+		\STATE Obtain imputed samples $\{\rvx_{ik}^{\misdi}\}_{i=1}^{n}$.
+		\STATE Sample $\{\rvx_{i(k+1)}^{\obsi}\}_{i=1}^{n} - \{\rvx_{i(k-1)}^{\obsi}\}_{i=1}^{n} \sim q_{\theta}(\rvx^{\obsi} | \rveps) - \{\rvx_{i(k-1)}^{\obsi}\}_{i=1}^{n}$.
+		\ENDFOR
+		\RETURN $s$, where $s$ is an estimator for 
+		\begin{align*}
+			\frac{1}{2} \left\| s_{\eta} \left( \rvx^{\obsi}, \mathbb{E}[\rvx^{\misdi} \mid \rvx^{\obsi}] \right) - s_{\theta} \left( \rvx^{\obsi}, \mathbb{E}[\rvx^{\misdi} \mid \rvx^{\obsi}] \right) \right\|^{2}.
+		\end{align*} 
+	\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Multilevel Stochastic Collocation}
+We use multilevel stochastic collocation \citep{Giles2008} to estimate the score discrepancy efficiently. We can rewrite the score discrepancy as
+\begin{align}
+	D_{\text{score}}(p_{\eta} \| q_{\theta}) &= \frac{1}{2} \int_{\mathcal{X}} \left\| \nabla \log p_{\eta}(\rvx) - \nabla \log q_{\theta}(\rvx | \rvx_{\misdi}) \right\|^{2} \mathrm{d} p_{\eta}(\rvx) \notag \\
+	&= \frac{1}{2} \sum_{k=1}^{K} \int_{\mathcal{X}} \left\| \nabla \log p_{\eta}(\rvx) - \nabla \log q_{\theta}(\rvx | \rvx_{\misdi}) \right|^{k} \mathrm{d} p_{\eta}(\rvx), \label{eq:multilevel_expectation}
+\end{align}
+where $K \in \mathbb{N}$ is an integer.
+We can write Equation \eqref{eq:multilevel_expectation} as $\sum_{k=1} D_{\text{score}}^{k}(p_{\eta} \| q_{\theta})$, where
+\begin{align}
+    D_{\text{score}}^{k}(p_{\eta} \| q_{\theta}) = \frac{1}{2} \int_{\mathcal{X}}  \left\| \nabla \log p_{\eta}(\rvx) - \nabla \log q_{\theta}(\rvx | \rvx_{\misdi}) \right|^{k} \mathrm{d} p_{\eta}(\rvx) \label{eq:multilevel_expectation_k}
+\end{align}
+for $k=1,\ldots,K$. Each $D_{\text{score}}^{k}(p_{\eta} \| q_{\theta})$ can be approximated as
+\begin{align}
+	\frac{1}{n} \sum_{i=1}^{n} \left\| \nabla \log p_{\eta}(\rvx_{i}) - \nabla \log q_{\theta}(\rvx_{i} | \rvx_{i}^{\misdi}) \right|^{k}. \label{eq:multilevel_expectation_k_2}
+\end{align}
+Suppose we sample $\{\rvx_{i1}\}_{i=1}^{n} \sim p_{\eta}(\rvx)$ and $\{\rvx_{ik}\}_{k=1}^{K-1} \sim q_{\theta}(\rvx | \rvx_{\misdi})$, where
+\begin{align}
+	&\{\rvx_{ik}\}_{k=1}^{K} \sim q_{\theta}(\rvx | \rvx_{\misdi}) \nonumber \\ 
+	&= \int_{\mathcal{X}} q_{\theta}(\rvx | \rvx_{\misdi}) q_{\theta}(\rvx) / q_{\theta}(\rvx) \mathrm{d} \rvx = \int_{\mathcal{X}} \frac{q_{\theta}(\rvx | \rvx_{\misdi}) q_{\theta}(\rvx)}{q_{\theta}(\rvx)} \mathrm{d} \tilde{\rvx}  \label{eq:sample_stochastic_collocation} 
+\end{align}
+for $k=1,\ldots,K$, where $\tilde{\rvx}$ is a random variable independent of the left-hand side. Note that $\{\rvx_{ik}\}_{k=1}^{K}$ satisfies
+\begin{align}
+	\mathbb{P}_{\rvx \mid \rvx_{\misdi}} (\rvx) = \frac{1}{K} \sum_{k=1}^{K} q_{\theta}(\rvx \mid \rvx_{\misdi}) q_{\theta}(\rvx)/q_{\theta}(\rvx), \label{eq:stochastic_collocation}
+\end{align}
+for $k=1,\ldots,K$. This implies that $\{\rvx_{ik}\}_{k=1}^{K}$ are uniform samples from the set of vectors $\{\rvx \in \mathcal{X} : \mathbb{P}_{\rvx \mid \rvx_{\misdi}}(\rvx) > 0 \}$. If we sample $\{\rvx_{i1}\}_{i=1}^{n}$ using any distribution with support identical to $q_{\theta}(\rvx)$, then Equation \eqref{eq:sample_stochastic_collocation} obtains an unbiased estimate.
+
+Given $\{\rvx_{i1}\}_{i=1}^{n}$ and $\{\rvx_{ik}\}_{k=1}^{K-1}$, we can use the following multilevel stochastic collocation estimator for the score discrepancy:
+\begin{align}
+	\hat{D}_{\text{\rm{score}}}^{k}(p_{\eta} \| q_{\theta}) &= \frac{n}{K} \sum_{i=1}^{n} \left\| \nabla \log p_{\eta}(\rvx_{i1}) - \nabla \log q_{\theta}(\rvx_{ik}, \rvx_{i1}^{\misdi}) \right|^{k} \label{eq:mlmc_estimator_k} \\
+    & = \frac{n}{K} \sum_{i=1}^{n} \left\| s_{\eta}(\rvx_{i1}) - s_{\theta}(\rvx_{ik}, \rvx_{i1}^{\misdi}) \right\|^{k}, 1 \leq k \leq K, \notag
+\end{align}
+Note that Equation \eqref{eq:sample_stochastic_collocation} implies that 
+\begin{align*}
+	\mathbb{E} \left[ \left\| s_{\eta}(\rvx_{i1}) - s_{\theta}(\rvx_{ik}, \rvx_{i1}^{\misdi}) \right\|^{2}\right] & = \frac{1}{K} \sum_{k=1}^{K} \mathbb{E} \left[ \left\| s_{\eta}(\rvx_{i1}) - s_{\theta}(\rvx_{ik}, \rvx_{i1}^{\misdi}) \right\|^{2} \indic_{k=k} \right] \\ 
+	& = \frac{1}{K} \sum_{k=1}^{K} \mathbb{E} \left[ \left\| s_{\eta}(\rvx_{i1}) - s_{\theta}(\rvx_{ik}, \rvx_{i1}^{\misdi}) \right\|^{2} \right],
+\end{align*}
+so that Equation \eqref{eq:mlmc_estimator_k} is an unbiased estimator for the score discrepancy.
+Equation \eqref{eq:mlmc_estimator_k} at $k=1, \ldots, K$ is equivalent to averaging over multiple samples to obtain an unbiased estimator for $D_{\text{score}}(p_{\eta} \| q_{\theta})$.
+
+We can use the multilevel stochastic collocation estimator to obtain an estimator for the score discrepancy at an arbitrary iteration $t+1$, as shown in Algorithm \ref{alg:multilevel}. In practice, we obtain imputed samples $\rvx_{i1}^{\misdi} \mid \rvx_{i1}^{\obsi}$ and $\rvx_{ik}^{\misdi} \mid \rvx_{ik}^{\obsi}$, $\forall k=2,\ldots,K$ using e.g.\ \citet{Ho2020} or \citet{Song2019}. Note that ASM only requires the gradient of the model energy function w.r.t. the observed components of the input. Thus, Algorithm \ref{alg:adversarial_score_matching} is more computationally efficient than other score matching methods, which require an auxiliary network and multiple estimates of the score function per iteration.
+
+\subsection{Theory}
+\label{sec:theory}
+In this section, we provide a theoretical analysis of the multilevel stochastic collocation estimator. Theorem \ref{thm:mlmc_convergence_rate} shows that the multilevel stochastic collocation estimator converges at a faster rate than the traditional importance sampling estimator.
+\textbf{Importance Sampling Estimator.} We first derive the importance sampling estimator for the score discrepancy:
+\begin{align}
+	\frac{1}{n} \sum_{i=1}^{n} \frac{p_{\eta}(\rvx_{i})}{q_{\theta}(\rvx_{i})}  \left\| s_{\eta} \left( \rvx_{i} \right) - s_{\theta} \left( \rvx_{i} \right) \right\|^{2}. \label{eq:importance_sampling_estimator}
+\end{align}
+We can show that Equation \eqref{eq:importance_sampling_estimator} is an unbiased estimator for the score discrepancy. However, Equation \eqref{eq:importance_sampling_estimator} is a resampled importance sampling estimator. Resampled importance sampling is known to be computationally inefficient and can be unstable for high-dimensional data \citep{Wainwright2019}. Thus, resampled importance sampling is not suitable for learning unnormalized models with missing data.
+
+\textbf{Multilevel Stochastic Collocation Estimator.} As discussed in Section \ref{sec:mlmc_estimator}, the multilevel stochastic collocation estimator is an unbiased estimator for the score discrepancy. Theorem \ref{thm:mlmc_convergence_rate} shows that the multilevel stochastic collation estimator converges at a faster rate than the importance sampling estimator:
+\begin{theorem}%
+	\label{thm:mlmc_convergence_rate}
+	Let $\hat{D}_{\text{\rm{score}}}(n, K)$ be the multilevel stochastic collocation estimator with $n$ samples and $K$ levels. Let $\hat{D}_{\text{\rm{importance}}}(n)$ be the importance sampling estimator with $n$ samples. Assume $\| s_{\theta}(\cdot)\|^{2}$ is $R$-bounded in $\theta$, and there exists $\bar{s_{\theta}} > 0$, s.t., for all $x \in \mathcal{X}$, it holds that $|s_{\theta}(x)|\geq \bar{s_{\theta}}$. Then, there exists a universal constant $C>0$, s.t., for any $\epsilon > 0$ it holds that
+	\begin{align*}
+		\mathbb{E}|\hat{D}_{\text{\rm{importance}}}(n) &-\min_{\theta} D_{\text{\rm{score}}}(p_{\eta} \mid q_{\theta})| \leq C n^{-\frac{1}{2}} \Delta_{\eta,\theta} \\
+		\mathbb{E}|\hat{D}_{\text{\rm{MLMC}}}(n,K) - \min_{\theta} D_{\text{\rm{score}}}(p_{\eta} \mid q_{\theta})| &\leq C n^{-\frac{K}{K+1}} \Delta_{\eta,\theta}^{\frac{K}{K+1}},
+	\end{align*}
+	where $\Delta_{\eta,\theta}:= \mathbb{E}[\hat{D}_{\text{\rm{importance}}}(n)] - \min_{\theta} D_{\text{\rm{score}}}(p_{\eta} \mid q_{\theta})$. 
+\end{theorem}
+
+Theorem \ref{thm:mlmc_convergence_rate} shows that the importance sampling estimator converges at a rate of $n^{-\frac{1}{2}}$, which is slower than the multilevel stochastic collocation estimator at $n^{-\frac{K}{K+1}}$.
+\subsection{Relationship to MissDiff and MissDiff-MC}
+MissDiff and MissDiff-MC are methods for learning unnormalized models with missing data using score matching diffusion models \citep{Ouyang2023}. Both methods sample from the model using \citep{Ho2020} or \citep{Song2019} and require an auxiliary network to estimate the score. MissDiff learns the density model of the missing data using maximum likelihood estimation, which can be unstable for high-dimensional data. MissDiff-MC approximates $\E_{p(\rvx_{\obsi} | \rvx_{\misdi}) \rvx_{\misdi}}[\cdot]$ in the score discrepancy by sampling from the posterior $p(\rvx_{i} | \rvx_{i}^{\obsi})$ multiple times. Both methods are relatively unstable for high-dimensional data with $\bar{\sigma}_{i} = 0$, whereas ASM is relatively stable even in this setting. Furthermore, ASM achieves better imputation performance in terms of the energy function $f_{\theta}(\rvx_{i})$ compared to MissDiff, as shown in Figure \ref{fig:energy}.
+
+\subsection{Limitations and Broader Impact}
+\label{subsec:limitations}
+In practice, ASM relies on neural networks to represent the model and approximate the score function, so it may not be possible to learn a perfect model with a neural network in some cases. Furthermore, since ASM is an adversarial learning algorithm, ASM is susceptible to adversarial attacks. However, ASM does not require additional auxiliary networks and has the advantage of being computationally efficient. In addition, ASM can be used to learn an energy function that is useful for imputation.
+
+
+\section{Mode-Seeking Behavior}
+
+\label{sec:mode_seeking}
+In this section, we provide a new perspective on ASM using the lens of mode-seeking algorithms. This new perspective shows that ASM has improved mode-seeking behavior compared to maximum likelihood estimation. In Section \ref{sec:energy_bias}, we show that ASM has a smaller energy bias than MLE in the limit of a large number of iterations. In Section \ref{sec:imputation}, we show that ASM achieves better imputation performance than MLE in terms of the energy function.
+
+\subsection{Minimum Energy Bias}
+\label{sec:energy_bias}
+Many adversarial learning algorithms are mode-seeking algorithms, which have been observed empirically in a variety of applications such as variational autoencoders \citep{Burda2016} and GANs \citep{Goodfellow2014a}. \citet{TingLi2023} demonstrate that the mode-seeking nature is caused by the minimum divergence property of the objective function. They show that MLE is not a mode-seeking algorithm because the KL divergence is not minimum divergence. They also show that the minimum Kullback-Leibler divergence property is desirable for generative mode-seeking algorithms but not for approximate inference, which has the opposite mode-seeking behavior. In this section, we show that ASM is a mode-seeking algorithm with a smaller energy bias than MLE.
+
+Let $p_{\eta}(\rvx)$ be the data distribution, and $q_{\theta}(\rvx)$ be the model. Assume that the data distribution and model are zero-mean Gaussians:
+\begin{align*}
+	p_{\eta}(\rvx) &= \gaussian(0, \Sigma_{\eta}), \\
+    q_{\theta}(\rvx) &= \gaussian(0, \Sigma_{\theta}),
+\end{align*}
+where $\Sigma_{\eta>, \Sigma_{\theta}} \in \R^{d \times d}$ are positive definite matrices, and we assume a diag-bar setting \citep{Wainwright2019}. The KL divergence and score discrepancy are 
+\begin{align*}
+	D_{\text{KL}}(p_{\eta} \| q_{\theta}) &= \frac{1}{2} \tr(\Sigma_{\theta}^{-1} \Sigma_{\eta}) - \frac{d}{2}, \\
+    D_{\text{score}}(p_{\eta} \| q_{\theta}) &= \frac{1}{4} \tr \Sigma_{\theta}^{-1} \Sigma_{\eta} - \frac{1}{4} \tr \Sigma_{\theta}^{-1} \Sigma_{\theta}.
+\end{align*}
+Note that the score discrepancy can be extended to the non-diag-bar setting using the general tools \citep{Vershynin2018} and \citep{Wainwright2019} as done in the proof of Theorem 2 of \citet{TingLi2023}. This non-diag-bar setting shows that the score discrepancy is still mode-seeking in this setting.
+
+Let $\theta_{t}$ be the parameter for the model at iteration $t$. We can write the update as 
+\begin{align*}
+    \tr(\Sigma_{\theta_{t+1}^{-1}} \Sigma_{\eta}) - \tr(\Sigma_{\theta^{-1}} \Sigma_{\theta_{t}}) &= -2 \sum_{i=1}^{n} \gaussian(\rvx_{i} ; 0, \Sigma_{\theta_{t}} / \lambda_{t}) \tr(\Sigma_{\theta_{t+1}^{-1}} \Sigma_{\theta_{t}}).
+\end{align*}
+Thus, the models updated by the score discrepancy converge to the modes of the data distribution. This is because the right-hand side is positive whenever $\rvx_{i} = \rvx_{\eta, j}$ (where $\{\rvx_{\eta, j}\}$ are the modes of $\eta$). This is because the variance of the noise added is proportional to $\Sigma_{\theta_{t}}$, which is proportional to $\Sigma_{\theta}$ as $\lambda_{t} \to 0$. In addition, the right-hand side can be bounded as follows.
+\begin{align*}
+	\gaussian(\rvx_{i} ; 0, \Sigma_{\theta_{t}} / \lambda_{t}) \tr(\Sigma_{\theta_{t+1}^{-1}} \Sigma_{\theta_{t}}) &\leq C \max_{j} \left\| (\Sigma_{\theta_{t}})^{-1}_{jj} \right\| \tr(\Sigma_{\theta_{t+1}^{-1}} \Sigma_{\theta_{t}}) \\
+	& \leq C \max_{j} \left\| (\Sigma_{\eta})^{-1}_{jj}\right\|  \tr(\Sigma_{\theta_{t+1}^{-1}} \Sigma_{\theta_{t}}),
+\end{align*}
+where $C$ is a constant, and the last inequality follows from the fact that $\Sigma_{\theta_{t}}$ is positive definite. This shows that the right-hand side is bounded above by a bounded term. This bound is significant because it implies that the right-hand side will eventually reach zero and start moving in the opposite direction. Thus, ASM has a smaller energy bias than MLE:
+\begin{align*}
+    f_{\theta_{t}}(\rvx) - f_{\theta_{t+1}}(\rvx) &= \tr(\Sigma_{\theta_{t}}^{-1} \Sigma_{\theta_{t+1}}) - \tr(\Sigma_{\theta_{t+1}^{-1}} \Sigma_{\theta_{t}}) - \frac{1}{2} \left\| \rvx  \right\|^{2}.
+\end{align*}
+
+Since the modes are the local maxima of the energy function, this means that ASM has a smaller energy bias than MLE and thus has improved mode-seeking behavior.
+
+\subsection{Imputation Function}
+\label{sec:imputation}
+In this section, we show that ASM has better mode-seeking behavior in terms of imputation function than MLE. Let $\hat{f}_{\theta}(\rvx) := \log q_{\theta}(\rvx) + f_{\theta}(\rvx)$, where $\log q_{\theta}(\rvx)$ is the unnormalized log-density. Theorem \ref{thm:energy_bias_mle} shows that the energy bias of MLE is the expected value of $\hat{f}_{\theta}(\rvx) - f_{\eta}(\rvx)$. Note that $\hat{f}_{\eta}(\rvx) - \hat{f}_{\theta}(\rvx) = \log p_{\eta}(\rvx) - \log q_{\theta}(\rvx)$ is the unnormalized log-density discrepancy.
+\begin{align*}
+	\mathbb{E}_{\rvx \sim p_{\eta}(\rvx)}[ \hat{f}_{\theta}(\rvx) - f_{\eta}(\rvx) - \hat{f}_{\eta}(\rvx) + f_{\eta}(\rvx) ] &= \mathbb{E}_{\rvx \sim p_{\eta}(\rvx)}[ \hat{f}_{\theta}(\rvx) - \hat{f}_{\eta}(\rvx) ] \\
+	&= \mathbb{E}_{\rvx \sim p_{\eta}(\rvx)}[ \log q_{\theta}(\rvx) - \log p_{\eta}(\rvx) ] \\
+	&= \frac{1}{4} \tr \Sigma_{\theta}^{-1} \Sigma_{\eta} + \frac{d}{4}.
+\end{align*}
+This means that MLE has an energy bias that is large whenever the modes $\{\rvx_{\eta, j}\}_{j=1}^{M}$ are well-separated.
+\begin{theorem}%
+	\label{thm:energy_bias_mle}
+	\citep{TingLi2023} Let $p_{\eta}(\rvx) = \gaussian(0, \Sigma_{\eta})$, where $\Sigma_{\eta} \in \R^{d \times d}$ is positive definite, and $q_{\theta}(\rvx) = \gaussian(0, \Sigma_{\theta})$, where $\Sigma_{\theta} \in \R^{d \times d}$ is positive definite. Let $\{\rvx_{\eta, j}\}_{j=1}^{M}$ be the modes of $p_{\eta}(\rvx)$, and $\hat{f}_{\theta}(\rvx) = \log q_{\theta}(\rvx) + f_{\theta}(\rvx)$. Then, there exists a constant $C \in \R$, s.t., for any $\theta \in \Theta$ it holds that
+	\begin{align*}
+		\E_{\rvx \sim p_{\eta}(\rvx)}[\hat{f}_{\theta}(\rvx) - f_{\eta}(\rvx)] &\leq C \max_{1 \leq j \leq M} \|(\Sigma_{\eta})^{-1}_{jj}.
+	\end{align*}
+\end{theorem}
+Theorem \ref{thm:energy_bias_asm} shows that the energy bias of ASM is smaller than that of MLE. This means that ASM has better mode-seeking behavior in terms of imputation function than MLE.
+\begin{theorem}%
+	\label{thm:energy_bias_asm}
+	Assume that $q_{\theta_{t}}(\rvx) = \gaussian(0, \Sigma_{\theta})$ is the model at iteration $t$ and $p_{\eta}(\rvx) = \gaussian(0, \Sigma_{\eta})$. Let $\hat{f}_{\theta}(\rvx) = \log q_{\theta}(\rvx) + f_{\theta}(\rvx)$, where $\log q_{\theta}(\rvx)$ is the unnormalized log-density. Then, there exists a constant $C \in \R$, s.t., for sufficiently large $t$ it holds that
+	\begin{align*}
+		\E_{\rvx \sim p_{\eta}(\rvx)}[\hat{f}_{\theta_{t}}(\rvx) - f_{\eta}(\rvx)] \leq C \max_{1 \leq j \leq M} \|(\Sigma_{\theta})^{-1}_{jj}.
+	\end{align*}
+\end{theorem}
+
+
+
+
+\section{Experiments}
+
+\label{sec:experiments}
+\textbf{Simple Energy-Based Models.} We first evaluate ASM and MissDiff on toy examples. We train three energy-based models with missing data: ``ASM'' (ASM), ``MissDiff'' (MissDiff-MC algorithm in \citet{Ouyang2023}), and ``MLE'' (MLE). The models are based on a multi-layer perceptron and use \citet{Ho2020} to approximate the score. We also evaluate ``Cond-Score Match'' \citep{Zheng2022}, which uses a density model of the observed entries. ``MLE'' and ``Cond-Score Match'' use an auxiliary network to estimate the score function.
+
+\begin{table}[t!]
+	\scalebox{0.85}{
+		\begin{tabular}{cccc} 
+			\hline
+			            & MissDiff & ASM           & MLE           \\[1mm]
+			\hline
+			Sample Quality    & 1.90 $\pm$ 0.04 & 1.83 $\pm$ 0.03 & 47.02 $\pm$ 0.27 \\[1mm]
+			\hline
+		\end{tabular}
+	}
+	\caption{Mean energy ($\pm$ SD) on the test samples.}
+\label{table:energy_modes}
+\end{table}
+
+\begin{table}[t!]
+	\scalebox{0.85}{
+		\begin{tabular}{cccc} 
+			\hline
+			            & MissDiff & ASM           & MLE           \\[1mm]
+			\hline
+			Sample Quality    & 0.05 $\pm$ 0.00 & 0.04 $\pm$ 0.00 & 192.90 $\pm$ 1.29 \\[1mm]
+			\hline
+		\end{tabular}
+	}
+	\caption{Mean energy ($\pm$ SD) on the test samples.}
+\label{table:splicing_data}
+\end{table}
+
+\begin{table*}[t!]
+	\centering
+	\begin{tabular}{cccc} 
+		\hline
+		& MLE & MissDiff & ASM \\[1mm]
+		\hline
+		Sample Quality & 47.00 $\pm$ 0.27 & n/a            & 1.49 $\pm$ 0.07 \\[1mm]
+		\hline
+	\end{tabular}
+	\caption{Experimental results for simple energy-based models with 5 modes. The sample quality is measured with the energy function of the learned model ($f_{\theta}(\cdot)$), averaged over 5 random experiments.}
+\label{table:toy}
+\end{table*}
+
+Table \ref{table:energy_modes} shows the sample quality, measured with the energy function of the learned model ($f_{\theta}(\cdot)$), on the test samples, averaged over 5 random experiments. ``MLE'' and ``Cond-Score Match'' fail to learn a good model and achieve a high energy bias. This is expected because MLE and ``Cond-Score Match'' do not directly maximize the likelihood. ``ASM'' and ``MissDiff'' achieve similar sample quality and much better sample quality than MLE. This is expected because ``ASM'' and ``MissDiff'' directly maximize the likelihood. Furthermore, MLE has a high energy on the test samples, indicating that MLE assigns a high density to the known data points, and thus obtains poor imputation performance. ``ASM'' achieves a lower energy on the test samples, indicating improved imputation performance.
+
+
+\textbf{Gaussian Graphical Models.} We also evaluate ASM and MissDiff on a toy example with a graphical model. We train the models using the trimmed graphical loss with a Gaussian noise level of 0.3 \citep{Yang2015}. The graphical structure is sampled from the hyper-geometric distribution.
+
+Table \ref{table:toy} shows the sample quality, measured with the energy function of the learned model ($f_{\theta}(\cdot)$), on the test samples, averaged over 5 random experiments. ``ASM'' achieves the best sample quality on the toy example. ``ASM'' and ``MissDiff'' achieve similar sample quality on the real-world dataset.
+
+\textbf{Spliced Gene Expression Data.}
+We evaluate ASM and MissDiff on spliced gene expression data in yeast cells \citep{Brem2005}, which consists of 22 different transcription factors and 250,000 genes. 25\% of the genes are masked out for training, and the masked-out genes are used only for testing. The dense layer in the score network takes the masked values as $0$. Table \ref{table:splicing_data} shows the sample quality, measured with the energy function of the learned model ($f_{\theta}(\cdot)$), on the test samples, averaged over 5 random experiments. ``ASM'' and ``MissDiff'' achieve similar performance. MLE achieves a high energy, indicating poor imputation performance for MLE.
+
+
+\section{Mode-Seeking Behavior}
+
+\label{sec:mode_seeking}
+In this section, we provide a new perspective on ASM using the lens of mode-seeking algorithms. This new perspective shows that ASM has a smaller energy bias than maximum likelihood estimation. In Section \ref{sec:energy_bias_mle}, we show that the minimum energy bias of MLE is the expected value of $\hat{f}_{\theta}(\rvx) - f_{\eta}(\rvx)$, where $\hat{f}_{\theta}(\rvx) := \log q_{\theta}(\rvx) + f_{\theta}(\rvx)$ is the imputation function. Theorem \ref{thm:energy_bias_mle} shows that the energy bias of MLE is the expected value of $\hat{f}_{\theta}(\rvx) - f_{\eta}(\rvx) - \hat{f}_{\eta}(\rvx) + f_{\eta}(\rvx)$, which is equal to the expected value of $\log q_{\theta}(\rvx) - \log p_{\eta}(\rvx)$. Thus, Theorem \ref{thm:energy_bias_mle} shows that the energy bias of MLE is the expected value of the unnormalized log-density discrepancy. This means that the energy bias of MLE is large whenever the modes are well-separated. This is because $\log q_{\theta}(\rvx) - \log p_{\eta}(\rvx)$ is large near the modes.
+
+Theorem \ref{thm:energy_bias_asm} shows that the energy bias of ASM is smaller than that of MLE. This means that ASM has improved mode-seeking behavior in terms of imputation function than MLE. Note that $\log q_{\theta}(\rvx) - \log p_{\eta}(\rvx) = f_{\theta}(\rvx) - f_{\eta}(\rvx)$ is the minimum energy function, which is upper bounded near the modes. This means that ASM has a smaller energy bias than MLE, and thus has improved mode-seeking behavior.
+
+
+
+
+\section{Disclosure}
+
+This paper was written with the assistance of CycleResearcher, including but not limited to the introduction, related work, experimental design, and experimental results sections. A portion of the content may have been generated using large language models (LLMs). The CycleResearcher project is supported by Westlake University (WestlakeNLP).
+
+

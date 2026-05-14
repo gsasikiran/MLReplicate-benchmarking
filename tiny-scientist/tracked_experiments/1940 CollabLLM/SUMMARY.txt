@@ -1,0 +1,57 @@
+
+TINY-SCIENTIST RUN SUMMARY
+================================================================================
+
+Configuration:
+  Intent: The main research goal is to adapt score matching techniques for datasets with incomplete data. The main research question is how to effectively handle missing data in score matching using importance weighting and variational methods across various data dimensions and complexities.
+  Model: gpt-4o
+  Budget: $10.0
+  Timestamp: 20251026_210246
+
+Timing:
+  Total Duration: 2222.8 seconds (37.0 minutes)
+  
+  Stage Breakdown:
+    Think: 192.9s
+    Code: 123.7s
+    Write: 1863.6s
+
+API Costs:
+  Total Cost: $1.0778
+  Budget: $10.0
+  Used: 10.8%
+
+  Module Breakdown:
+    - Writer: $0.9191
+    - Thinker: $0.1024
+    - Coder: $0.0512
+    - Safety Checker: $0.0050
+    - Reviewer: $0.0000
+
+Resource Usage (Average):
+  CPU: 0.3%
+  Memory: 8.9%
+  GPU Load: 0.0%
+  GPU Memory: 0.0%
+
+Tokens:
+Input tokens: 361,941
+Output tokens: 17,287
+Total tokens: 379,228
+
+Outputs:
+  All files: tracked_experiments/20251026_210246_The_main_research_goal_is_to_adapt_score_matching_/
+  Research Idea: research_idea.json
+  GitHub Code Search: github_code_search.json (if available)
+  Method Diagram: tiny_scientist_output/method_diagram.svg (if generated)
+  Experiments: tiny_scientist_output/
+  Paper (LaTeX): tiny_scientist_output/latex/
+  Terminal Log: terminal_output.log
+  Detailed Metrics: metrics.json
+  Resource Samples: resource_samples.json
+
+Next Steps:
+  1. Check tiny_scientist_output/ for all generated files
+  2. Review tiny_scientist_output/latex/acl_latex.tex for the paper
+  3. Check tiny_scientist_output/experiment.py for experiment code
+  4. View metrics.json for detailed resource usage

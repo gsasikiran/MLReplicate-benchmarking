@@ -1,0 +1,1 @@
+This diagram visualizes the architecture of the adaptive AI governance model, illustrating the flow from input data through predictive analytics to policy recommendations.

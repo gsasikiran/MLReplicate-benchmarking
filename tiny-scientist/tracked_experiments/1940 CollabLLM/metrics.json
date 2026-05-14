@@ -1,0 +1,57 @@
+{
+  "config": {
+    "intent": "The main research goal is to adapt score matching techniques for datasets with incomplete data. The main research question is how to effectively handle missing data in score matching using importance weighting and variational methods across various data dimensions and complexities.",
+    "model": "gpt-4o",
+    "budget": 10.0,
+    "timestamp": "20251026_210246",
+    "output_dir": "tracked_experiments/20251026_210246_The_main_research_goal_is_to_adapt_score_matching_"
+  },
+  "timings": {
+    "total_seconds": 2222.8466935157776,
+    "stages": {
+      "think": 192.91967177391052,
+      "code": 123.66553974151611,
+      "write": 1863.6406183242798
+    }
+  },
+  "costs": {
+    "final_total": 1.0778,
+    "module_costs": {
+      "Safety Checker": 0.005,
+      "Thinker": 0.1024,
+      "Coder": 0.0512,
+      "Writer": 0.9191,
+      "Reviewer": 0.0
+    },
+    "scientist_total": 1.0778,
+    "drawer_cost": 0.0
+  },
+  "resources": {
+    "duration_seconds": 2217.79869055748,
+    "num_samples": 368,
+    "cpu": {
+      "avg": 0.3130434782608698,
+      "max": 1.7,
+      "min": 0.0
+    },
+    "memory": {
+      "avg": 8.922826086956565,
+      "max": 9.2,
+      "min": 8.9
+    },
+    "gpu": {
+      "avg_load": 0.0,
+      "max_load": 0.0,
+      "min_load": 0.0,
+      "avg_memory_percent": 0.02348526664402186,
+      "max_memory_percent": 1.4241536458333335
+    }
+  },
+  "outputs": {
+    "idea": "tracked_experiments/20251026_210246_The_main_research_goal_is_to_adapt_score_matching_/research_idea.json",
+    "github_search": null,
+    "experiments": "tracked_experiments/20251026_210246_The_main_research_goal_is_to_adapt_score_matching_/tiny_scientist_output",
+    "diagrams": "tracked_experiments/20251026_210246_The_main_research_goal_is_to_adapt_score_matching_/tiny_scientist_output/method_diagram.svg",
+    "terminal_log": "tracked_experiments/20251026_210246_The_main_research_goal_is_to_adapt_score_matching_/terminal_output.log"
+  }
+}

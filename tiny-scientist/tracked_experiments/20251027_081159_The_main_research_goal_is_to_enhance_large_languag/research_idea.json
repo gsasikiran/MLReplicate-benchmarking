@@ -1,0 +1,73 @@
+{
+  "Name": "ProactiveMultimodalLLM",
+  "Title": "Proactive Adaptation of Large Language Models in Multimodal Multiturn Interactions",
+  "Problem": "Can large language models (LLMs) be enhanced to proactively detect and adapt to evolving user intents across multiturn interactions by leveraging multimodal cues such as visual and audio inputs? This problem is crucial as user intents are often dynamic and context-dependent, especially in complex settings like customer support or virtual assistant interactions. Current LLMs excel in static contexts but struggle with proactive intent adaptation in dynamic, multiturn, and multimodal environments. For example, in customer support, a user's initial vague complaint might become more specific with additional context, requiring the LLM to adapt its responses accordingly. Literature such as 'Multimodal sentiment analysis' and 'Toward multimodal human-computer interface' highlight the challenges in integrating multimodal signals effectively.",
+  "Importance": "The ability of LLMs to adapt to user intents in real-time is increasingly important as they are deployed in high-stakes settings like customer service and education. According to 'When large language models meet personalization: perspectives of challenges and opportunities,' there is a significant gap in models' capabilities to dynamically adapt to user intents. Addressing this gap could significantly enhance user satisfaction and task performance, aligning with trends towards more interactive and context-aware AI systems, as highlighted in 'A Survey on Evaluation of Large Language Models.'",
+  "Difficulty": "(1) Dynamic intent detection is challenging because human dialogue is inherently fluid, with intents evolving based on conversational context, which is discussed in 'Toward multimodal human-computer interface.' (2) Real-time multimodal integration, involving audio and visual cues, is complex, requiring advanced methods to prevent information overload or misalignment, as noted in 'Multimodal sentiment analysis.' (3) Maintaining computational efficiency while enabling real-time adaptation is challenging, especially in resource-constrained environments, as described in 'Harnessing the Power of LLMs in Practice: A Survey on ChatGPT and Beyond.'",
+  "NoveltyComparison": "Existing works like 'CollabLLM' focus on reward-based adaptation for multiturn interactions but do not fully address the dynamic nature of user intents. 'ContextNav' offers a framework for noise-robust contextualization but lacks proactive intent detection mechanisms. 'CoVLA' excels in cross-modal alignment but is applied to semantic location prediction rather than intent detection in dialogues. Our approach introduces dynamic contextual alignment through real-time feedback loops and multimodal integration, enabling proactive adjustments to user interactions and predicting potential shifts in user goals. This is not realized in existing frameworks, which mostly rely on static or batch-processing methods. Our method also leverages lightweight adapter modules to ensure real-time, resource-efficient adaptation, which is a significant improvement over current models that require retraining for adaptation.",
+  "Approach": "The ProactiveMultimodalLLM employs a hybrid model that integrates dynamic contextual alignment with multimodal integration. (1) Dynamic intent detection is enhanced by a feedback loop mechanism that continuously refines the model's understanding of user intent using the latest conversational context, addressing issues noted in 'Towards a standard for identifying and managing bias in artificial intelligence.' (2) Multimodal integration is achieved by incorporating visual and audio cues to enhance textual understanding, using techniques from 'Multimodal sentiment analysis' to capture nuanced user intents. (3) A lightweight adapter module is designed to ensure real-time adaptation without requiring full model retraining, addressing computational efficiency challenges highlighted in 'A tutorial survey of architectures, algorithms, and applications for deep learning.' These components together enable the model to proactively adjust responses, aligning with evolving user intents and improving interaction quality over time.",
+  "Interestingness": 9,
+  "Feasibility": 8,
+  "Novelty": 8,
+  "IntentAlignment": 9,
+  "Score": 8.5,
+  "Experiment": {
+    "Model": {
+      "Text_Input": {
+        "Type": "TF-IDF",
+        "Output_Dim": 3000
+      },
+      "Image_Input": {
+        "Type": "CNN",
+        "Layers": [
+          {
+            "Type": "Conv2D",
+            "Filters": 16,
+            "Kernel_Size": 3,
+            "Activation": "relu"
+          },
+          {
+            "Type": "MaxPooling2D",
+            "Pool_Size": 2
+          }
+        ],
+        "Flattened_Dim": 400
+      },
+      "Multimodal_Fusion": {
+        "Type": "Concatenate",
+        "Dim": 3400
+      },
+      "Dense_Layers": [
+        {
+          "Units": 64,
+          "Activation": "relu"
+        },
+        {
+          "Units": 2,
+          "Activation": "softmax"
+        }
+      ],
+      "Total_Parameters": 100000
+    },
+    "Dataset": {
+      "Name": "yelp_polarity",
+      "Size": {
+        "Train": 5000,
+        "Validation": 2000,
+        "Test": 2000
+      },
+      "Splits": "70/20/10",
+      "Preprocessing": {
+        "Text": "Lowercasing, TF-IDF (max_features=3000)",
+        "Image": "Normalization, Resizing to 28x28"
+      },
+      "Load_Command": "datasets.load_dataset('yelp_polarity')"
+    },
+    "Metric": {
+      "Primary": "Accuracy",
+      "Secondary": "F1 Score",
+      "Justification": "Accuracy measures overall performance, while F1 Score better handles class imbalance."
+    }
+  },
+  "ExperimentTable": "| Component               | Specification                                                                                             | Justification / Rationale                                                                                                                                                      | Status |\n|-------------------------|-----------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|\n| Model Architecture      | Text: TF-IDF vectorizer (3000 features); Image: CNN with 1 Conv2D (16 filters, 3x3) + MaxPooling (2x2); Dense layers (64 units, softmax output) | TF-IDF is efficient for text features; simple CNN with few layers processes visual cues; small dense layers keep model lightweight, enabling real-time adaptation (Zhang et al., 2015). |        |\n| Dataset                 | Yelp Polarity: 5000 train, 2000 val, 2000 test; Text lowercased and TF-IDF processed; MNIST for images    | Yelp provides sentiment data relevant to intent detection; MNIST simulates visual modality. These datasets are auto-downloadable and manageable in size (Lecun et al., 1998). |        |\n| Baselines               | Logistic Regression (text only), CNN (image only), Multimodal SVM, Previous State-of-the-Art (Zhang et al., 2015) | Comparing against simple models and previous benchmarks provides context for improvements (Cai et al., 2018).                                                            |        |\n| Training Setup          | Adam optimizer, 0.001 learning rate, batch size 32, 10 epochs, run on CPU                                  | Adam is effective for small models; settings ensure feasible training times on modest hardware (Kingma & Ba, 2015).                                                         |        |\n| Evaluation Metrics      | Accuracy for general performance; F1 Score for handling potential class imbalance                          | Accuracy is standard for classification; F1 Score captures precision and recall trade-offs (Sokolova & Lapalme, 2009).                                                      |        |\n| Hyperparameters         | Learning rate: 0.001; Batch size: 32; TF-IDF max_features: 3000; CNN filters: 16, kernel size: 3           | Fine-tuned for balance between training speed and model performance (Goodfellow et al., 2016).                                                                               |        |\n| **Sanity Checks**       | Ensure dataset subsampling: \u22645,000 train, \u22642,000 val/test; Model parameter estimate: \u2264100k parameters; JSON syntax validated | Confirm lightweight architecture and manageability; JSON is free of comments and inline expressions.                                                                       |        |"
+}

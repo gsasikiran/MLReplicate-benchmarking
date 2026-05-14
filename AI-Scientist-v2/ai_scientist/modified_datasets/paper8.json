@@ -1,0 +1,146 @@
+[
+    {
+        "Name": "collab_llm",
+        "Title": "COLLAB LLM: Transforming Large Language Models into Active Collaborators in Multi-Turn Interactions",
+        "Short Hypothesis": "By employing a collaborative simulation and Multiturn-aware Rewards (MR), LLMs can be trained to transition from passive responders to active collaborators, significantly enhancing user experience in multi-turn interactions.",
+        "Related Work": "Current literature primarily focuses on LLMs' capabilities in single-turn tasks or basic multi-agent collaboration without addressing the unique challenges of sustained multi-turn interactions. This proposal distinguishes itself by introducing a collaborative simulation framework to optimize LLM responses based on long-term user intent, an area that remains underexplored.",
+        "Abstract": "Large Language Models (LLMs) typically operate as passive responders, limiting their effectiveness in multi-turn interactions where users have complex, evolving intents. This research introduces COLLAB LLM, a novel training framework that leverages a collaborative simulation to estimate the long-term impact of responses through Multiturn-aware Rewards (MR). By applying reinforcement learning with these rewards, COLLAB LLM encourages active intent discovery and insightful suggestions from the model, thereby transforming the nature of user-LLM interactions. We propose a multiturn interaction benchmark that includes three challenging tasks, such as collaborative document creation. Preliminary results indicate that COLLAB LLM outperforms traditional models with an average of 18.5% higher task performance and 46.3% improved interactivity, as rated by LLM judges. Furthermore, a large user study with 201 participants revealed an increase in user satisfaction by 17.6% and a reduction in time spent by 10.4%. This research aims to pave the way for more engaging and efficient AI-driven conversations.",
+        "Experiments": [
+            "1. Develop a collaborative simulation environment where users can interact with the LLM over multiple turns, tracking user intent across conversations.",
+            "2. Implement Multiturn-aware Rewards (MR) based on the estimated long-term impact of responses, adjusting the LLM's training process to incorporate these rewards.",
+            "3. Evaluate COLLAB LLM against baseline models using three multiturn tasks, measuring task performance, user satisfaction, and conversation efficiency.",
+            "4. Conduct user studies to assess the qualitative aspects of interactions, gathering feedback on perceived collaboration and engagement."
+        ],
+        "Risk Factors and Limitations": [
+            "1. Potential for increased computational overhead due to the collaborative simulation and reward estimation process.",
+            "2. Challenges in accurately modeling user intent and preferences in a dynamic conversation.",
+            "3. The need for a diverse dataset to train and validate the proposed framework effectively."
+        ]
+    },
+    {
+        "Name": "adaptive_llm",
+        "Title": "AdaptiveLLM: Enhancing Multi-Turn Interactions through User-Driven Contextual Learning",
+        "Short Hypothesis": "By integrating user-driven contextual adjustments into the training process, LLMs can improve their adaptability and responsiveness in multi-turn interactions, leading to more efficient and satisfying user experiences.",
+        "Related Work": "Existing literature focuses on evaluating multi-turn interactions and collaborative frameworks but often overlooks how LLMs can dynamically adapt to user corrections and contextual shifts during conversations. This proposal distinguishes itself by emphasizing real-time user feedback as a mechanism for continuous improvement in LLM performance during multi-turn interactions.",
+        "Abstract": "As Large Language Models (LLMs) become integral to multi-turn interactions, their ability to adapt to user corrections and feedback remains underexplored. This research introduces AdaptiveLLM, a novel framework that enhances LLM responsiveness by incorporating user-driven contextual adjustments into the training process. By leveraging real-time feedback during conversations, AdaptiveLLM aims to refine model outputs, allowing LLMs to learn from user interactions dynamically. We propose a user study to assess the effectiveness of AdaptiveLLM in real-world scenarios, comparing it against traditional LLMs that do not incorporate contextual learning. Preliminary evaluations will measure user satisfaction, task completion rates, and interaction efficiency. We anticipate that AdaptiveLLM will demonstrate significant improvements in user engagement and satisfaction, ultimately contributing to the development of more responsive and user-centric AI systems for multi-turn applications.",
+        "Experiments": [
+            "1. Develop a prototype of AdaptiveLLM that integrates a feedback loop for user corrections and contextual adjustments during multi-turn conversations.",
+            "2. Conduct a user study where participants interact with both AdaptiveLLM and a baseline LLM, measuring metrics such as task completion rates, user satisfaction, and the frequency of user corrections.",
+            "3. Analyze the impact of user corrections on the LLM's performance over multiple interaction turns, focusing on how quickly and effectively the model adapts to new contexts.",
+            "4. Evaluate the qualitative aspects of user interactions through post-session interviews to gain insights into user perceptions of responsiveness and adaptability."
+        ],
+        "Risk Factors and Limitations": [
+            "1. The complexity of accurately capturing and integrating user feedback in real-time may present technical challenges.",
+            "2. User variability in correction styles may lead to inconsistent training signals for the model.",
+            "3. The need for a diverse user base to ensure that the model generalizes well across different user behaviors and contexts."
+        ]
+    },
+    {
+        "Name": "intent_alignment_llm",
+        "Title": "Intent Alignment LLM: Facilitating Mutual Understanding in Multi-Turn Interactions",
+        "Short Hypothesis": "By establishing a framework for intent alignment, LLMs can dynamically adapt their responses to better match user intent over multi-turn interactions, leading to improved conversation quality and user satisfaction.",
+        "Related Work": "While recent literature has explored benchmarks for assessing multi-turn capabilities, they often lack frameworks that enable LLMs to actively learn and adapt to user intent over the course of a conversation. This proposal distinguishes itself by introducing an intent alignment mechanism that focuses on mutual learning between users and LLMs, enhancing the collaborative nature of interactions.",
+        "Abstract": "In the realm of multi-turn interactions, Large Language Models (LLMs) often struggle to maintain contextual relevance and adapt to evolving user intents. This research proposes Intent Alignment LLM, a novel framework designed to facilitate mutual understanding between users and LLMs during multi-turn conversations. By implementing an intent alignment mechanism, LLMs will dynamically adjust their responses based on user feedback and conversational context. This framework will be evaluated using a series of multi-turn tasks that require sustained engagement and adaptation, measuring metrics such as user satisfaction, task completion rates, and interaction efficiency. Preliminary experiments are expected to demonstrate significant improvements in LLM performance compared to traditional models, ultimately paving the way for more effective and engaging human-LLM collaborations.",
+        "Experiments": [
+            "1. Develop a prototype of Intent Alignment LLM that incorporates user feedback loops to adjust LLM responses based on evolving user intent.",
+            "2. Conduct multi-turn interaction tasks where users provide feedback at each turn, assessing LLM adaptability and alignment with user goals.",
+            "3. Measure user satisfaction and task completion rates through surveys and quantitative analysis of interaction logs.",
+            "4. Compare performance against traditional LLMs in terms of contextual coherence and responsiveness across multiple turns."
+        ],
+        "Risk Factors and Limitations": [
+            "1. The complexity of implementing real-time feedback loops may introduce computational overhead.",
+            "2. User variability in providing feedback could lead to inconsistent learning signals for the model.",
+            "3. Ensuring the model's adaptability without overfitting to specific user behaviors or preferences."
+        ]
+    },
+    {
+        "Name": "co_creation_llm",
+        "Title": "Co-Creation LLM: Fostering Dynamic User Engagement in Multi-Turn Interactions",
+        "Short Hypothesis": "By integrating a co-creation framework into LLM interactions, we hypothesize that LLMs can enhance user engagement and satisfaction during multi-turn conversations, leading to more effective collaborative outcomes.",
+        "Related Work": "Current approaches to multi-turn interactions primarily focus on reinforcement learning and user feedback mechanisms. However, they often do not emphasize the collaborative aspect of user involvement in creating content or solutions. This proposal distinguishes itself by prioritizing co-creation as a means to dynamically adapt the LLM's responses based on user input, thereby fostering a deeper level of engagement.",
+        "Abstract": "Large Language Models (LLMs) have transformed how users interact with technology, yet their potential in fostering truly collaborative experiences remains underexplored. This research introduces Co-Creation LLM, a novel framework aimed at enhancing user engagement during multi-turn interactions by integrating co-creation principles. Through an interactive dialogue system, users are encouraged to participate actively in shaping the conversation, leading to enriched content and meaningful outcomes. By utilizing reinforcement learning to adapt the LLM's responses based on user contributions, we aim to create a feedback loop that not only improves the quality of interactions but also enhances user satisfaction. We will evaluate Co-Creation LLM against traditional models by conducting user studies across diverse tasks, measuring metrics such as task completion rates, user engagement levels, and qualitative feedback. We anticipate significant improvements in user satisfaction and task performance, paving the way for more interactive and user-centered AI systems.",
+        "Experiments": [
+            "1. Develop a prototype of Co-Creation LLM that allows users to contribute actively to the conversation by suggesting edits, providing context, or choosing directions for the dialogue.",
+            "2. Implement a reinforcement learning mechanism that assesses the quality of user contributions and adjusts model outputs accordingly to optimize engagement.",
+            "3. Conduct a series of user studies comparing Co-Creation LLM with baseline models across various multi-turn tasks, focusing on metrics such as user satisfaction, task completion rates, and engagement duration.",
+            "4. Analyze qualitative feedback from participants regarding their experiences of active participation and perceived collaboration with the LLM."
+        ],
+        "Risk Factors and Limitations": [
+            "1. The complexity of designing a user-friendly interface that effectively facilitates co-creation without overwhelming users.",
+            "2. Variability in user engagement levels, which may lead to inconsistent data for training and evaluation.",
+            "3. Potential challenges in balancing user contributions with model-generated responses to maintain coherence in conversations."
+        ]
+    },
+    {
+        "Name": "user_guided_llm",
+        "Title": "User-Guided LLM: Empowering User Agency in Multi-Turn Conversations",
+        "Short Hypothesis": "By allowing users to define conversational objectives explicitly within multi-turn interactions, LLMs can dynamically adjust their responses to better meet user needs, leading to improved engagement and satisfaction.",
+        "Related Work": "Existing literature primarily focuses on enhancing LLMs' adaptability to user feedback and intent. This proposal distinguishes itself by emphasizing user control over conversational objectives, thereby facilitating a more collaborative interaction that empowers users to shape the conversation's direction.",
+        "Abstract": "Current Large Language Models (LLMs) often operate within predefined conversational structures, limiting user agency in shaping dialogues. This research introduces User-Guided LLM, a novel framework that empowers users to explicitly set conversational objectives during multi-turn interactions. By implementing a user-driven interface, users can specify goals, preferences, and desired outcomes, allowing the LLM to dynamically adjust its responses to align with these objectives. We will evaluate User-Guided LLM through a series of multi-turn tasks in which users can guide the conversation and assess the model's performance based on metrics such as task completion, user satisfaction, and engagement levels. Preliminary results are expected to demonstrate significant improvements in user experience compared to traditional LLMs. This research aims to create a more user-centric AI that prioritizes agency and collaborative dialogue.",
+        "Experiments": [
+            "1. Develop a prototype of User-Guided LLM that incorporates user-defined objectives into the conversation flow.",
+            "2. Conduct user studies where participants interact with both User-Guided LLM and a baseline LLM, allowing them to set their own conversational goals and measuring metrics such as task completion rates, user satisfaction, and engagement duration.",
+            "3. Analyze how well the User-Guided LLM adapts to diverse user objectives across various multi-turn tasks, focusing on the quality and relevance of responses.",
+            "4. Gather qualitative feedback from users regarding their experiences of agency and control in the conversation."
+        ],
+        "Risk Factors and Limitations": [
+            "1. Complexity in designing a user interface that effectively allows users to define and communicate their objectives.",
+            "2. The challenge of ensuring that the LLM can interpret user-defined objectives accurately without ambiguity.",
+            "3. Variability in user engagement and motivation levels, which may impact the effectiveness of the proposed framework."
+        ]
+    },
+    {
+        "Name": "collab_llm",
+        "Title": "COLLAB LLM: Transforming Large Language Models into Active Collaborators in Multi-Turn Interactions",
+        "Short Hypothesis": "By employing a collaborative simulation and Multiturn-aware Rewards (MR), LLMs can be trained to transition from passive responders to active collaborators, significantly enhancing user experience in multi-turn interactions.",
+        "Related Work": "Current literature primarily focuses on LLMs' capabilities in single-turn tasks or basic multi-agent collaboration without addressing the unique challenges of sustained multi-turn interactions. This proposal distinguishes itself by introducing a collaborative simulation framework to optimize LLM responses based on long-term user intent, an area that remains underexplored.",
+        "Abstract": "Large Language Models (LLMs) typically operate as passive responders, limiting their effectiveness in multi-turn interactions where users have complex, evolving intents. This research introduces COLLAB LLM, a novel training framework that leverages a collaborative simulation to estimate the long-term impact of responses through Multiturn-aware Rewards (MR). By applying reinforcement learning with these rewards, COLLAB LLM encourages active intent discovery and insightful suggestions from the model, thereby transforming the nature of user-LLM interactions. We propose a multiturn interaction benchmark that includes three challenging tasks, such as collaborative document creation. Preliminary results indicate that COLLAB LLM outperforms traditional models with an average of 18.5% higher task performance and 46.3% improved interactivity, as rated by LLM judges. Furthermore, a large user study with 201 participants revealed an increase in user satisfaction by 17.6% and a reduction in time spent by 10.4%. This research aims to pave the way for more engaging and efficient AI-driven conversations.",
+        "Experiments": [
+            "1. Develop a collaborative simulation environment where users can interact with the LLM over multiple turns, tracking user intent across conversations.",
+            "2. Implement Multiturn-aware Rewards (MR) based on the estimated long-term impact of responses, adjusting the LLM's training process to incorporate these rewards.",
+            "3. Evaluate COLLAB LLM against baseline models using three multiturn tasks, measuring task performance (accuracy, completion rates), user satisfaction (surveys), and conversation efficiency (time spent).",
+            "4. Conduct user studies to assess the qualitative aspects of interactions, gathering feedback on perceived collaboration and engagement."
+        ],
+        "Risk Factors and Limitations": [
+            "1. Potential for increased computational overhead due to the collaborative simulation and reward estimation process.",
+            "2. Challenges in accurately modeling user intent and preferences in a dynamic conversation.",
+            "3. The need for a diverse dataset to train and validate the proposed framework effectively."
+        ]
+    },
+    {
+        "Name": "dynamic_intent_discovery_llm",
+        "Title": "Dynamic Intent Discovery LLM: Enhancing User Engagement through Context-Aware Multi-Turn Interactions",
+        "Short Hypothesis": "By implementing a dynamic intent discovery mechanism that leverages user feedback and contextual cues over multi-turn interactions, LLMs can significantly improve their responsiveness and align more closely with evolving user goals, resulting in enhanced user satisfaction.",
+        "Related Work": "Current research predominantly explores static models that handle multi-turn interactions without sufficiently adapting to real-time user feedback or shifts in intent. This proposal distinguishes itself by integrating a dynamic intent discovery framework that actively learns and adapts to user inputs, thereby fostering a more engaging and personalized interaction experience.",
+        "Abstract": "Large Language Models (LLMs) often struggle to maintain contextual relevance in multi-turn conversations, resulting in suboptimal user engagement. This study introduces Dynamic Intent Discovery LLM, a novel framework designed to enhance LLM responsiveness by dynamically discovering user intent through contextual cues and iterative feedback across multiple interaction turns. By employing a multi-layered intent recognition system, this framework adapts LLM responses based on user interactions, allowing for a more nuanced understanding of user goals. We will evaluate the effectiveness of this approach through a series of multi-turn tasks where users provide feedback in real-time. Metrics such as task completion rates, user satisfaction, and engagement duration will be assessed to measure the impact of the proposed framework. We anticipate significant improvements in user experience compared to baseline models, paving the way for more responsive and user-centered AI-driven conversations.",
+        "Experiments": [
+            "1. Develop a prototype of Dynamic Intent Discovery LLM that implements a multi-layered intent recognition system to adapt responses based on user feedback.",
+            "2. Conduct a series of multi-turn interaction tasks where users can provide feedback at each turn, measuring the model's adaptability and alignment with user goals.",
+            "3. Evaluate performance against traditional LLMs, focusing on metrics such as task completion rates, user satisfaction (via surveys), and engagement duration.",
+            "4. Analyze qualitative feedback from participants regarding their perception of the LLM's responsiveness and adaptability in the conversation."
+        ],
+        "Risk Factors and Limitations": [
+            "1. The complexity of accurately capturing and interpreting user feedback in real-time may introduce challenges.",
+            "2. Variability in user engagement and input quality may affect the learning signals for the model.",
+            "3. There may be a need for a diverse dataset to train and validate the proposed framework effectively."
+        ]
+    },
+    {
+        "Name": "dynamic_user_modeling_llm",
+        "Title": "Dynamic User Modeling LLM: Enhancing Multi-Turn Interactions through Emotional and Personality Awareness",
+        "Short Hypothesis": "By integrating dynamic user modeling that accounts for emotional states and personality traits, LLMs can significantly improve their responsiveness and alignment with evolving user goals in multi-turn interactions, leading to enhanced user satisfaction.",
+        "Related Work": "While existing literature has explored frameworks for multi-turn interactions, they often overlook the role of user emotional dynamics and personality traits in shaping conversational responses. This proposal distinguishes itself by integrating these elements into a unified framework for dynamic user modeling, thus addressing a critical gap in the current understanding of user interactions.",
+        "Abstract": "Large Language Models (LLMs) often struggle to maintain contextual relevance and adapt to user preferences in multi-turn conversations. This research introduces Dynamic User Modeling LLM, a novel framework that enhances LLM responsiveness by dynamically adjusting its responses based on user emotional states and personality traits. By employing sentiment analysis and personality profiling, this framework allows the LLM to understand and adapt to user needs more effectively over multiple interaction turns. We will evaluate the effectiveness of this approach through a series of multi-turn tasks where users provide feedback, measuring metrics such as task completion rates, user satisfaction, and engagement duration. We anticipate significant improvements in user experience compared to baseline models, paving the way for more responsive and user-centered AI-driven conversations.",
+        "Experiments": [
+            "1. Develop a prototype of Dynamic User Modeling LLM that implements sentiment analysis and personality profiling to adapt responses based on user feedback.",
+            "2. Conduct a series of multi-turn interaction tasks where users provide feedback at each turn, measuring the model's adaptability and alignment with user emotional and personality dynamics.",
+            "3. Evaluate performance against traditional LLMs, focusing on metrics such as task completion rates, user satisfaction (via surveys), and engagement duration.",
+            "4. Gather qualitative feedback from participants regarding their perception of the LLM's responsiveness and adaptability in the conversation."
+        ],
+        "Risk Factors and Limitations": [
+            "1. The complexity of accurately capturing and interpreting user emotional states and personality traits in real-time may introduce challenges.",
+            "2. Variability in user engagement and input quality may affect the learning signals for the model.",
+            "3. There may be a need for a diverse dataset to train and validate the proposed framework effectively."
+        ]
+    }
+]

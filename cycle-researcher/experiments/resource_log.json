@@ -1,0 +1,412 @@
+[
+  {
+    "timestamp": "2025-10-20T13:41:09.379416",
+    "function": "main",
+    "wall_time_sec": 194.45446874853224,
+    "ram_delta_MB": 54.25,
+    "disk_read_delta_MB": 0.0,
+    "disk_write_delta_MB": 0.171875,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 72,
+        "mem_util_percent": 9
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 5383,
+      "input": 5561,
+      "output": 13872
+    },
+    "filename": "53_Position_The_AI_Conference_.json"
+  },
+  {
+    "timestamp": "2025-10-20T13:47:48.498820",
+    "function": "main",
+    "wall_time_sec": 239.517562456429,
+    "ram_delta_MB": 189.12890625,
+    "disk_read_delta_MB": 0.0,
+    "disk_write_delta_MB": 0.19140625,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 57,
+        "mem_util_percent": 7
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 5383,
+      "input": 5561,
+      "output": 13872
+    },
+    "filename": "53_Position_The_AI_Conference_.json"
+  },
+  {
+    "timestamp": "2025-10-20T13:53:38.055453",
+    "function": "main",
+    "wall_time_sec": 262.03557326924056,
+    "ram_delta_MB": 192.42578125,
+    "disk_read_delta_MB": 0.0,
+    "disk_write_delta_MB": 0.18359375,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 85,
+        "mem_util_percent": 11
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 5383,
+      "input": 5561,
+      "output": 15362
+    },
+    "filename": "53_Position_The_AI_Conference_.json"
+  },
+  {
+    "timestamp": "2025-10-20T13:57:38.447318",
+    "function": "main",
+    "wall_time_sec": 240.2152044782415,
+    "ram_delta_MB": 57.203125,
+    "disk_read_delta_MB": 0.0,
+    "disk_write_delta_MB": 0.203125,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 93,
+        "mem_util_percent": 12
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 2946,
+      "input": 3124,
+      "output": 18995
+    },
+    "filename": "11432_Conformal_Prediction_as_.json"
+  },
+  {
+    "timestamp": "2025-10-20T14:01:34.700995",
+    "function": "main",
+    "wall_time_sec": 236.07998955529183,
+    "ram_delta_MB": 0.23828125,
+    "disk_read_delta_MB": 0.01171875,
+    "disk_write_delta_MB": 0.08203125,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 48,
+        "mem_util_percent": 6
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 22011,
+      "input": 22189,
+      "output": 16619
+    },
+    "filename": "12175_Roll_the_dice_look_befor.json"
+  },
+  {
+    "timestamp": "2025-10-20T14:05:33.554018",
+    "function": "main",
+    "wall_time_sec": 238.67025705054402,
+    "ram_delta_MB": 6.4140625,
+    "disk_read_delta_MB": 0.0,
+    "disk_write_delta_MB": 0.1953125,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 45,
+        "mem_util_percent": 5
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 6683,
+      "input": 6861,
+      "output": 18055
+    },
+    "filename": "14095_Train_for_the_Worst_Plan.json"
+  },
+  {
+    "timestamp": "2025-10-20T14:09:47.074814",
+    "function": "main",
+    "wall_time_sec": 253.3462131312117,
+    "ram_delta_MB": -0.828125,
+    "disk_read_delta_MB": 0.0,
+    "disk_write_delta_MB": 0.19140625,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 72,
+        "mem_util_percent": 9
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 16859,
+      "input": 17037,
+      "output": 17865
+    },
+    "filename": "12176_Score_Matching_with_Miss.json"
+  },
+  {
+    "timestamp": "2025-10-20T14:13:53.500840",
+    "function": "main",
+    "wall_time_sec": 246.25005207024515,
+    "ram_delta_MB": 4.796875,
+    "disk_read_delta_MB": 0.0,
+    "disk_write_delta_MB": 0.2265625,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 49,
+        "mem_util_percent": 6
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 8683,
+      "input": 8861,
+      "output": 18997
+    },
+    "filename": "1940_CollabLLM_From_Passive_Re.json"
+  },
+  {
+    "timestamp": "2025-10-20T14:18:05.251789",
+    "function": "main",
+    "wall_time_sec": 251.5734902592376,
+    "ram_delta_MB": 2.046875,
+    "disk_read_delta_MB": 0.0,
+    "disk_write_delta_MB": 0.2421875,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 100,
+        "mem_util_percent": 13
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 11668,
+      "input": 11846,
+      "output": 18996
+    },
+    "filename": "463_Position_AI_Safety_should_.json"
+  },
+  {
+    "timestamp": "2025-10-20T14:21:51.735360",
+    "function": "main",
+    "wall_time_sec": 226.317932237871,
+    "ram_delta_MB": 0.03515625,
+    "disk_read_delta_MB": 0.0,
+    "disk_write_delta_MB": 0.19140625,
+    "gpu": [
+      {
+        "device": 0,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 19,
+        "mem_util_percent": 2
+      },
+      {
+        "device": 1,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 2,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      },
+      {
+        "device": 3,
+        "gpu_mem_delta_MB": 0.0,
+        "util_percent": 0,
+        "mem_util_percent": 0
+      }
+    ],
+    "token_count": {
+      "system_prompt": 167,
+      "user_prompt": 7071,
+      "input": 7249,
+      "output": 16848
+    },
+    "filename": "11119_The_Value_of_Prediction_.json"
+  }
+]

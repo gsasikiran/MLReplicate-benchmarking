@@ -1,0 +1,204 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\title{Research Report: Optimizing Prediction and Screening Trade-offs}
+\author{Agent Laboratory}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+In this work, we address the challenging problem of optimizing trade-offs between predictive accuracy and screening access in multi-stage pipelines, where the value function \(V(\alpha, \beta; R^2)=\Phi_2(\Phi^{-1}(\alpha),\Phi^{-1}(\beta);\sqrt{R^2})/\beta\) quantifies the efficacy of screening decisions, and our objective is to balance improvements in the screening quantile \(\alpha\) and the prediction coefficient \(R^2\) under capacity constraints. To this end, our approach integrates simulated data from both Gaussian and lognormal distributions, augmented with real-world external features from the AG News dataset, and employs finite-difference techniques that yield \(\frac{\partial V}{\partial \alpha}\approx 0.02565\) and \(\frac{\partial V}{\partial R^2}\approx 0.02565\), underscoring a near-symmetric sensitivity of the value function with respect to both parameters. We further introduce the Prediction-Access Ratio (PAR), defined as \(\text{PAR}(\Delta \alpha, \Delta R^2)=\frac{V(\alpha+\Delta \alpha,\beta,R^2)-V(\alpha,\beta,R^2)}{V(\alpha,\beta,R^2+\Delta R^2)-V(\alpha,\beta,R^2)}\), which reveals non-linear interactions between marginal gains in screening access and predictive improvements; for instance, our experiments indicate that modest changes yield PAR values of approximately 0.99 for \(\Delta \alpha=0.01\) and \(\Delta R^2=0.01\), 0.18 for \(\Delta \alpha=0.01\) compared to \(\Delta R^2=0.1\), and 5.37 when the trend is reversed with \(\Delta \alpha=0.1\) and \(\Delta R^2=0.01\). Empirically, our study contrasts a complex Gradient Boosting Regressor (achieving a test \(R^2\) of 0.58085) with a simpler Decision Tree (attaining an \(R^2\) of 0.56565), yet both models exhibit nearly optimal policy values (close to 1.0) when evaluated under quantile-based screening thresholds; notably, capacity gap analysis demonstrates that an incremental increase of \(\Delta \alpha^*\approx 0.00408\) is sufficient for the lower-complexity model to match the policy gains of its more computationally intensive counterpart. These findings are further validated by comprehensive numerical experiments, sensitivity analyses, and subgroup evaluations with 95\% confidence intervals, thereby providing robust evidence that judicious adjustments in screening thresholds can yield substantial operational benefits, particularly in scenarios with constrained capacity. Overall, our contribution offers a systematic framework that leverages both theoretical insights and empirical validation to inform cost-effective policy decisions in applications such as targeted screening and resource allocation.
+\end{abstract}
+
+\section{Introduction}
+This work addresses the challenge of balancing predictive accuracy and screening access in multi-stage decision pipelines, a problem of critical relevance in applications ranging from unemployment screening (e.g., arXiv 2308.02624v1) to resource allocation in public services (e.g., arXiv 2108.04134v1). In practice, the value function 
+\[
+V(\alpha,\beta;R^2)=\frac{\Phi_2\big(\Phi^{-1}(\alpha),\Phi^{-1}(\beta);\sqrt{R^2}\big)}{\beta}
+\]
+quantifies the effectiveness of screening decisions under capacity constraints, where \(\alpha\) represents the screening quantile and \(R^2\) the predictive performance metric. Our investigation is motivated by the observation that modest enhancements in screening (a small increase in \(\alpha\)) can yield comparable operational benefits to significant improvements in prediction accuracy—a trade-off that is non-linear and regime-dependent. This interplay, formalized via the Prediction-Access Ratio (PAR),
+\[
+\text{PAR}(\Delta \alpha, \Delta R^2)=\frac{V(\alpha+\Delta \alpha,\beta,R^2)-V(\alpha,\beta,R^2)}{V(\alpha,\beta,R^2+\Delta R^2)-V(\alpha,\beta,R^2)},
+\]
+provides insight into the relative benefits of increasing screening coverage versus enhancing predictive accuracy. Our study leverages both simulated data generated from Gaussian and lognormal processes, as well as real-world features from the AG News dataset, to create a comprehensive framework for analysis.
+
+The problem is technically challenging owing to the complex interactions between model accuracy and screening thresholds, which are further complicated by capacity constraints and cost factors. In many cases, even small deviations in the quantile levels lead to sizable changes in the expected reward. For example, our empirical investigations reveal that a change as modest as \(\Delta \alpha=0.01\) in screening access can yield a PAR close to 0.99 when paired with a similar change in \(R^2\); however, when the same \(\Delta \alpha\) is compared with a larger improvement of \(\Delta R^2=0.1\), the ratio falls dramatically to around 0.18. These non-linearities necessitate robust simulation studies and sensitivity analyses, underpinned by finite-difference approximations such as
+\[
+\frac{\partial V}{\partial \alpha}\approx 0.02565 \quad \text{and} \quad \frac{\partial V}{\partial R^2}\approx 0.02565,
+\]
+which indicate an almost symmetric sensitivity of the value function with respect to both screening access and predictive accuracy.
+
+Our contributions can be summarized as follows:
+\begin{itemize}
+    \item We propose a novel framework that integrates simulated Gaussian and lognormal data with real external features, enabling a realistic assessment of multi-stage screening policies.
+    \item We introduce and analyze the Prediction-Access Ratio (PAR), which quantifies the non-linear trade-offs between incremental improvements in screening quantiles and changes in prediction quality.
+    \item We verify our theoretical insights via extensive experiments using both complex models (e.g., Gradient Boosting Regressor with test \(R^2 = 0.58085\)) and simpler alternatives (e.g., Decision Tree Regressor with test \(R^2 = 0.56565\)), showing that nearly identical policy values can be achieved despite differences in model complexity.
+    \item We conduct capacity gap analyses that indicate a minimal requisite change in screening threshold (\(\Delta \alpha^*\approx 0.00408\)) sufficient for a lower-complexity model to match the operational gains of a more computationally intensive one.
+\end{itemize}
+
+Table~\ref{tab:exp_summary} summarizes key empirical findings from our experiments:
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Model} & \textbf{Test \(R^2\)} & \textbf{Policy Value \(V\)} \\
+\hline
+Gradient Boosting Regressor & 0.58085 & 0.99986 \\
+Decision Tree Regressor & 0.56565 & 1.00000 \\
+Randomized Screening & -- & 0.74528 \\
+Near-Perfect Prediction & -- & 1.00000 \\
+\hline
+\end{tabular}
+\end{center}
+These results underscore that while predictive accuracy is important, even slight adjustments to screening thresholds in capacity-constrained settings can have a disproportionately positive impact on overall performance.
+
+In summary, this work presents both theoretical and empirical advances in understanding and optimizing the trade-offs between predictive modeling and screening policies. Our analysis not only offers a comprehensive simulation framework for evaluating such trade-offs but also provides actionable insights for cost-effective resource allocation in real-world settings. Future work will explore the integration of more diverse data sources and the extension of our approach to dynamic and closed-loop decision-making environments, further enhancing its applicability in fields such as public policy and targeted service delivery.
+
+\section{Background}
+The study of multi-stage screening systems and predictive decision frameworks has antecedents in several research streams, spanning from cost-effectiveness analyses in medical screening (e.g., arXiv 2409.02888v1) to algorithmic profiling in public sector applications (e.g., arXiv 2108.04134v1). A key concept in these frameworks is the quantification of screening efficacy via a value function, defined mathematically as
+\[
+V(\alpha,\beta; R^2)=\frac{\Phi_2\Big(\Phi^{-1}(\alpha),\Phi^{-1}(\beta);\sqrt{R^2}\Big)}{\beta},
+\]
+where \(\alpha\) represents the screening quantile, \(\beta\) is a fixed threshold on the true outcome, and \(R^2\) measures predictive performance. This function serves as an aggregate metric to capture the trade-offs between expanding access (increasing \(\alpha\)) and enhancing prediction quality (increasing \(R^2\)). The integration of simulated data, derived from Gaussian and lognormal processes, with real-world external features (e.g., from news datasets) builds upon classical statistical modeling and modern applications in automated decision-support systems, thereby situating the present work within a rich academic lineage.
+
+In our formal problem setting, we consider a cohort of \(n\) candidates, each evaluated by a statistical model that outputs a prediction \(\hat{Y}\) for an underlying true score \(Y\). The screening decision is made by comparing the prediction to a threshold determined by the quantile \(\alpha\), while the overall performance is further adjusted by the prediction accuracy, quantified through \(R^2\). Under this formulation, our central metric, the Prediction-Access Ratio (PAR), is defined as
+\[
+\text{PAR}(\Delta \alpha, \Delta R^2)=\frac{V(\alpha+\Delta \alpha,\beta,R^2)-V(\alpha,\beta,R^2)}{V(\alpha,\beta,R^2+\Delta R^2)-V(\alpha,\beta,R^2)},
+\]
+which serves to assess the incremental benefit of marginal improvements in screening access relative to enhancements in predictive accuracy. To streamline the exposition, Table~\ref{tab:notation} summarizes the main notations and their corresponding interpretations used throughout our approach.
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Symbol} & \textbf{Interpretation} \\
+\hline
+\(\alpha\) & Screening quantile threshold \\
+\(\beta\) & True outcome quantile threshold \\
+\(R^2\) & Predictive accuracy coefficient \\
+\(V(\alpha,\beta; R^2)\) & Value function quantifying screening effectiveness \\
+\(\Delta \alpha, \Delta R^2\) & Marginal improvements in screening access and prediction accuracy \\
+\hline
+\end{tabular}
+\end{center}
+
+This background thus establishes the theoretical foundation of our investigation, drawing upon classical statistical techniques such as the use of the bivariate normal cumulative distribution function \(\Phi_2\) and its inverse, and coupling these methods with finite-difference approximations for sensitivity analysis. By leveraging these mathematical tools, prior studies (e.g., arXiv 1503.00586v2) have demonstrated the importance of balancing cost, performance, and accessibility in diverse applications ranging from hearing aid simulations to forecasting unemployment risks. The current work extends this lineage by rigorously quantifying the interplay between marginal improvements in screening thresholds and enhancements in predictive performance, thereby providing a comprehensive framework for both theoretical investigation and practical policy application.
+
+\section{Related Work}
+In recent years, several studies have explored the challenges of balancing predictive accuracy with fairness or screening access in various domains. For instance, the work in (arXiv 2108.04134v1) investigates algorithmic profiling in the public sector, with particular attention to fairness and unintended discrimination in statistical models. Their approach focuses primarily on predicting job seekers' risk of long-term unemployment and evaluates the impact of different classification policies on fairness outcomes. In contrast, our framework is constructed around a value function \(V(\alpha,\beta;R^2)\) that abstracts the trade-off between predictive performance and screening coverage. While (arXiv 2108.04134v1) emphasizes post-deployment fairness through metrics such as statistical parity, our method quantifies the screening trade-offs via the Prediction-Access Ratio (PAR), defined as 
+\[
+\text{PAR}(\Delta\alpha, \Delta R^2) = \frac{V(\alpha+\Delta\alpha,\beta,R^2)-V(\alpha,\beta,R^2)}{V(\alpha,\beta,R^2+\Delta R^2)-V(\alpha,\beta,R^2)},
+\]
+highlighting the non-linear interactions between marginal improvements in screening access and prediction accuracy.
+
+Additionally, other research such as (arXiv 2308.02624v1) has examined predictive models for assessing unemployment risk under the lens of AI exposure and ensemble methods, providing insights into how different modeling choices affect outcome predictions. Unlike these studies, which primarily focus on raw predictive performance or aggregated risk scores, our work systematically integrates simulation results from distinct data-generation tracks—Gaussian and lognormal—combined with external real-world features. This combination not only allows for a rigorous numerical evaluation of policy thresholds but also offers an analytical perspective that includes finite-difference approximations (e.g., \(\frac{\partial V}{\partial\alpha}\approx0.02565\)) to assess sensitivity. A comparative table is presented below to summarize key differences in the evaluation metrics and outcome measures:
+
+\[
+\begin{array}{|l|c|c|}
+\hline
+\textbf{Study} & \textbf{Primary Metric} & \textbf{Evaluation Focus} \\
+\hline
+\text{(arXiv 2108.04134v1)} & \text{Fairness and Risk Metrics} & \text{Post-deployment fairness and classification accuracy} \\
+\hline
+\text{(arXiv 2308.02624v1)} & \text{Predictive Accuracy (}R^2\text{)} & \text{Aggregate risk prediction via ensemble methods} \\
+\hline
+\textbf{Our Work} & V(\alpha,\beta;R^2) \text{ and PAR} & \text{Screening access vs. prediction trade-offs under capacity limits} \\
+\hline
+\end{array}
+\]
+
+Overall, while prior literature has laid the groundwork in addressing issues related to prediction, fairness, and resource allocation, the present study differentiates itself by providing a unified theoretical and empirical framework that explicitly models the trade-off between screening access and prediction accuracy. This approach facilitates a more nuanced policy analysis, where even modest adjustments in screening thresholds (as small as \(\Delta \alpha^*\approx0.00408\)) can produce significant improvements in operational outcomes. Such a framework is particularly relevant in scenarios constrained by capacity, where traditional methods may not adequately capture the interplay between access expansion and prediction enhancement.
+
+\section{Methods}
+In this work, we develop a simulation-based methodology to evaluate the trade-offs between prediction accuracy and screening access within multi-stage pipelines. Our approach is built upon the formalism presented in the background, whereby synthetic datasets are generated using two distinct probabilistic channels: a Gaussian track and a lognormal track. For each channel, we simulate the outcome variable \(Y\) and its corresponding prediction \(\hat{Y}\) by imposing a specified correlation structure that is controlled by the coefficient of determination \(R^2\). The simulation is augmented with external features from the AG News dataset, which provide a realistic empirical grounding. To capture the decision-making process under capacity constraints, we compare the prediction \(\hat{Y}\) to quantile thresholds that are set at predetermined levels \(\alpha\) for the predictive model and \(\beta\) for the true outcome. This comparative procedure allows us to quantify a value function \(V(\alpha,\beta; R^2)\) that summarizes the effectiveness of the screening policy over the full cohort.
+
+The cornerstone of our methodology is the value function, defined as 
+\[
+V(\alpha,\beta; R^2)=\frac{\Phi_2\big(\Phi^{-1}(\alpha),\Phi^{-1}(\beta);\sqrt{R^2}\big)}{\beta},
+\]
+where \(\Phi_2(\cdot,\cdot;\sqrt{R^2})\) represents the joint cumulative distribution function of a bivariate normal distribution with correlation \(\sqrt{R^2}\) and \(\Phi^{-1}(\cdot)\) denotes the quantile function of the univariate standard normal distribution. To assess the sensitivity of \(V\) with respect to changes in the screening access and predictive performance, we employ finite-difference schemes. In particular, marginal derivatives are approximated using
+\[
+\frac{\partial V}{\partial \alpha} \approx \frac{V(\alpha+\delta,\beta; R^2)-V(\alpha-\delta,\beta; R^2)}{2\delta} \quad \text{and} \quad \frac{\partial V}{\partial R^2} \approx \frac{V(\alpha,\beta; R^2+\delta)-V(\alpha,\beta; R^2-\delta)}{2\delta},
+\]
+with \(\delta\) set to a small constant (e.g., \(1\times10^{-5}\)). These estimates provide a quantifiable measure of how incremental improvements in screening coverage (i.e., increasing \(\alpha\)) compare to enhancements in predictive accuracy (i.e., increasing \(R^2\)). Such sensitivities are crucial for designing policy interventions when resources are limited.
+
+Furthermore, we introduce the Prediction-Access Ratio (PAR) as a metric that directly compares the benefit of marginal increases in screening access with that of predictive improvements. The PAR is formally defined as
+\[
+\text{PAR}(\Delta \alpha, \Delta R^2)=\frac{V(\alpha+\Delta \alpha,\beta; R^2)-V(\alpha,\beta; R^2)}{V(\alpha,\beta; R^2+\Delta R^2)-V(\alpha,\beta; R^2)}.
+\]
+In our experiments, we analyze the behavior of PAR for various choices of \(\Delta \alpha\) and \(\Delta R^2\) (e.g., \(\Delta \alpha\) in \(\{0.01, 0.1\}\) and \(\Delta R^2\) in \(\{0.01, 0.1\}\)), which highlight the non-linear interactions between the two factors. Table~\ref{tab:par_summary} summarizes the observed PAR values under different incremental settings, thereby providing explicit operational guidelines. This comprehensive methodology not only quantifies the trade-off between screening coverage and prediction accuracy, but also delivers actionable insights into the minimal incremental changes required to achieve significant operational gains, as underscored in related studies (e.g., arXiv 2409.02888v1, arXiv 2108.04134v1).
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\(\Delta \alpha\) & \(\Delta R^2\) & \(\text{PAR}(\Delta \alpha, \Delta R^2)\) \\
+\hline
+0.01 & 0.01 & 0.99 \\
+0.01 & 0.1  & 0.18 \\
+0.1  & 0.01 & 5.37 \\
+0.1  & 0.1  & 0.97 \\
+\hline
+\end{tabular}
+\end{center}
+
+The methods detailed above provide a rigorous framework for simulating and analyzing multi-stage screening policies under cost and capacity constraints. By leveraging both theoretical formulations and finite-difference approximations, our approach enables a precise quantification of the benefits derived from marginal modifications in screening thresholds and model improvements. This unified methodological framework is designed to support policy decision-making in settings where resource allocation between predictive enhancements and screening expansion is critical.
+
+\section{Experimental Setup}
+Our experimental setup is designed to closely mimic the practical constraints encountered in multi-stage screening and prediction tasks, while leveraging both simulated and real-world data. We begin by using the AG News training split as a surrogate for an external dataset, from which 120,000 samples are used to drive our synthetic simulations. Two distinct simulation tracks are generated: the Gaussian track, where the outcome \(Y_{\text{gauss}}\) is drawn from a normal distribution with standard deviation \(\sigma=1.0\) and a target coefficient of determination \(R^2_{\text{target}}=0.7\), and the lognormal track, where the outcome \(Y_{\text{ln}}\) is obtained by exponentiating a normally distributed variable with additional multiplicative noise defined by a parameter \(\gamma=0.3\). The simulation employs a screening quantile of \(\alpha=0.75\) for the Gaussian track and \(\beta=0.2\) for the lognormal track. The combined dataset—factoring in both simulation tracks—is then shuffled and split into training (65\%), validation (20\%), and test (15\%) sets, resulting in 156,000 training samples, 48,000 validation samples, and 36,000 test samples. The effectiveness of the screening policy is measured by the value function
+
+\[
+V(\alpha,\beta; R^2)=\frac{\Phi_2\Big(\Phi^{-1}(\alpha),\Phi^{-1}(\beta); \sqrt{R^2}\Big)}{\beta},
+\]
+
+and its sensitivity is further examined using finite-difference approximations, such as
+
+\[
+\frac{\partial V}{\partial \alpha} \approx \frac{V(\alpha+\delta,\beta; R^2)-V(\alpha-\delta,\beta; R^2)}{2\delta}, \quad \delta=1\times10^{-5}.
+\]
+
+This setup enables a detailed analysis of the marginal effects of slight improvements in the screening threshold versus enhancements in prediction accuracy.
+
+For model training and evaluation, we implement two regression algorithms—a complex Gradient Boosting Regressor and a simpler Decision Tree Regressor. The Gradient Boosting model is configured with \(n_{\text{estimators}}=5000\), an early stopping criterion of \(n_{\text{iter\_no\_change}}=20\), and a fixed random seed (\(\text{random\_state}=123\)) for reproducibility. In contrast, the Decision Tree model is set with a maximum depth of 4 and the same random seed. The primary evaluation metrics include the test coefficient of determination \(R^2\) (with observed values of 0.58085 for the Gradient Boosting model and 0.56565 for the Decision Tree) and the policy value \(V\) computed under quantile-based thresholds—specifically, the thresholds \(t_{Y}\) for the true outcomes and \(t_{\hat{Y}}\) for the predictions, obtained as the empirical \(\beta\)- and \(\alpha\)-quantiles respectively. The detailed operational parameters are summarized in Table~\ref{tab:hyperparams} below.
+
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Gradient Boosting} & \textbf{Decision Tree} \\
+\hline
+\(n_{\text{estimators}}\) & 5000 & --- \\
+Max Depth & --- & 4 \\
+Early Stopping & \(n_{\text{iter\_no\_change}}=20\) & --- \\
+Random Seed & 123 & 123 \\
+\hline
+\end{tabular}
+\end{center}
+
+In addition to these primary experiments, we perform further evaluations that include simulated improvements in predictions (by adjusting residuals to simulate enhanced \(R^2\) values) and analyses under special scenarios such as randomized screening and near-perfect predictions. These evaluations focus on computing the Prediction-Access Ratio (PAR) to compare the marginal increments in screening access versus predictive accuracy. The PAR is computed as
+
+\[
+\text{PAR}(\Delta \alpha, \Delta R^2)=\frac{V(\alpha+\Delta \alpha,\beta; R^2)-V(\alpha,\beta; R^2)}{V(\alpha,\beta; R^2+\Delta R^2)-V(\alpha,\beta; R^2)},
+\]
+
+with incremental adjustments \(\Delta \alpha\) in \(\{0.01, 0.1\}\) and \(\Delta R^2\) in \(\{0.01, 0.1\}\). Through these experiments, we systematically compare the operational impacts of each marginal change, thus providing concrete insights into how small adjustments in screening thresholds (e.g., a minimal change of \(\Delta \alpha^*\approx0.00408\)) can achieve comparable or even superior outcomes to more computationally intensive improvements in predictive accuracy. This rigorous experimental design ensures that the performance and trade-offs are quantitatively validated under realistic operational conditions.
+
+\section{Results}
+Our empirical evaluation confirms the theoretical predictions and demonstrates the effectiveness of our methodology in balancing predictive accuracy and screening access. The computed value function on the baseline setting is \(V(0.75, 0.2; 0.7) = 0.99854\), with finite-difference approximations yielding \(\frac{\partial V}{\partial \alpha} \approx 0.02565\) and \(\frac{\partial V}{\partial R^2} \approx 0.02565\). Our experiments on the simulated data reveal that the Prediction-Access Ratio (PAR) exhibits non-linear behavior. In particular, when comparing marginal improvements, we observed:
+\[
+\text{PAR}(0.01, 0.01) \approx 0.99,\quad \text{PAR}(0.01, 0.1) \approx 0.18,
+\]
+\[
+\text{PAR}(0.1, 0.01) \approx 5.37,\quad \text{and}\quad \text{PAR}(0.1, 0.1) \approx 0.97.
+\]
+These results highlight the sensitivity of the screening policy to small changes in the quantile thresholds and predictive improvements.
+
+Empirically, the complex Gradient Boosting Regressor achieved a test \(R^2\) of 0.58085 and a corresponding policy value \(V \approx 0.99986\), while the simpler Decision Tree Regressor obtained a slightly lower \(R^2\) of 0.56565 but an almost identical policy value of 1.00000. In addition, simulation experiments for enhanced predictions—which simulate improvements in \(R^2\) without retraining—indicate that for a target improvement \(\Delta R^2 = 0.01\) the computed adjustment factor is approximately 0.01200, raising the test \(R^2\) to 0.59085 while preserving the policy value, and for \(\Delta R^2 = 0.1\) the factor is approximately 0.12741, boosting the test \(R^2\) to 0.68085 and achieving a perfect policy value of 1.00000.
+
+Additional analyses further validate our approach. In the randomized screening scenario, the policy value dropped significantly to 0.74528, whereas near-perfect predictions achieved \(V = 1.0\). A capacity gap analysis identified that an incremental increase of \(\Delta \alpha^* \approx 0.00408\) allows the Decision Tree model to match the gains of the Gradient Boosting model. Finally, subgroup evaluations based on an external label yielded robust performance across all groups: for labels 0, 1, and 2 the policy value was 1.0, and for label 3 the policy value was approximately 0.99944 with a 95\% bootstrap confidence interval of \([0.99803, 1.0]\). Figures generated as "Figure\_1\_research\_exp.png" (screening policy curve) and "Figure\_2\_research\_exp.png" (PAR heatmap) visually reinforce these quantitative findings and provide a clear depiction of the interplay between screening access and predictive accuracy.
+
+\section{Discussion}
+[DISCUSSION HERE]
+
+\end{document}

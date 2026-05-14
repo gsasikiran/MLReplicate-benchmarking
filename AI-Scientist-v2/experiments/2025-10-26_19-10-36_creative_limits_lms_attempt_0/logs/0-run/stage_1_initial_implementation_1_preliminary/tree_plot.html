@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Check if we're running under Live Server
+      if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+          let lastModified = '';
+
+          // Check for file changes every second
+          setInterval(async () => {
+              try {
+                  const response = await fetch(window.location.href, { method: 'HEAD' });
+                  // get a timestamp that shows when the file was last changed
+                  const currentModified = response.headers.get('last-modified');
+
+                  if (lastModified && lastModified !== currentModified) {
+                      window.location.reload();
+                  }
+
+                  lastModified = currentModified;
+              } catch (e) {
+                  console.error('Error checking for updates:', e);
+              }
+          }, 1000);
+      }
+  </script>
+    <script
+      id="p5scripttag"
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"
+      integrity="sha512-uaz5GpnQoE6t5echKlX8P52czvsIGgLPcvlzfvRubLZ1Hp8JemUDnbUiAahbVtPb+jUVrNETuXvAhDDF/N3M4w=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+
+    <script>
+      const bgCol = "#FFFFFF";
+const accentCol = "#1a439e";
+
+hljs.initHighlightingOnLoad();
+
+// Function to update background color globally
+function updateBackgroundColor(color) {
+  // Update the JS variable
+  window.bgColCurrent = color;
+
+  // Update body background
+  document.body.style.backgroundColor = color;
+
+  // Update canvas container background
+  const canvasContainer = document.getElementById('canvas-container');
+  if (canvasContainer) {
+    canvasContainer.style.backgroundColor = color;
+  }
+}
+
+// Store tree data for each stage
+const stageData = {
+  Stage_1: null,
+  Stage_2: null,
+  Stage_3: null,
+  Stage_4: null
+};
+
+// Keep track of current selected stage
+let currentStage = null;
+let currentSketch = null;
+let availableStages = [];
+
+// Class definitions for nodes and edges
+class Node {
+  constructor(x, y, id, isRoot = false) {
+    this.x = x;
+    this.y = y;
+    this.id = id;
+    this.visible = isRoot; // Only root nodes are visible initially
+    this.appearProgress = 0;
+    this.popEffect = 0;
+    this.selected = false;
+    this.isRootNode = isRoot;
+  }
+
+  update() {
+    if (this.visible) {
+      // Handle the main appearance animation
+      if (this.appearProgress < 1) {
+        this.appearProgress += 0.06;
+
+        // When we reach full size, trigger the pop effect
+        if (this.appearProgress >= 1) {
+          this.appearProgress = 1; // Cap at 1
+          this.popEffect = 1; // Start the pop effect
+        }
+      }
+
+      // Handle the pop effect animation
+      if (this.popEffect > 0) {
+        this.popEffect -= 0.15; // Control how quickly it shrinks back
+        if (this.popEffect < 0) this.popEffect = 0; // Don't go negative
+      }
+    }
+  }
+
+  startAnimation() {
+    this.visible = true;
+  }
+
+  color() {
+    if (this.selected) {
+      return accentCol; // Use the global accent color variable for selected node
+    }
+    return '#4263eb'; // Default blue color
+  }
+
+  render(p5) {
+    if (this.visible) {
+      const popBonus = this.popEffect * 0.1;
+      const nodeScale = p5.map(this.appearProgress, 0, 1, 0, 1) + popBonus;
+      const alpha = p5.map(this.appearProgress, 0, 1, 0, 255);
+
+      p5.push();
+      p5.translate(this.x, this.y);
+
+      // Shadow effect
+      p5.noStroke();
+      p5.rectMode(p5.CENTER);
+
+      for (let i = 1; i <= 4; i++) {
+        p5.fill(0, 0, 0, alpha * 0.06);
+        p5.rect(i, i, 30 * nodeScale, 30 * nodeScale, 10);
+      }
+
+      // Main square - use node's color with alpha
+      let nodeColor = p5.color(this.color());
+      nodeColor.setAlpha(alpha);
+      p5.fill(nodeColor);
+      p5.rect(0, 0, 30 * nodeScale, 30 * nodeScale, 10);
+
+      // Draw checkmark icon if the node is selected
+      if (this.selected && this.appearProgress >= 1) {
+        p5.stroke(255);
+        p5.strokeWeight(2 * nodeScale);
+        p5.noFill();
+        // Draw checkmark
+        p5.beginShape();
+        p5.vertex(-8, 0);
+        p5.vertex(-3, 5);
+        p5.vertex(8, -6);
+        p5.endShape();
+      }
+
+      p5.pop();
+    }
+  }
+
+  isMouseOver(p5) {
+    return this.visible &&
+           p5.mouseX > this.x - 15 &&
+           p5.mouseX < this.x + 15 &&
+           p5.mouseY > this.y - 15 &&
+           p5.mouseY < this.y + 15;
+  }
+
+  // Connect this node to a child node
+  child(childNode) {
+    // Create an edge from this node to the child
+    let isLeft = childNode.x < this.x;
+    let isRight = childNode.x > this.x;
+    let edge = new Edge(this, childNode, isLeft, isRight);
+    return edge;
+  }
+}
+
+class Edge {
+  constructor(parent, child, isLeft, isRight) {
+    this.parent = parent;
+    this.child = child;
+    this.isLeft = isLeft;
+    this.isRight = isRight;
+    this.progress = 0;
+
+    // Calculate the midpoint where branching occurs
+    this.midY = parent.y + (child.y - parent.y) * 0.6;
+
+    // Use the actual child x-coordinate
+    // This ensures the edge will connect directly to the child node
+    this.branchX = child.x;
+  }
+
+  update() {
+    if (this.parent.visible && this.progress < 1) {
+      this.progress += 0.01; // Adjust animation speed
+    }
+    if (this.progress >= 1) {
+      this.child.visible = true;
+    }
+  }
+
+  color() {
+    return this.child.color();
+  }
+
+  render(p5) {
+    if (!this.parent.visible) return;
+
+    // Calculate path lengths
+    const verticalDist1 = this.midY - this.parent.y;
+    const horizontalDist = Math.abs(this.branchX - this.parent.x);
+    const verticalDist2 = this.child.y - this.midY;
+    const totalLength = verticalDist1 + horizontalDist + verticalDist2;
+
+    // Calculate how much of each segment to draw
+    const currentLength = totalLength * this.progress;
+
+    p5.stroke(180, 190, 205);
+    p5.strokeWeight(1.5);
+    p5.noFill();
+
+    // Always draw the first vertical segment from parent
+    if (currentLength > 0) {
+      const firstSegmentLength = Math.min(currentLength, verticalDist1);
+      const currentMidY = p5.lerp(this.parent.y, this.midY, firstSegmentLength / verticalDist1);
+      p5.line(this.parent.x, this.parent.y, this.parent.x, currentMidY);
+    }
+
+    if (currentLength > verticalDist1) {
+      // Draw second segment (horizontal)
+      const secondSegmentLength = Math.min(currentLength - verticalDist1, horizontalDist);
+      const currentBranchX = p5.lerp(this.parent.x, this.branchX, secondSegmentLength / horizontalDist);
+      p5.line(this.parent.x, this.midY, currentBranchX, this.midY);
+
+      if (currentLength > verticalDist1 + horizontalDist) {
+        // Draw third segment (vertical to child)
+        const thirdSegmentLength = currentLength - verticalDist1 - horizontalDist;
+        const currentChildY = p5.lerp(this.midY, this.child.y, thirdSegmentLength / verticalDist2);
+        p5.line(this.branchX, this.midY, this.branchX, currentChildY);
+      }
+    }
+  }
+}
+
+// Create a modified sketch for each stage
+function createTreeSketch(stageId) {
+  return function(p5) {
+    let nodes = [];
+    let edges = [];
+    let treeData = stageData[stageId];
+
+    p5.setup = function() {
+      const canvas = p5.createCanvas(p5.windowWidth * 0.4, p5.windowHeight);
+      canvas.parent('canvas-container');
+      p5.smooth();
+      p5.frameRate(60);
+
+      if (treeData) {
+        createTreeFromData(treeData);
+      }
+    };
+
+    p5.windowResized = function() {
+      p5.resizeCanvas(p5.windowWidth * 0.4, p5.windowHeight);
+    };
+
+    function createTreeFromData(data) {
+      // Clear existing nodes and edges
+      nodes = [];
+      edges = [];
+
+      // Add defensive checks to prevent errors
+      if (!data || !data.layout || !Array.isArray(data.layout) || !data.edges || !Array.isArray(data.edges)) {
+        console.error("Invalid tree data format:", data);
+        return; // Exit if data structure is invalid
+      }
+
+      // Find all parent nodes in edges
+      const parentNodes = new Set();
+      for (const [parentId, childId] of data.edges) {
+        parentNodes.add(parentId);
+      }
+
+      // Create nodes
+      for (let i = 0; i < data.layout.length; i++) {
+        const [nx, ny] = data.layout[i];
+        // A node is a root if it's a parent and not a child in any edge
+        const isRoot = parentNodes.has(i) && data.edges.every(edge => edge[1] !== i);
+
+        const node = new Node(
+          nx * p5.width * 0.8 + p5.width * 0.1,
+          ny * p5.height * 0.8 + p5.height * 0.1,
+          i,
+          isRoot
+        );
+        nodes.push(node);
+      }
+
+      // If no root was found, make the first parent node visible
+      if (!nodes.some(node => node.visible) && parentNodes.size > 0) {
+        // Get the first parent node
+        const firstParentId = [...parentNodes][0];
+        if (nodes[firstParentId]) {
+          nodes[firstParentId].visible = true;
+        }
+      }
+
+      // Create edges
+      for (const [parentId, childId] of data.edges) {
+        const parent = nodes[parentId];
+        const child = nodes[childId];
+        if (parent && child) { // Verify both nodes exist
+          const isLeft = child.x < parent.x;
+          const isRight = child.x > parent.x;
+          edges.push(new Edge(parent, child, isLeft, isRight));
+        }
+      }
+
+      // Select the first node by default
+      if (nodes.length > 0) {
+        nodes[0].selected = true;
+        updateNodeInfo(0);
+      }
+    }
+
+    p5.draw = function() {
+      // Use the global background color if available, otherwise use the default bgCol
+      const currentBgColor = window.bgColCurrent || bgCol;
+      p5.background(currentBgColor);
+
+      // Update and render edges
+      for (const edge of edges) {
+        edge.update();
+        edge.render(p5);
+      }
+
+      // Update and render nodes
+      for (const node of nodes) {
+        node.update();
+        node.render(p5);
+      }
+
+      // Handle mouse hover
+      p5.cursor(p5.ARROW);
+      for (const node of nodes) {
+        if (node.isMouseOver(p5)) {
+          p5.cursor(p5.HAND);
+        }
+      }
+    };
+
+    p5.mousePressed = function() {
+      // Check if any node was clicked
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].visible && nodes[i].isMouseOver(p5)) {
+          // Deselect all nodes
+          nodes.forEach(n => n.selected = false);
+          // Select the clicked node
+          nodes[i].selected = true;
+          // Update the right panel with node info
+          updateNodeInfo(i);
+          break;
+        }
+      }
+    };
+
+    function updateNodeInfo(nodeIndex) {
+      if (treeData) {
+        setNodeInfo(
+          treeData.code[nodeIndex],
+          treeData.plan[nodeIndex],
+          treeData.plot_code?.[nodeIndex],
+          treeData.plot_plan?.[nodeIndex],
+          treeData.metrics?.[nodeIndex],
+          treeData.exc_type?.[nodeIndex] || '',
+          treeData.exc_info?.[nodeIndex]?.args?.[0] || '',
+          treeData.exc_stack?.[nodeIndex] || [],
+          treeData.plots?.[nodeIndex] || [],
+          treeData.plot_analyses?.[nodeIndex] || [],
+          treeData.vlm_feedback_summary?.[nodeIndex] || '',
+          treeData.datasets_successfully_tested?.[nodeIndex] || [],
+          treeData.exec_time_feedback?.[nodeIndex] || '',
+          treeData.exec_time?.[nodeIndex] || ''
+        );
+      }
+    }
+  };
+}
+
+// Start a new p5 sketch for the given stage
+function startSketch(stageId) {
+  if (currentSketch) {
+    currentSketch.remove();
+  }
+
+  if (stageData[stageId]) {
+    currentSketch = new p5(createTreeSketch(stageId));
+
+    // Update stage info
+    const stageNumber = stageId.split('_')[1];
+    let stageDesc = '';
+    switch(stageId) {
+      case 'Stage_1': stageDesc = 'Preliminary Investigation'; break;
+      case 'Stage_2': stageDesc = 'Baseline Tuning'; break;
+      case 'Stage_3': stageDesc = 'Research Agenda Execution'; break;
+      case 'Stage_4': stageDesc = 'Ablation Studies'; break;
+    }
+
+    document.getElementById('stage-info').innerHTML =
+      `<strong>Current Stage: ${stageNumber} - ${stageDesc}</strong>`;
+  }
+}
+
+// Handle tab selection
+function selectStage(stageId) {
+  if (!stageData[stageId] || !availableStages.includes(stageId)) {
+    return; // Don't allow selection of unavailable stages
+  }
+
+  // Update active tab styles
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  document.querySelector(`.tab[data-stage="${stageId}"]`).classList.add('active');
+
+  // Start the new sketch
+  currentStage = stageId;
+  startSketch(stageId);
+}
+
+// Function to load the tree data for all stages
+async function loadAllStageData(baseTreeData) {
+  console.log("Loading stage data with base data:", baseTreeData);
+
+  // The base tree data is for the current stage
+  const currentStageId = baseTreeData.current_stage || 'Stage_1';
+
+  // Ensure base tree data is valid and has required properties
+  if (baseTreeData && baseTreeData.layout && baseTreeData.edges) {
+    stageData[currentStageId] = baseTreeData;
+    availableStages.push(currentStageId);
+    console.log(`Added current stage ${currentStageId} to available stages`);
+  } else {
+    console.warn(`Current stage ${currentStageId} data is invalid:`, baseTreeData);
+  }
+
+  // Use relative path to load other stage trees
+  const logDirPath = baseTreeData.log_dir_path || '.';
+  console.log("Log directory path:", logDirPath);
+
+  // Load data for each stage if available
+  const stageNames = ['Stage_1', 'Stage_2', 'Stage_3', 'Stage_4'];
+  const stageNames2actualNames = {
+    'Stage_1': 'stage_1_initial_implementation_1_preliminary',
+    'Stage_2': 'stage_2_baseline_tuning_1_first_attempt',
+    'Stage_3': 'stage_3_creative_research_1_first_attempt',
+    'Stage_4': 'stage_4_ablation_studies_1_first_attempt'
+    }
+
+  for (const stage of stageNames) {
+
+    if (baseTreeData.completed_stages && baseTreeData.completed_stages.includes(stage)) {
+      try {
+        console.log(`Attempting to load data for ${stage} from ${logDirPath}/${stageNames2actualNames[stage]}/tree_data.json`);
+        const response = await fetch(`${logDirPath}/${stageNames2actualNames[stage]}/tree_data.json`);
+
+        if (response.ok) {
+          const data = await response.json();
+
+          // Validate the loaded data
+          if (data && data.layout && data.edges) {
+            stageData[stage] = data;
+            availableStages.push(stage);
+            console.log(`Successfully loaded and validated data for ${stage}`);
+          } else {
+            console.warn(`Loaded data for ${stage} is invalid:`, data);
+          }
+        } else {
+          console.warn(`Failed to load data for ${stage} - HTTP status ${response.status}`);
+        }
+      } catch (error) {
+        console.error(`Error loading data for ${stage}:`, error);
+      }
+    } else {
+      console.log(`Skipping stage ${stage} - not in completed stages list:`, baseTreeData.completed_stages);
+    }
+  }
+
+  // Update tab visibility based on available stages
+  updateTabVisibility();
+
+  // Start with the first available stage
+  if (availableStages.length > 0) {
+    selectStage(availableStages[0]);
+  } else {
+    console.warn("No stages available to display");
+    // Display a message in the canvas area
+    document.getElementById('canvas-container').innerHTML =
+      '<div style="padding: 20px; color: #333; text-align: center;"><h3>No valid tree data available to display</h3></div>';
+  }
+}
+
+// Update tab visibility based on available stages
+function updateTabVisibility() {
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    const stageId = tab.getAttribute('data-stage');
+    if (availableStages.includes(stageId)) {
+      tab.classList.remove('disabled');
+    } else {
+      tab.classList.add('disabled');
+    }
+  });
+}
+
+// Utility function to set the node info in the right panel
+const setNodeInfo = (code, plan, plot_code, plot_plan, metrics = null, exc_type = '', exc_info = '',
+    exc_stack = [], plots = [], plot_analyses = [], vlm_feedback_summary = '',
+    datasets_successfully_tested = [], exec_time_feedback = '', exec_time = '') => {
+  const codeElm = document.getElementById("code");
+  if (codeElm) {
+    if (code) {
+      codeElm.innerHTML = hljs.highlight(code, { language: "python" }).value;
+    } else {
+      codeElm.innerHTML = '<p>No code available</p>';
+    }
+  }
+
+  const planElm = document.getElementById("plan");
+  if (planElm) {
+    if (plan) {
+      planElm.innerHTML = hljs.highlight(plan, { language: "plaintext" }).value;
+    } else {
+      planElm.innerHTML = '<p>No plan available</p>';
+    }
+  }
+
+  const plot_codeElm = document.getElementById("plot_code");
+  if (plot_codeElm) {
+    if (plot_code) {
+      plot_codeElm.innerHTML = hljs.highlight(plot_code, { language: "python" }).value;
+    } else {
+      plot_codeElm.innerHTML = '<p>No plot code available</p>';
+    }
+  }
+
+  const plot_planElm = document.getElementById("plot_plan");
+  if (plot_planElm) {
+    if (plot_plan) {
+      plot_planElm.innerHTML = hljs.highlight(plot_plan, { language: "plaintext" }).value;
+    } else {
+      plot_planElm.innerHTML = '<p>No plot plan available</p>';
+    }
+  }
+
+  const metricsElm = document.getElementById("metrics");
+  if (metricsElm) {
+      let metricsContent = `<h3>Metrics:</h3>`;
+      if (metrics && metrics.metric_names) {
+          for (const metric of metrics.metric_names) {
+              metricsContent += `<div class="metric-group">`;
+              metricsContent += `<h4>${metric.metric_name}</h4>`;
+              metricsContent += `<p><strong>Description:</strong> ${metric.description || 'N/A'}</p>`;
+              metricsContent += `<p><strong>Optimization:</strong> ${metric.lower_is_better ? 'Minimize' : 'Maximize'}</p>`;
+
+              // Create table for dataset values
+              metricsContent += `<table class="metric-table">
+                  <tr>
+                      <th>Dataset</th>
+                      <th>Final Value</th>
+                      <th>Best Value</th>
+                  </tr>`;
+
+              for (const dataPoint of metric.data) {
+                  metricsContent += `<tr>
+                      <td>${dataPoint.dataset_name}</td>
+                      <td>${dataPoint.final_value?.toFixed(4) || 'N/A'}</td>
+                      <td>${dataPoint.best_value?.toFixed(4) || 'N/A'}</td>
+                  </tr>`;
+              }
+
+              metricsContent += `</table></div>`;
+          }
+      } else if (metrics === null) {
+          metricsContent += `<p>No metrics available</p>`;
+      }
+      metricsElm.innerHTML = metricsContent;
+  }
+
+  // Add plots display
+  const plotsElm = document.getElementById("plots");
+  if (plotsElm) {
+      if (plots && plots.length > 0) {
+          let plotsContent = '';
+          plots.forEach(plotPath => {
+              plotsContent += `
+                  <div class="plot-item">
+                      <img src="${plotPath}" alt="Experiment Plot" onerror="console.error('Failed to load plot:', this.src)"/>
+                  </div>`;
+          });
+          plotsElm.innerHTML = plotsContent;
+      } else {
+          plotsElm.innerHTML = '';
+      }
+  }
+
+  // Add error info display
+  const errorElm = document.getElementById("exc_info");
+  if (errorElm) {
+    if (exc_type) {
+      let errorContent = `<h3 style="color: #ff5555">Exception Information:</h3>
+                          <p><strong>Type:</strong> ${exc_type}</p>`;
+
+      if (exc_info) {
+        errorContent += `<p><strong>Details:</strong> <pre>${JSON.stringify(exc_info, null, 2)}</pre></p>`;
+      }
+
+      if (exc_stack) {
+        errorContent += `<p><strong>Stack Trace:</strong> <pre>${exc_stack.join('\n')}</pre></p>`;
+      }
+
+      errorElm.innerHTML = errorContent;
+    } else {
+      errorElm.innerHTML = "No exception info available";
+    }
+  }
+
+  const exec_timeElm = document.getElementById("exec_time");
+  if (exec_timeElm) {
+    let exec_timeContent = '<div id="exec_time"><h3>Execution Time (in seconds):</h3><p>' + exec_time + '</p></div>';
+    exec_timeElm.innerHTML = exec_timeContent;
+  }
+
+  const exec_time_feedbackElm = document.getElementById("exec_time_feedback");
+  if (exec_time_feedbackElm) {
+    let exec_time_feedbackContent = '<div id="exec_time_feedback_content">'
+    exec_time_feedbackContent += '<h3>Execution Time Feedback:</h3>'
+    exec_time_feedbackContent += '<p>' + exec_time_feedback + '</p>'
+    exec_time_feedbackContent += '</div>';
+    exec_time_feedbackElm.innerHTML = exec_time_feedbackContent;
+  }
+
+  const vlm_feedbackElm = document.getElementById("vlm_feedback");
+  if (vlm_feedbackElm) {
+      let vlm_feedbackContent = '';
+
+      if (plot_analyses && plot_analyses.length > 0) {
+          vlm_feedbackContent += `<h3>Plot Analysis:</h3>`;
+          plot_analyses.forEach(analysis => {
+              if (analysis && analysis.plot_path) {  // Add null check
+                  vlm_feedbackContent += `
+                      <div class="plot-analysis">
+                          <h4>Analysis for ${analysis.plot_path.split('/').pop()}</h4>
+                          <p>${analysis.analysis || 'No analysis available'}</p>
+                          <ul class="key-findings">
+                              ${(analysis.key_findings || []).map(finding => `<li>${finding}</li>`).join('')}
+                          </ul>
+                      </div>`;
+              } else {
+                  console.warn('Received invalid plot analysis:', analysis);
+                  vlm_feedbackContent += `
+                      <div class="plot-analysis">
+                          <p>Invalid plot analysis data received</p>
+                      </div>`;
+              }
+          });
+      }
+
+      // Add actionable insights if available
+      if (vlm_feedback_summary && typeof vlm_feedback_summary === 'string') {
+          vlm_feedbackContent += `
+              <div class="vlm_feedback">
+                  <h3>VLM Feedback Summary:</h3>
+                  <p>${vlm_feedback_summary}</p>
+              </div>`;
+      }
+
+      console.log("Datasets successfully tested:", datasets_successfully_tested);
+      if (datasets_successfully_tested && datasets_successfully_tested.length > 0) {
+          vlm_feedbackContent += `
+              <div id="datasets_successfully_tested">
+                  <h3>Datasets Successfully Tested:</h3>
+                  <p>${datasets_successfully_tested.join(', ')}</p>
+              </div>`;
+      }
+
+      if (!vlm_feedbackContent) {
+          vlm_feedbackContent = '<p>No insights available for this experiment.</p>';
+      }
+
+      vlm_feedbackElm.innerHTML = vlm_feedbackContent;
+  }
+
+  const datasets_successfully_testedElm = document.getElementById("datasets_successfully_tested");
+  if (datasets_successfully_testedElm) {
+      let datasets_successfully_testedContent = '';
+      if (datasets_successfully_tested && datasets_successfully_tested.length > 0) {
+          datasets_successfully_testedContent = `<h3>Datasets Successfully Tested:</h3><ul>`;
+          datasets_successfully_tested.forEach(dataset => {
+              datasets_successfully_testedContent += `<li>${dataset}</li>`;
+          });
+          datasets_successfully_testedContent += `</ul>`;
+      } else {
+          datasets_successfully_testedContent = '<p>No datasets tested yet</p>';
+      }
+      datasets_successfully_testedElm.innerHTML = datasets_successfully_testedContent;
+  }
+};
+
+// Initialize with the provided tree data
+const treeStructData = {"edges": [[0, 5], [1, 6], [3, 10], [3, 8], [5, 11], [8, 12], [8, 14], [8, 15], [8, 13]], "layout": [[0.0, 0.0], [0.16666666666666666, 0.0], [0.3333333333333333, 0.0], [0.5, 0.0], [0.6666666666666666, 0.0], [0.0, 0.5], [0.16666666666666666, 0.5], [0.8333333333333334, 0.0], [0.4166666666666667, 0.5], [1.0, 0.0], [0.5833333333333334, 0.5], [0.0, 1.0], [0.16666666666666666, 1.0], [0.3333333333333333, 1.0], [0.5, 1.0], [0.6666666666666666, 1.0]], "plan": ["To investigate the creative limits of language models through multi-token\nprediction and seed-conditioning, we will create a simple baseline using a\nsynthetic dataset. We will simulate a task where a language model generates\ncreative responses based on input seeds. The model will be evaluated using the\nCreative Output Diversity Score (CODS), measured by the cosine similarity\nbetween generated outputs. The architecture will involve a straightforward LSTM-\nbased model for the prediction task. Throughout the training process, we will\nlog metrics like validation loss and CODS, and visualize the results at the end.\nThe dataset will be synthetic text sequences composed of random words.", "To implement a basic version of the proposed research on multi-token prediction\nusing a language model, we'll create synthetic data to simulate creative tasks.\nWe'll use a simple architecture from PyTorch to explore the model's\ncapabilities. This implementation will involve generating random text using a\ncharacter-level language model and employing a seed-conditioning technique to\nassess output diversity. The Creative Output Diversity Score (CODS) will be\ncomputed for every generated output batch to measure variety and novelty. The\noutputs will be saved along with relevant metrics using the specified\nconventions.", "To construct a solid baseline for the proposed research on multi-token\nprediction and seed-conditioning in language models, we'll create a simple\ngenerative model using a basic synthetic text dataset. The model will be a\nstraightforward transformer architecture implemented in PyTorch. We'll generate\nsynthetic data by creating sequences of random words, which simulates the open-\nended tasks we want to evaluate. During training, we'll utilize the seed-\nconditioning technique by introducing random noise to the input, providing a\nbasis for the evaluation of the model's outputs. We will compute the Creative\nOutput Diversity Score (CODS) to measure the variation among generated samples,\nusing cosine similarity to assess the distinctiveness of model outputs. Finally,\nwe will save relevant metrics and generated predictions to the working directory\nfor future analysis.", "To implement a basic framework for exploring the creative limits of language\nmodels through multi-token prediction, we'll start by using a simple dataset\ngenerated synthetically for this experiment. The model will be a basic LSTM-\nbased sequence generator. In this setup, we will define a training routine that\nevaluates the model's performance through a Creative Output Diversity Score\n(CODS), calculated by assessing the diversity of generated sequences using\ncosine similarity. We'll implement seed-conditioning by introducing randomness\nto the input sequences before feeding them into the model. Lastly, metrics will\nbe recorded and saved, allowing us to evaluate the model's ability to produce\nvaried and creative outputs.", "To implement a basic setup for the proposed research idea, we will create a\nsynthetic dataset that simulates multi-token prediction tasks. We'll use a\nsimple LSTM-based model to perform these tasks and introduce randomness to the\ninput via seed-conditioning to enhance diversification in outputs. The model\nwill be trained on the generated synthetic data, and during training, we'll\nevaluate the Creative Output Diversity Score (CODS) to measure the diversity of\noutputs. After training, we'll save the metrics, losses, and generated outputs\nfor analysis. The chosen architecture and data generation approach create a\nmanageable baseline for subsequent refinements.", "To fix the issues in the previous code implementation, we need to address two\nmain points. Firstly, we will adjust the input tensor construction where we\ncurrently convert the batch into a tensor; instead, we should directly work with\ntensors from the `DataLoader`. Secondly, we need to change the way we calculate\nthe loss to ensure the output tensor is compatible with the labels by using\n`.reshape()` instead of `.view()`, which resolves the runtime error seen during\nexecution.  Here's the revised code implementing these bug fixes:", "The issue within the current implementation arises from a mismatch between the\npredicted output size and the target tensor size during the loss computation.\nThe model is generating outputs (predictions) that are one timestep shorter than\nthe target data due to the indexing when calculating the cross-entropy loss. To\nfix this, the target tensor should be correctly shaped to match the model's\noutput shape. This can be achieved by slicing the output tensor appropriately\nand ensuring that both the input and target tensors are aligned correctly.", "To start our exploration of the creative limits of language models, we will\nconduct an initial experiment using a synthetic dataset. We'll generate simple\nsequences of text where each sequence contains several tokens. We will implement\na basic LSTM model for multi-token prediction and will incorporate a seed-\nconditioning approach by adding random noise to the input sequences. Our\nevaluation will focus on measuring the Creative Output Diversity Score (CODS),\nusing cosine similarity to assess the variation among generated sequences. The\ndevelopment will include basic training and validation loops, as well as metrics\ntracking, to establish a solid baseline for future refinements.", "To fix the bug in the previous implementation, we need to ensure that the input\ntensor to the LSTM model contains valid indices for the embedding layer. The\nCUDA error was likely due to random noise being added to the input tensor which\ncould produce out-of-bound indices. To fix this, we will modify the way we apply\nnoise to the input by using a clipping method to ensure that the indices remain\nvalid. Also, we'll ensure proper device memory handling for tensors throughout\nthe training loop.", "To implement the initial experiment for our research idea, we'll create a simple\nlanguage model using PyTorch, paired with a synthetic dataset to evaluate multi-\ntoken prediction and seed-conditioning. The synthetic data will consist of\nsequences of numbers, where the model learns to predict the next few numbers\nbased on the prior inputs. We'll incorporate randomness through seed-\nconditioning by adding noise to the input tensors. During training, we'll\nmeasure the validation loss and calculate the Creative Output Diversity Score\n(CODS) using cosine similarity between generated samples. Lastly, we will save\nall metrics to a file for later analysis.", "The issue in the previous implementation arises from the addition of random\nnoise to the input tensor directly, which can potentially lead to input values\nthat exceed the expected range of indices for the embedding layer, resulting in\ndevice-side assert errors. To resolve this, we should ensure that the added\nnoise wraps around correctly within the bounds of `num_classes` and does not\ndisrupt the indexing. Therefore, I will modify the code to apply the noise\ncorrectly and ensure that the input values remain valid indices for the\nembedding layer.", "To resolve the issues present in the previous implementation, we need to\ncorrectly manage tensor operations and ensure that tensors are moved to the\nappropriate device (CPU or GPU) consistently. The warning regarding tensor\ncreation suggests we should use `torch.tensor(batch).to(device)` correctly by\nmaking sure to detach and clone tensors appropriately. Additionally, the view\nerror during loss computation indicates a misalignment of dimensions, which\nshould be fixed by using `reshape` correctly while retaining compatibility with\nthe tensor's shape during training.   Here is the revised implementation:", "Seed node", "Seed node", "Seed node", "Aggregate results from multiple seeds"], "code": ["import os\nimport torch\nimport numpy as np\nfrom torch import nn, optim\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics import pairwise_distances\n\n# Create working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n\n# Synthetic Dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, num_samples=1000, seq_length=10, vocab_size=100):\n        self.data = np.random.randint(0, vocab_size, (num_samples, seq_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, idx):\n        return self.data[idx]\n\n\n# LSTM Model\nclass LSTMModel(nn.Module):\n    def __init__(self, input_size, hidden_size, output_size):\n        super(LSTMModel, self).__init__()\n        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)\n        self.fc = nn.Linear(hidden_size, output_size)\n\n    def forward(self, x):\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Evaluation Metric: Creative Output Diversity Score (CODS)\ndef compute_cods(generated_outputs):\n    if len(generated_outputs) < 2:\n        return 0\n    cosine_sim = 1 - pairwise_distances(generated_outputs, metric=\"cosine\")\n    avg_similarity = np.mean(cosine_sim)\n    return 1 - avg_similarity  # Higher scores indicate more diversity\n\n\n# Training function\ndef train_model(model, train_loader, num_epochs=10):\n    optimizer = optim.Adam(model.parameters())\n    loss_fn = nn.CrossEntropyLoss()\n    experiment_data = {\n        \"synthetic_data\": {\n            \"metrics\": {\"train\": [], \"val\": []},\n            \"predictions\": [],\n        },\n    }\n\n    for epoch in range(num_epochs):\n        model.train()\n        total_loss = 0\n        generated_outputs = []\n\n        for batch in train_loader:\n            inputs = (\n                torch.nn.functional.one_hot(torch.tensor(batch), num_classes=100)\n                .float()\n                .to(device)\n            )\n            labels = inputs.clone()[:, 1:]  # Shift for next token prediction\n\n            optimizer.zero_grad()\n            outputs = model(inputs)\n            loss = loss_fn(outputs[:, :-1, :].view(-1, 100), labels.view(-1).to(device))\n            loss.backward()\n            optimizer.step()\n            total_loss += loss.item()\n\n            # Store some generated outputs for CODS evaluation\n            generated_outputs.append(outputs.detach().cpu().numpy())\n\n        avg_loss = total_loss / len(train_loader)\n        experiment_data[\"synthetic_data\"][\"metrics\"][\"train\"].append(avg_loss)\n\n        # Compute CODS\n        generated_outputs = np.concatenate(generated_outputs, axis=0)\n        cods = compute_cods(generated_outputs.reshape(-1, 100))\n        experiment_data[\"synthetic_data\"][\"metrics\"][\"val\"].append(cods)\n\n        print(f\"Epoch {epoch + 1}: train_loss = {avg_loss:.4f}, cods = {cods:.4f}\")\n\n    np.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n\n\n# Main script execution\ndataset = SyntheticDataset()\ntrain_loader = DataLoader(dataset, batch_size=32, shuffle=True)\nmodel = LSTMModel(input_size=100, hidden_size=64, output_size=100).to(device)\ntrain_model(model, train_loader, num_epochs=10)\n", "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nimport torch.nn.functional as F\n\n# Setting up working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n# Using GPU/CPU\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n\n# Simple character-level language model\nclass CharRNN(nn.Module):\n    def __init__(self, vocab_size, embedding_dim, hidden_dim):\n        super(CharRNN, self).__init__()\n        self.embedding = nn.Embedding(vocab_size, embedding_dim)\n        self.rnn = nn.RNN(embedding_dim, hidden_dim, batch_first=True)\n        self.fc = nn.Linear(hidden_dim, vocab_size)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        x, _ = self.rnn(x)\n        return self.fc(x)\n\n\n# Dataset and data preparation\ndef synthetic_data(sequence_length=20, num_samples=1000):\n    vocab = list(\"abcdefghijklmnopqrstuvwxyz \")\n    vocab_size = len(vocab)\n    encoded_data = [\n        torch.tensor(\n            [\n                vocab.index(char)\n                for char in \"\".join(np.random.choice(vocab, sequence_length))\n            ]\n        )\n        for _ in range(num_samples)\n    ]\n    return encoded_data, vocab_size\n\n\n# Evaluate diversity of outputs based on CODS\ndef calculate_cods(outputs):\n    # A basic implementation of CODS using cosine similarity\n    from sklearn.metrics.pairwise import cosine_similarity\n    from scipy.spatial.distance import pdist, squareform\n\n    unique_outputs = set(np.array(outputs).flatten())\n    output_matrix = np.stack(\n        [np.array(list(output)).reshape(1, -1) for output in unique_outputs]\n    )\n    similarities = 1 - squareform(pdist(output_matrix, metric=\"cosine\"))\n    diversity_score = np.mean(similarities)\n    return diversity_score\n\n\n# Training and evaluation\ndataset, vocab_size = synthetic_data()\nmodel = CharRNN(vocab_size, embedding_dim=100, hidden_dim=128).to(device)\noptimizer = optim.Adam(model.parameters())\nepochs = 10\nexperiment_data = {\n    \"dataset\": {\"metrics\": {\"train\": []}, \"predictions\": [], \"ground_truth\": []}\n}\n\nfor epoch in range(epochs):\n    total_loss = 0\n    for batch in dataset:\n        inputs = batch.unsqueeze(0).to(device)\n        target = batch[1:].unsqueeze(0).to(device)\n\n        optimizer.zero_grad()\n        outputs = model(inputs)\n        loss = F.cross_entropy(outputs[:, :-1, :], target)\n        total_loss += loss.item()\n        loss.backward()\n        optimizer.step()\n\n    avg_loss = total_loss / len(dataset)\n    experiment_data[\"dataset\"][\"metrics\"][\"train\"].append(avg_loss)\n    generated_outputs = [\n        model(torch.randint(0, vocab_size, (1, 10)).to(device)).argmax(2)\n        for _ in range(100)\n    ]\n    cods = calculate_cods(generated_outputs)\n    experiment_data[\"dataset\"][\"predictions\"].extend(generated_outputs)\n\n    print(f\"Epoch {epoch}: average_loss = {avg_loss:.4f}, CODS = {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nfrom sklearn.metrics import pairwise_distances\n\n# Setup\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n\n# Generate synthetic dataset\ndef generate_synthetic_data(num_samples=1000, seq_length=10, vocab_size=50):\n    return np.random.randint(0, vocab_size, size=(num_samples, seq_length))\n\n\n# Define a simple transformer model\nclass SimpleTransformer(nn.Module):\n    def __init__(self, vocab_size, embed_size=64, n_heads=4, n_layers=2):\n        super(SimpleTransformer, self).__init__()\n        self.embedding = nn.Embedding(vocab_size, embed_size)\n        self.transformer = nn.Transformer(embed_size, n_heads, n_layers)\n        self.fc = nn.Linear(embed_size, vocab_size)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        x = self.transformer(x)\n        return self.fc(x)\n\n\n# Training parameters\nvocab_size = 50\ndataset = generate_synthetic_data()\ntrain_data = torch.tensor(dataset, dtype=torch.long).to(device)\n\nmodel = SimpleTransformer(vocab_size).to(device)\noptimizer = optim.Adam(model.parameters(), lr=0.001)\ncriterion = nn.CrossEntropyLoss()\n\n# Experiment data structure for metrics\nexperiment_data = {\n    \"simple_transformer\": {\n        \"metrics\": {\"train\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n# Training loop\nn_epochs = 10\nfor epoch in range(n_epochs):\n    model.train()\n    total_loss = 0\n    for i in range(len(train_data)):\n        optimizer.zero_grad()\n        input_seq = train_data[i : i + 1].to(device) + torch.randn(input_seq.shape).to(\n            device\n        )\n        target_seq = input_seq.clone()\n        output = model(input_seq)\n        loss = criterion(output.view(-1, vocab_size), target_seq.view(-1))\n        loss.backward()\n        optimizer.step()\n        total_loss += loss.item()\n\n    avg_loss = total_loss / len(train_data)\n    experiment_data[\"simple_transformer\"][\"metrics\"][\"train\"].append(avg_loss)\n    print(f\"Epoch {epoch}: training_loss = {avg_loss:.4f}\")\n\n\n# Evaluation metric: Creative Output Diversity Score (CODS)\ndef calculate_cod(output):\n    embeddings = output.detach().cpu().numpy()\n    distances = pairwise_distances(embeddings)\n    diversity = 1 - np.mean(distances)\n    return diversity\n\n\n# Generate synthetic predictions and calculate CODS\nmodel.eval()\nfor _ in range(5):\n    input_seq = torch.randn((1, 10)).to(device)\n    output = model(input_seq)\n    cods = calculate_cod(output)\n    experiment_data[\"simple_transformer\"][\"predictions\"].append(\n        output.detach().cpu().numpy()\n    )\n    experiment_data[\"simple_transformer\"][\"ground_truth\"].append(\n        input_seq.cpu().numpy()\n    )\n    print(f\"Generated CODS: {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics.pairwise import cosine_similarity\n\n# Constants\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\nnum_samples = 1000\nseq_length = 10\nnum_classes = 5\nembedding_dim = 16\nhidden_dim = 32\nnum_epochs = 50\nbatch_size = 32\nlearning_rate = 0.001\n\n\n# Create synthetic dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, num_samples, seq_length):\n        self.data = torch.randint(0, num_classes, (num_samples, seq_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, index):\n        return (\n            self.data[index],\n            self.data[index],\n        )  # Returning input and target as the same for simplicity\n\n\n# Model Definition\nclass LSTMModel(nn.Module):\n    def __init__(self):\n        super(LSTMModel, self).__init__()\n        self.embedding = nn.Embedding(num_classes, embedding_dim)\n        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)\n        self.fc = nn.Linear(hidden_dim, num_classes)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Metrics Storage\nexperiment_data = {\n    \"synthetic_dataset\": {\n        \"metrics\": {\"train\": [], \"val\": []},\n        \"losses\": {\"train\": [], \"val\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n\n# Evaluation Metric: CODS\ndef calculate_cods(outputs):\n    similarity_matrix = cosine_similarity(outputs)\n    distinctiveness = 1 - np.mean(similarity_matrix)\n    return distinctiveness\n\n\n# Training Routine\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\ndataset = SyntheticDataset(num_samples, seq_length)\ndataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)\nmodel = LSTMModel().to(device)\ncriterion = nn.CrossEntropyLoss()\noptimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)\n\nfor epoch in range(num_epochs):\n    epoch_loss = 0\n    all_outputs = []\n\n    for inputs, targets in dataloader:\n        inputs, targets = inputs.to(device), targets.to(device)\n\n        # Seed-conditioning: introducing randomness\n        noise = torch.randint(0, num_classes, inputs.shape).to(device)\n        inputs += noise % num_classes  # Simple form of seed-conditioning\n\n        optimizer.zero_grad()\n        outputs = model(inputs)\n        loss = criterion(outputs.view(-1, num_classes), targets.view(-1))\n        loss.backward()\n        optimizer.step()\n\n        epoch_loss += loss.item()\n        all_outputs.append(outputs.detach().cpu().numpy())\n\n    avg_loss = epoch_loss / len(dataloader)\n    experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"].append(avg_loss)\n\n    # Calculate CODS\n    all_outputs = np.concatenate(all_outputs)\n    cods = calculate_cods(all_outputs.reshape(-1, num_classes))\n    experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"].append(cods)\n\n    print(f\"Epoch {epoch+1}: training_loss = {avg_loss:.4f}, CODS = {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics.pairwise import cosine_similarity\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n# Set device\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n\n# Define synthetic dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, size=1000, seq_len=10, vocab_size=20):\n        self.data = np.random.randint(0, vocab_size, size=(size, seq_len))\n        self.targets = np.roll(self.data, -1, axis=1)  # target is just shifted input\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, idx):\n        return {\n            \"input\": torch.tensor(self.data[idx], dtype=torch.long),\n            \"target\": torch.tensor(self.targets[idx], dtype=torch.long),\n        }\n\n\n# Simple LSTM Model\nclass LSTMModel(nn.Module):\n    def __init__(self, input_size, hidden_size, output_size):\n        super(LSTMModel, self).__init__()\n        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)\n        self.fc = nn.Linear(hidden_size, output_size)\n\n    def forward(self, x):\n        x = x.unsqueeze(-1).float()  # Add dimension for LSTM\n        lstm_out, _ = self.lstm(x)\n        return self.fc(lstm_out)\n\n\n# Seed-conditioning technique\ndef seed_conditioning(inputs, noise_level=0.1):\n    return inputs + torch.randn_like(inputs) * noise_level\n\n\n# Create dataset and dataloader\ndataset = SyntheticDataset()\ndataloader = DataLoader(dataset, batch_size=32, shuffle=True)\n\n# Initialize model, optimizer and loss function\nmodel = LSTMModel(input_size=20, hidden_size=50, output_size=20).to(device)\noptimizer = optim.Adam(model.parameters())\ncriterion = nn.CrossEntropyLoss()\n\n# Experiment data storage\nexperiment_data = {\n    \"synthetic_dataset\": {\n        \"metrics\": {\"train\": [], \"val\": []},\n        \"losses\": {\"train\": [], \"val\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n# Training loop\nfor epoch in range(10):\n    model.train()\n    total_loss = 0\n    for batch in dataloader:\n        batch = {\n            k: v.to(device) for k, v in batch.items() if isinstance(v, torch.Tensor)\n        }\n        inputs = seed_conditioning(batch[\"input\"])\n        targets = batch[\"target\"]\n\n        optimizer.zero_grad()\n        outputs = model(inputs)\n        loss = criterion(outputs.view(-1, 20), targets.view(-1))\n        loss.backward()\n        optimizer.step()\n\n        total_loss += loss.item()\n\n    # Track and log metrics\n    avg_loss = total_loss / len(dataloader)\n    experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"].append(avg_loss)\n    print(f\"Epoch {epoch}: train_loss = {avg_loss:.4f}\")\n\n# Evaluate CODS\nmodel.eval()\nwith torch.no_grad():\n    sample_outputs = []\n    for _ in range(100):  # Generate some samples\n        noise_input = torch.randint(0, 20, (1, 10)).to(device)\n        conditioned_input = seed_conditioning(noise_input)\n        output = model(conditioned_input)\n        sample_outputs.append(torch.argmax(output, dim=-1).cpu().numpy())\n\n    # Calculate CODS\n    cods = cosine_similarity(sample_outputs).mean()  # Example CODS calculation\n    experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"].append(cods)\n    print(f\"CODS: {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "import os\nimport torch\nimport numpy as np\nfrom torch import nn, optim\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics import pairwise_distances\n\n# Create working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n\n# Synthetic Dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, num_samples=1000, seq_length=10, vocab_size=100):\n        self.data = np.random.randint(0, vocab_size, (num_samples, seq_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, idx):\n        return self.data[idx]\n\n\n# LSTM Model\nclass LSTMModel(nn.Module):\n    def __init__(self, input_size, hidden_size, output_size):\n        super(LSTMModel, self).__init__()\n        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)\n        self.fc = nn.Linear(hidden_size, output_size)\n\n    def forward(self, x):\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Evaluation Metric: Creative Output Diversity Score (CODS)\ndef compute_cods(generated_outputs):\n    if len(generated_outputs) < 2:\n        return 0\n    cosine_sim = 1 - pairwise_distances(generated_outputs, metric=\"cosine\")\n    avg_similarity = np.mean(cosine_sim)\n    return 1 - avg_similarity  # Higher scores indicate more diversity\n\n\n# Training function\ndef train_model(model, train_loader, num_epochs=10):\n    optimizer = optim.Adam(model.parameters())\n    loss_fn = nn.CrossEntropyLoss()\n    experiment_data = {\n        \"synthetic_data\": {\n            \"metrics\": {\"train\": [], \"val\": []},\n            \"predictions\": [],\n        },\n    }\n\n    for epoch in range(num_epochs):\n        model.train()\n        total_loss = 0\n        generated_outputs = []\n\n        for batch in train_loader:\n            inputs = torch.nn.functional.one_hot(\n                torch.tensor(batch).to(device), num_classes=100\n            ).float()\n            labels = inputs.clone()[:, 1:]  # Shift for next token prediction\n\n            optimizer.zero_grad()\n            outputs = model(inputs)\n            loss = loss_fn(\n                outputs[:, :-1, :].reshape(-1, 100), labels.view(-1).to(device)\n            )  # Changed view to reshape\n            loss.backward()\n            optimizer.step()\n            total_loss += loss.item()\n\n            # Store some generated outputs for CODS evaluation\n            generated_outputs.append(outputs.detach().cpu().numpy())\n\n        avg_loss = total_loss / len(train_loader)\n        experiment_data[\"synthetic_data\"][\"metrics\"][\"train\"].append(avg_loss)\n\n        # Compute CODS\n        generated_outputs = np.concatenate(generated_outputs, axis=0)\n        cods = compute_cods(generated_outputs.reshape(-1, 100))\n        experiment_data[\"synthetic_data\"][\"metrics\"][\"val\"].append(cods)\n\n        print(f\"Epoch {epoch + 1}: train_loss = {avg_loss:.4f}, cods = {cods:.4f}\")\n\n    np.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n\n\n# Main script execution\ndataset = SyntheticDataset()\ntrain_loader = DataLoader(dataset, batch_size=32, shuffle=True)\nmodel = LSTMModel(input_size=100, hidden_size=64, output_size=100).to(device)\ntrain_model(model, train_loader, num_epochs=10)\n", "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nimport torch.nn.functional as F\n\n# Setting up working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n# Using GPU/CPU\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n\n# Simple character-level language model\nclass CharRNN(nn.Module):\n    def __init__(self, vocab_size, embedding_dim, hidden_dim):\n        super(CharRNN, self).__init__()\n        self.embedding = nn.Embedding(vocab_size, embedding_dim)\n        self.rnn = nn.RNN(embedding_dim, hidden_dim, batch_first=True)\n        self.fc = nn.Linear(hidden_dim, vocab_size)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        x, _ = self.rnn(x)\n        return self.fc(x)\n\n\n# Dataset and data preparation\ndef synthetic_data(sequence_length=20, num_samples=1000):\n    vocab = list(\"abcdefghijklmnopqrstuvwxyz \")\n    vocab_size = len(vocab)\n    encoded_data = [\n        torch.tensor(\n            [\n                vocab.index(char)\n                for char in \"\".join(np.random.choice(vocab, sequence_length))\n            ]\n        )\n        for _ in range(num_samples)\n    ]\n    return encoded_data, vocab_size\n\n\n# Evaluate diversity of outputs based on CODS\ndef calculate_cods(outputs):\n    from sklearn.metrics.pairwise import cosine_similarity\n    from scipy.spatial.distance import pdist, squareform\n\n    unique_outputs = set(tuple(output.cpu().numpy()) for output in outputs)\n    output_matrix = np.stack(\n        [np.array(list(output)).reshape(1, -1) for output in unique_outputs]\n    )\n    similarities = 1 - squareform(pdist(output_matrix, metric=\"cosine\"))\n    diversity_score = np.mean(similarities)\n    return diversity_score\n\n\n# Training and evaluation\ndataset, vocab_size = synthetic_data()\nmodel = CharRNN(vocab_size, embedding_dim=100, hidden_dim=128).to(device)\noptimizer = optim.Adam(model.parameters())\nepochs = 10\nexperiment_data = {\n    \"dataset\": {\"metrics\": {\"train\": []}, \"predictions\": [], \"ground_truth\": []}\n}\n\nfor epoch in range(epochs):\n    total_loss = 0\n    for batch in dataset:\n        inputs = batch.unsqueeze(0).to(device)\n        target = (\n            batch[1:].unsqueeze(0).to(device)\n        )  # Adjusted target shape to be [1, 19]\n\n        optimizer.zero_grad()\n        outputs = model(inputs)\n\n        # Correctly slicing outputs to match target shape [1, 19]\n        loss = F.cross_entropy(\n            outputs[:, :-1, :], target\n        )  # Outputs are [1, 20, vocab_size]\n        total_loss += loss.item()\n        loss.backward()\n        optimizer.step()\n\n    avg_loss = total_loss / len(dataset)\n    experiment_data[\"dataset\"][\"metrics\"][\"train\"].append(avg_loss)\n\n    generated_outputs = [\n        model(torch.randint(0, vocab_size, (1, 10)).to(device)).argmax(2)\n        for _ in range(100)\n    ]\n    cods = calculate_cods(generated_outputs)\n    experiment_data[\"dataset\"][\"predictions\"].extend(generated_outputs)\n\n    print(f\"Epoch {epoch}: average_loss = {avg_loss:.4f}, CODS = {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nfrom torch.utils.data import Dataset, DataLoader\nfrom sklearn.metrics.pairwise import cosine_similarity\n\n# Directory setup\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n# Device configuration\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n\n# Generate synthetic data\ndef generate_data(num_samples=1000, seq_length=10, vocab_size=20):\n    return np.random.randint(0, vocab_size, (num_samples, seq_length))\n\n\n# Custom dataset class\nclass SequenceDataset(Dataset):\n    def __init__(self, data):\n        self.data = data\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, idx):\n        return torch.tensor(self.data[idx], dtype=torch.long)\n\n\n# Define the LSTM model\nclass LSTMModel(nn.Module):\n    def __init__(self, vocab_size, embedding_dim, hidden_dim):\n        super(LSTMModel, self).__init__()\n        self.embedding = nn.Embedding(vocab_size, embedding_dim)\n        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)\n        self.fc = nn.Linear(hidden_dim, vocab_size)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Hyperparameters\nseq_length = 10\nvocab_size = 20\nembedding_dim = 10\nhidden_dim = 20\nnum_epochs = 20\nbatch_size = 32\nlearning_rate = 0.001\n\n# Dataset and DataLoader\ndata = generate_data()\ndataset = SequenceDataset(data)\ndataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)\n\n# Model, loss, and optimizer\nmodel = LSTMModel(vocab_size, embedding_dim, hidden_dim).to(device)\ncriterion = nn.CrossEntropyLoss()\noptimizer = optim.Adam(model.parameters(), lr=learning_rate)\n\n# Experiment data storage\nexperiment_data = {\n    \"synthetic_dataset\": {\n        \"metrics\": {\"train\": [], \"val\": []},\n        \"losses\": {\"train\": [], \"val\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n# Training Loop\nfor epoch in range(num_epochs):\n    model.train()\n    total_loss = 0\n    for batch in dataloader:\n        batch = batch.to(device)\n        # Add noise for seed-conditioning\n        noise = torch.randint(0, 5, batch.size()).to(device)\n        inputs = (batch + noise) % vocab_size\n        targets = batch[:, 1:]  # Predict the next token\n\n        optimizer.zero_grad()\n        outputs = model(inputs[:, :-1])\n        loss = criterion(outputs.view(-1, vocab_size), targets.view(-1))\n        loss.backward()\n        optimizer.step()\n        total_loss += loss.item()\n\n    average_loss = total_loss / len(dataloader)\n    experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"].append(average_loss)\n    print(f\"Epoch {epoch + 1}: train_loss = {average_loss:.4f}\")\n\n# Evaluation for CODS\nmodel.eval()\nwith torch.no_grad():\n    generated_outputs = []\n    for _ in range(100):\n        seed = torch.randint(0, vocab_size, (1, seq_length)).to(device)\n        output = model(seed)\n        generated_outputs.append(output.cpu().numpy())\n\n    generated_outputs = np.array(generated_outputs).reshape(-1, vocab_size)\n\n# Calculate CODS\nsimilarity_matrix = cosine_similarity(generated_outputs)\ncods = 1 - np.mean(similarity_matrix)  # Higher is better\nexperiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"].append(cods)\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics.pairwise import cosine_similarity\n\n# Constants\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\nnum_samples = 1000\nseq_length = 10\nnum_classes = 5\nembedding_dim = 16\nhidden_dim = 32\nnum_epochs = 50\nbatch_size = 32\nlearning_rate = 0.001\n\n\n# Create synthetic dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, num_samples, seq_length):\n        self.data = torch.randint(0, num_classes, (num_samples, seq_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, index):\n        return (\n            self.data[index],\n            self.data[index],\n        )  # Returning input and target as the same for simplicity\n\n\n# Model Definition\nclass LSTMModel(nn.Module):\n    def __init__(self):\n        super(LSTMModel, self).__init__()\n        self.embedding = nn.Embedding(num_classes, embedding_dim)\n        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)\n        self.fc = nn.Linear(hidden_dim, num_classes)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Metrics Storage\nexperiment_data = {\n    \"synthetic_dataset\": {\n        \"metrics\": {\"train\": [], \"val\": []},\n        \"losses\": {\"train\": [], \"val\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n\n# Evaluation Metric: CODS\ndef calculate_cods(outputs):\n    similarity_matrix = cosine_similarity(outputs)\n    distinctiveness = 1 - np.mean(similarity_matrix)\n    return distinctiveness\n\n\n# Training Routine\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\ndataset = SyntheticDataset(num_samples, seq_length)\ndataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)\nmodel = LSTMModel().to(device)\ncriterion = nn.CrossEntropyLoss()\noptimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)\n\nfor epoch in range(num_epochs):\n    epoch_loss = 0\n    all_outputs = []\n\n    for inputs, targets in dataloader:\n        inputs, targets = inputs.to(device), targets.to(device)\n\n        # Seed-conditioning: introducing randomness with constraint\n        noise = torch.randint(0, num_classes, inputs.shape).to(device)\n        inputs = (inputs + noise) % num_classes  # Ensure valid index ranges\n\n        optimizer.zero_grad()\n        outputs = model(inputs)\n        loss = criterion(outputs.view(-1, num_classes), targets.view(-1))\n        loss.backward()\n        optimizer.step()\n\n        epoch_loss += loss.item()\n        all_outputs.append(outputs.detach().cpu().numpy())\n\n    avg_loss = epoch_loss / len(dataloader)\n    experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"].append(avg_loss)\n\n    # Calculate CODS\n    all_outputs = np.concatenate(all_outputs)\n    cods = calculate_cods(all_outputs.reshape(-1, num_classes))\n    experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"].append(cods)\n\n    print(f\"Epoch {epoch+1}: training_loss = {avg_loss:.4f}, CODS = {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics import pairwise_distances\n\n# Setting up working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\n# Device configuration\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n\n# Synthetic dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, length=1000, sequence_length=5):\n        self.data = np.random.randint(0, 100, (length, sequence_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, idx):\n        return torch.tensor(self.data[idx], dtype=torch.float32)\n\n\n# Simple LSTM Model\nclass SimpleLSTM(nn.Module):\n    def __init__(self, input_size=1, hidden_size=50, num_layers=1):\n        super(SimpleLSTM, self).__init__()\n        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)\n        self.fc = nn.Linear(hidden_size, input_size)\n\n    def forward(self, x):\n        out, _ = self.lstm(x.unsqueeze(2))  # Add feature dimension\n        return self.fc(out[:, -1])  # Output the last LSTM output\n\n\n# Parameters\nsequence_length = 5\nnum_epochs = 20\nbatch_size = 32\nlearning_rate = 0.001\n\n# Data preparation\ndataset = SyntheticDataset(sequence_length=sequence_length)\ndata_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)\n\n# Model, Loss and Optimizer\nmodel = SimpleLSTM(input_size=1).to(device)\ncriterion = nn.MSELoss()\noptimizer = optim.Adam(model.parameters(), lr=learning_rate)\n\n# Experiment data storage\nexperiment_data = {\n    \"synthetic_dataset\": {\n        \"metrics\": {\"train\": [], \"val\": []},\n        \"losses\": {\"train\": [], \"val\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n# Training loop\nfor epoch in range(num_epochs):\n    model.train()\n    for i, batch in enumerate(data_loader):\n        batch = batch.to(device)\n\n        # Adding seed-conditioning (noise)\n        noise = torch.randn_like(batch) * 0.1\n        noisy_input = batch + noise\n\n        # Forward pass and loss calculation\n        outputs = model(noisy_input)\n        targets = batch[:, -1].unsqueeze(1)  # predicting the next number\n        loss = criterion(outputs, targets)\n\n        # Backpropagation and optimization\n        optimizer.zero_grad()\n        loss.backward()\n        optimizer.step()\n\n    # Validation\n    model.eval()\n    with torch.no_grad():\n        val_loss = (\n            loss.item()\n        )  # For simplicity, using last batch loss as validation loss\n        experiment_data[\"synthetic_dataset\"][\"losses\"][\"val\"].append(val_loss)\n        print(f\"Epoch {epoch+1}: validation_loss = {val_loss:.4f}\")\n\n        # Generate predictions for CODS calculation\n        predictions = (\n            model(dataset.data[:10].to(device)).cpu().numpy()\n        )  # generate for first 10 samples\n        experiment_data[\"synthetic_dataset\"][\"predictions\"].append(predictions)\n\n# CODS Calculation\nall_predictions = np.array(experiment_data[\"synthetic_dataset\"][\"predictions\"]).reshape(\n    -1, 1\n)\ncods = 1 - pairwise_distances(all_predictions, metric=\"cosine\").mean()  # Example CODS\nexperiment_data[\"synthetic_dataset\"][\"metrics\"][\"val\"].append(cods)\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "import os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics.pairwise import cosine_similarity\n\n# Constants\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\nnum_samples = 1000\nseq_length = 10\nnum_classes = 5\nembedding_dim = 16\nhidden_dim = 32\nnum_epochs = 50\nbatch_size = 32\nlearning_rate = 0.001\n\n\n# Create synthetic dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, num_samples, seq_length):\n        self.data = torch.randint(0, num_classes, (num_samples, seq_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, index):\n        return (\n            self.data[index],\n            self.data[index],\n        )  # Returning input and target as the same for simplicity\n\n\n# Model Definition\nclass LSTMModel(nn.Module):\n    def __init__(self):\n        super(LSTMModel, self).__init__()\n        self.embedding = nn.Embedding(num_classes, embedding_dim)\n        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)\n        self.fc = nn.Linear(hidden_dim, num_classes)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Metrics Storage\nexperiment_data = {\n    \"synthetic_dataset\": {\n        \"metrics\": {\"train\": [], \"val\": []},\n        \"losses\": {\"train\": [], \"val\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n\n# Evaluation Metric: CODS\ndef calculate_cods(outputs):\n    similarity_matrix = cosine_similarity(outputs)\n    distinctiveness = 1 - np.mean(similarity_matrix)\n    return distinctiveness\n\n\n# Training Routine\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\ndataset = SyntheticDataset(num_samples, seq_length)\ndataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)\nmodel = LSTMModel().to(device)\ncriterion = nn.CrossEntropyLoss()\noptimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)\n\nfor epoch in range(num_epochs):\n    epoch_loss = 0\n    all_outputs = []\n\n    for inputs, targets in dataloader:\n        inputs, targets = inputs.to(device), targets.to(device)\n\n        # Seed-conditioning: introducing randomness within valid bounds\n        noise = torch.randint(0, num_classes, inputs.shape).to(device)\n        inputs = (inputs + noise) % num_classes  # Ensure input values are valid indices\n\n        optimizer.zero_grad()\n        outputs = model(inputs)\n        loss = criterion(outputs.view(-1, num_classes), targets.view(-1))\n        loss.backward()\n        optimizer.step()\n\n        epoch_loss += loss.item()\n        all_outputs.append(outputs.detach().cpu().numpy())\n\n    avg_loss = epoch_loss / len(dataloader)\n    experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"].append(avg_loss)\n\n    # Calculate CODS\n    all_outputs = np.concatenate(all_outputs)\n    cods = calculate_cods(all_outputs.reshape(-1, num_classes))\n    experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"].append(cods)\n\n    print(f\"Epoch {epoch+1}: training_loss = {avg_loss:.4f}, CODS = {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "import os\nimport torch\nimport numpy as np\nfrom torch import nn, optim\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics import pairwise_distances\n\n# Create working directory\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\n\n# Synthetic Dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, num_samples=1000, seq_length=10, vocab_size=100):\n        self.data = np.random.randint(0, vocab_size, (num_samples, seq_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, idx):\n        return self.data[idx]\n\n\n# LSTM Model\nclass LSTMModel(nn.Module):\n    def __init__(self, input_size, hidden_size, output_size):\n        super(LSTMModel, self).__init__()\n        self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)\n        self.fc = nn.Linear(hidden_size, output_size)\n\n    def forward(self, x):\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Evaluation Metric: Creative Output Diversity Score (CODS)\ndef compute_cods(generated_outputs):\n    if len(generated_outputs) < 2:\n        return 0\n    cosine_sim = 1 - pairwise_distances(generated_outputs, metric=\"cosine\")\n    avg_similarity = np.mean(cosine_sim)\n    return 1 - avg_similarity  # Higher scores indicate more diversity\n\n\n# Training function\ndef train_model(model, train_loader, num_epochs=10):\n    optimizer = optim.Adam(model.parameters())\n    loss_fn = nn.CrossEntropyLoss()\n    experiment_data = {\n        \"synthetic_data\": {\n            \"metrics\": {\"train\": [], \"val\": []},\n            \"predictions\": [],\n        },\n    }\n\n    for epoch in range(num_epochs):\n        model.train()\n        total_loss = 0\n        generated_outputs = []\n\n        for batch in train_loader:\n            batch = batch.to(device)  # Move batch to device\n            inputs = (\n                torch.nn.functional.one_hot(batch, num_classes=100).float().to(device)\n            )\n            labels = inputs.clone()[:, 1:]  # Shift for next token prediction\n\n            optimizer.zero_grad()\n            outputs = model(inputs)\n            loss = loss_fn(\n                outputs[:, :-1, :].reshape(-1, 100), labels.view(-1).to(device)\n            )\n            loss.backward()\n            optimizer.step()\n            total_loss += loss.item()\n\n            # Store some generated outputs for CODS evaluation\n            generated_outputs.append(outputs.detach().cpu().numpy())\n\n        avg_loss = total_loss / len(train_loader)\n        experiment_data[\"synthetic_data\"][\"metrics\"][\"train\"].append(avg_loss)\n\n        # Compute CODS\n        generated_outputs = np.concatenate(generated_outputs, axis=0)\n        cods = compute_cods(generated_outputs.reshape(-1, 100))\n        experiment_data[\"synthetic_data\"][\"metrics\"][\"val\"].append(cods)\n\n        print(f\"Epoch {epoch + 1}: train_loss = {avg_loss:.4f}, cods = {cods:.4f}\")\n\n    np.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n\n\n# Main script execution\ndataset = SyntheticDataset()\ntrain_loader = DataLoader(dataset, batch_size=32, shuffle=True)\nmodel = LSTMModel(input_size=100, hidden_size=64, output_size=100).to(device)\ntrain_model(model, train_loader, num_epochs=10)\n", "# Set random seed\nimport random\nimport numpy as np\nimport torch\n\nseed = 0\nrandom.seed(seed)\nnp.random.seed(seed)\ntorch.manual_seed(seed)\nif torch.cuda.is_available():\n    torch.cuda.manual_seed(seed)\n\nimport os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics.pairwise import cosine_similarity\n\n# Constants\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\nnum_samples = 1000\nseq_length = 10\nnum_classes = 5\nembedding_dim = 16\nhidden_dim = 32\nnum_epochs = 50\nbatch_size = 32\nlearning_rate = 0.001\n\n\n# Create synthetic dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, num_samples, seq_length):\n        self.data = torch.randint(0, num_classes, (num_samples, seq_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, index):\n        return (\n            self.data[index],\n            self.data[index],\n        )  # Returning input and target as the same for simplicity\n\n\n# Model Definition\nclass LSTMModel(nn.Module):\n    def __init__(self):\n        super(LSTMModel, self).__init__()\n        self.embedding = nn.Embedding(num_classes, embedding_dim)\n        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)\n        self.fc = nn.Linear(hidden_dim, num_classes)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Metrics Storage\nexperiment_data = {\n    \"synthetic_dataset\": {\n        \"metrics\": {\"train\": [], \"val\": []},\n        \"losses\": {\"train\": [], \"val\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n\n# Evaluation Metric: CODS\ndef calculate_cods(outputs):\n    similarity_matrix = cosine_similarity(outputs)\n    distinctiveness = 1 - np.mean(similarity_matrix)\n    return distinctiveness\n\n\n# Training Routine\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\ndataset = SyntheticDataset(num_samples, seq_length)\ndataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)\nmodel = LSTMModel().to(device)\ncriterion = nn.CrossEntropyLoss()\noptimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)\n\nfor epoch in range(num_epochs):\n    epoch_loss = 0\n    all_outputs = []\n\n    for inputs, targets in dataloader:\n        inputs, targets = inputs.to(device), targets.to(device)\n\n        # Seed-conditioning: introducing randomness with constraint\n        noise = torch.randint(0, num_classes, inputs.shape).to(device)\n        inputs = (inputs + noise) % num_classes  # Ensure valid index ranges\n\n        optimizer.zero_grad()\n        outputs = model(inputs)\n        loss = criterion(outputs.view(-1, num_classes), targets.view(-1))\n        loss.backward()\n        optimizer.step()\n\n        epoch_loss += loss.item()\n        all_outputs.append(outputs.detach().cpu().numpy())\n\n    avg_loss = epoch_loss / len(dataloader)\n    experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"].append(avg_loss)\n\n    # Calculate CODS\n    all_outputs = np.concatenate(all_outputs)\n    cods = calculate_cods(all_outputs.reshape(-1, num_classes))\n    experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"].append(cods)\n\n    print(f\"Epoch {epoch+1}: training_loss = {avg_loss:.4f}, CODS = {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "# Set random seed\nimport random\nimport numpy as np\nimport torch\n\nseed = 1\nrandom.seed(seed)\nnp.random.seed(seed)\ntorch.manual_seed(seed)\nif torch.cuda.is_available():\n    torch.cuda.manual_seed(seed)\n\nimport os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics.pairwise import cosine_similarity\n\n# Constants\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\nnum_samples = 1000\nseq_length = 10\nnum_classes = 5\nembedding_dim = 16\nhidden_dim = 32\nnum_epochs = 50\nbatch_size = 32\nlearning_rate = 0.001\n\n\n# Create synthetic dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, num_samples, seq_length):\n        self.data = torch.randint(0, num_classes, (num_samples, seq_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, index):\n        return (\n            self.data[index],\n            self.data[index],\n        )  # Returning input and target as the same for simplicity\n\n\n# Model Definition\nclass LSTMModel(nn.Module):\n    def __init__(self):\n        super(LSTMModel, self).__init__()\n        self.embedding = nn.Embedding(num_classes, embedding_dim)\n        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)\n        self.fc = nn.Linear(hidden_dim, num_classes)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Metrics Storage\nexperiment_data = {\n    \"synthetic_dataset\": {\n        \"metrics\": {\"train\": [], \"val\": []},\n        \"losses\": {\"train\": [], \"val\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n\n# Evaluation Metric: CODS\ndef calculate_cods(outputs):\n    similarity_matrix = cosine_similarity(outputs)\n    distinctiveness = 1 - np.mean(similarity_matrix)\n    return distinctiveness\n\n\n# Training Routine\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\ndataset = SyntheticDataset(num_samples, seq_length)\ndataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)\nmodel = LSTMModel().to(device)\ncriterion = nn.CrossEntropyLoss()\noptimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)\n\nfor epoch in range(num_epochs):\n    epoch_loss = 0\n    all_outputs = []\n\n    for inputs, targets in dataloader:\n        inputs, targets = inputs.to(device), targets.to(device)\n\n        # Seed-conditioning: introducing randomness with constraint\n        noise = torch.randint(0, num_classes, inputs.shape).to(device)\n        inputs = (inputs + noise) % num_classes  # Ensure valid index ranges\n\n        optimizer.zero_grad()\n        outputs = model(inputs)\n        loss = criterion(outputs.view(-1, num_classes), targets.view(-1))\n        loss.backward()\n        optimizer.step()\n\n        epoch_loss += loss.item()\n        all_outputs.append(outputs.detach().cpu().numpy())\n\n    avg_loss = epoch_loss / len(dataloader)\n    experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"].append(avg_loss)\n\n    # Calculate CODS\n    all_outputs = np.concatenate(all_outputs)\n    cods = calculate_cods(all_outputs.reshape(-1, num_classes))\n    experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"].append(cods)\n\n    print(f\"Epoch {epoch+1}: training_loss = {avg_loss:.4f}, CODS = {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "# Set random seed\nimport random\nimport numpy as np\nimport torch\n\nseed = 2\nrandom.seed(seed)\nnp.random.seed(seed)\ntorch.manual_seed(seed)\nif torch.cuda.is_available():\n    torch.cuda.manual_seed(seed)\n\nimport os\nimport numpy as np\nimport torch\nimport torch.nn as nn\nfrom torch.utils.data import DataLoader, Dataset\nfrom sklearn.metrics.pairwise import cosine_similarity\n\n# Constants\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\nnum_samples = 1000\nseq_length = 10\nnum_classes = 5\nembedding_dim = 16\nhidden_dim = 32\nnum_epochs = 50\nbatch_size = 32\nlearning_rate = 0.001\n\n\n# Create synthetic dataset\nclass SyntheticDataset(Dataset):\n    def __init__(self, num_samples, seq_length):\n        self.data = torch.randint(0, num_classes, (num_samples, seq_length))\n\n    def __len__(self):\n        return len(self.data)\n\n    def __getitem__(self, index):\n        return (\n            self.data[index],\n            self.data[index],\n        )  # Returning input and target as the same for simplicity\n\n\n# Model Definition\nclass LSTMModel(nn.Module):\n    def __init__(self):\n        super(LSTMModel, self).__init__()\n        self.embedding = nn.Embedding(num_classes, embedding_dim)\n        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)\n        self.fc = nn.Linear(hidden_dim, num_classes)\n\n    def forward(self, x):\n        x = self.embedding(x)\n        out, _ = self.lstm(x)\n        return self.fc(out)\n\n\n# Metrics Storage\nexperiment_data = {\n    \"synthetic_dataset\": {\n        \"metrics\": {\"train\": [], \"val\": []},\n        \"losses\": {\"train\": [], \"val\": []},\n        \"predictions\": [],\n        \"ground_truth\": [],\n    },\n}\n\n\n# Evaluation Metric: CODS\ndef calculate_cods(outputs):\n    similarity_matrix = cosine_similarity(outputs)\n    distinctiveness = 1 - np.mean(similarity_matrix)\n    return distinctiveness\n\n\n# Training Routine\ndevice = torch.device(\"cuda\" if torch.cuda.is_available() else \"cpu\")\nprint(f\"Using device: {device}\")\n\ndataset = SyntheticDataset(num_samples, seq_length)\ndataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)\nmodel = LSTMModel().to(device)\ncriterion = nn.CrossEntropyLoss()\noptimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)\n\nfor epoch in range(num_epochs):\n    epoch_loss = 0\n    all_outputs = []\n\n    for inputs, targets in dataloader:\n        inputs, targets = inputs.to(device), targets.to(device)\n\n        # Seed-conditioning: introducing randomness with constraint\n        noise = torch.randint(0, num_classes, inputs.shape).to(device)\n        inputs = (inputs + noise) % num_classes  # Ensure valid index ranges\n\n        optimizer.zero_grad()\n        outputs = model(inputs)\n        loss = criterion(outputs.view(-1, num_classes), targets.view(-1))\n        loss.backward()\n        optimizer.step()\n\n        epoch_loss += loss.item()\n        all_outputs.append(outputs.detach().cpu().numpy())\n\n    avg_loss = epoch_loss / len(dataloader)\n    experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"].append(avg_loss)\n\n    # Calculate CODS\n    all_outputs = np.concatenate(all_outputs)\n    cods = calculate_cods(all_outputs.reshape(-1, num_classes))\n    experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"].append(cods)\n\n    print(f\"Epoch {epoch+1}: training_loss = {avg_loss:.4f}, CODS = {cods:.4f}\")\n\n# Save experiment data\nnp.save(os.path.join(working_dir, \"experiment_data.npy\"), experiment_data)\n", "# plotting aggregation code"], "term_out": ["['Using device: cuda', '\\n', 'runfile.py:67: UserWarning: To copy construct from\na tensor, it is recommended to use sourceTensor.detach().clone() or\nsourceTensor.detach().clone().requires_grad_(True), rather than\ntorch.tensor(sourceTensor).\\n  torch.nn.functional.one_hot(torch.tensor(batch),\nnum_classes=100)\\n', 'Traceback (most recent call last):\\n  File \"runfile.py\",\nline 100, in <module>\\n    train_model(model, train_loader, num_epochs=10)\\n\nFile \"runfile.py\", line 75, in train_model\\n    loss = loss_fn(outputs[:, :-1,\n:].view(-1, 100), labels.view(-1).to(device))\\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nRuntimeError: view size is not compatible with\ninput tensor\\'s size and stride (at least one dimension spans across two\ncontiguous subspaces). Use .reshape(...) instead.\\n', 'Execution time: 10\nseconds seconds (time limit is an hour).']", "['Using device: cuda', '\\n', 'Traceback (most recent call last):\\n  File\n\"runfile.py\", line 79, in <module>\\n    loss = F.cross_entropy(outputs[:, :-1,\n:], target)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File\n\"/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-\npackages/torch/nn/functional.py\", line 3458, in cross_entropy\\n    return\ntorch._C._nn.cross_entropy_loss(\\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nRuntimeError: Expected target size [1, 27],\ngot [1, 19]\\n', 'Execution time: 7 seconds seconds (time limit is an hour).']", "['Using device: cuda', '\\n', 'Traceback (most recent call last):\\n  File\n\"runfile.py\", line 59, in <module>\\n    input_seq = train_data[i : i +\n1].to(device) + torch.randn(input_seq.shape).to(\\n\n^^^^^^^^^\\nNameError: name \\'input_seq\\' is not defined\\n', 'Execution time: 10\nseconds seconds (time limit is an hour).']", "['Using device: cuda', '\\n', 'Traceback (most recent call last):\\n  File\n\"runfile.py\", line 90, in <module>\\n    outputs = model(inputs)\\n\n^^^^^^^^^^^^^\\n  File\n\"/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-\npackages/torch/nn/modules/module.py\", line 1775, in _wrapped_call_impl\\n\nreturn self._call_impl(*args, **kwargs)\\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File\n\"/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-\npackages/torch/nn/modules/module.py\", line 1786, in _call_impl\\n    return\nforward_call(*args, **kwargs)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File\n\"runfile.py\", line 46, in forward\\n    out, _ = self.lstm(x)\\n\n^^^^^^^^^^^^\\n  File\n\"/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-\npackages/torch/nn/modules/module.py\", line 1775, in _wrapped_call_impl\\n\nreturn self._call_impl(*args, **kwargs)\\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File\n\"/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-\npackages/torch/nn/modules/module.py\", line 1786, in _call_impl\\n    return\nforward_call(*args, **kwargs)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File\n\"/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-\npackages/torch/nn/modules/rnn.py\", line 1127, in forward\\n    result =\n_VF.lstm(\\n             ^^^^^^^^^\\ntorch.AcceleratorError: CUDA error: device-\nside assert triggered\\nSearch for `cudaErrorAssert\\' in\nhttps://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more\ninformation.\\nCUDA kernel errors might be asynchronously reported at some other\nAPI call, so the stacktrace below might be incorrect.\\nFor debugging consider\npassing CUDA_LAUNCH_BLOCKING=1\\nCompile with `TORCH_USE_CUDA_DSA` to enable\ndevice-side assertions.\\n\\n', 'Execution time: 10 seconds seconds (time limit is\nan hour).']", "['Using device: cuda', '\\n', 'Traceback (most recent call last):\\n  File\n\"runfile.py\", line 78, in <module>\\n    inputs =\nseed_conditioning(batch[\"input\"])\\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \"runfile.py\", line 48, in\nseed_conditioning\\n    return inputs + torch.randn_like(inputs) * noise_level\\n\n^^^^^^^^^^^^^^^^^^^^^^^^\\nNotImplementedError: \"normal_kernel_cuda\" not\nimplemented for \\'Long\\'\\n', 'Execution time: 13 seconds seconds (time limit is\nan hour).']", "['Using device: cuda', '\\n', 'runfile.py:67: UserWarning: To copy construct from\na tensor, it is recommended to use sourceTensor.detach().clone() or\nsourceTensor.detach().clone().requires_grad_(True), rather than\ntorch.tensor(sourceTensor).\\n  torch.tensor(batch).to(device),\nnum_classes=100\\n', 'Traceback (most recent call last):\\n  File \"runfile.py\",\nline 100, in <module>\\n    train_model(model, train_loader, num_epochs=10)\\n\nFile \"runfile.py\", line 74, in train_model\\n    outputs[:, :-1, :].reshape(-1,\n100), labels.view(-1).to(device)\\n\n^^^^^^^^^^^^^^^\\nRuntimeError: view size is not compatible with input tensor\\'s\nsize and stride (at least one dimension spans across two contiguous subspaces).\nUse .reshape(...) instead.\\n', 'Execution time: 9 seconds seconds (time limit is\nan hour).']", "['Using device: cuda', '\\n', 'Traceback (most recent call last):\\n  File\n\"runfile.py\", line 82, in <module>\\n    loss = F.cross_entropy(\\n\n^^^^^^^^^^^^^^^^\\n  File\n\"/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-\npackages/torch/nn/functional.py\", line 3458, in cross_entropy\\n    return\ntorch._C._nn.cross_entropy_loss(\\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nRuntimeError: Expected target size [1, 27],\ngot [1, 19]\\n', 'Execution time: 8 seconds seconds (time limit is an hour).']", "['Using device: cuda', '\\n', 'Traceback (most recent call last):\\n  File\n\"runfile.py\", line 91, in <module>\\n    loss = criterion(outputs.view(-1,\nvocab_size), targets.view(-1))\\n\n^^^^^^^^^^^^^^^^\\nRuntimeError: view size is not compatible with input tensor\\'s\nsize and stride (at least one dimension spans across two contiguous subspaces).\nUse .reshape(...) instead.\\n', 'Execution time: 11 seconds seconds (time limit\nis an hour).']", "['Using device: cuda', '\\n', 'Epoch 1: training_loss = 1.6147, CODS = 0.4889',\n'\\n', 'Epoch 2: training_loss = 1.6103, CODS = 0.9009', '\\n', 'Epoch 3:\ntraining_loss = 1.6100, CODS = 0.9005', '\\n', 'Epoch 4: training_loss = 1.6102,\nCODS = 0.8877', '\\n', 'Epoch 5: training_loss = 1.6100, CODS = 0.8174', '\\n',\n'Epoch 6: training_loss = 1.6096, CODS = 0.6803', '\\n', 'Epoch 7: training_loss\n= 1.6101, CODS = 0.7124', '\\n', 'Epoch 8: training_loss = 1.6101, CODS =\n0.7880', '\\n', 'Epoch 9: training_loss = 1.6099, CODS = 0.6626', '\\n', 'Epoch\n10: training_loss = 1.6096, CODS = 0.5677', '\\n', 'Epoch 11: training_loss =\n1.6094, CODS = 0.5239', '\\n', 'Epoch 12: training_loss = 1.6096, CODS = 0.6203',\n'\\n', 'Epoch 13: training_loss = 1.6102, CODS = 0.5104', '\\n', 'Epoch 14:\ntraining_loss = 1.6097, CODS = 0.5954', '\\n', 'Epoch 15: training_loss = 1.6095,\nCODS = 0.5626', '\\n', 'Epoch 16: training_loss = 1.6091, CODS = 0.5833', '\\n',\n'Epoch 17: training_loss = 1.6098, CODS = 0.6086', '\\n', 'Epoch 18:\ntraining_loss = 1.6091, CODS = 0.6114', '\\n', 'Epoch 19: training_loss = 1.6098,\nCODS = 0.6015', '\\n', 'Epoch 20: training_loss = 1.6096, CODS = 0.5472', '\\n',\n'Epoch 21: training_loss = 1.6097, CODS = 0.4718', '\\n', 'Epoch 22:\ntraining_loss = 1.6094, CODS = 0.5531', '\\n', 'Epoch 23: training_loss = 1.6094,\nCODS = 0.5711', '\\n', 'Epoch 24: training_loss = 1.6097, CODS = 0.5652', '\\n',\n'Epoch 25: training_loss = 1.6091, CODS = 0.5029', '\\n', 'Epoch 26:\ntraining_loss = 1.6099, CODS = 0.5249', '\\n', 'Epoch 27: training_loss = 1.6093,\nCODS = 0.4740', '\\n', 'Epoch 28: training_loss = 1.6093, CODS = 0.5292', '\\n',\n'Epoch 29: training_loss = 1.6097, CODS = 0.4984', '\\n', 'Epoch 30:\ntraining_loss = 1.6092, CODS = 0.5097', '\\n', 'Epoch 31: training_loss = 1.6096,\nCODS = 0.4977', '\\n', 'Epoch 32: training_loss = 1.6091, CODS = 0.4897', '\\n',\n'Epoch 33: training_loss = 1.6094, CODS = 0.5144', '\\n', 'Epoch 34:\ntraining_loss = 1.6094, CODS = 0.4873', '\\n', 'Epoch 35: training_loss = 1.6095,\nCODS = 0.4549', '\\n', 'Epoch 36: training_loss = 1.6096, CODS = 0.4794', '\\n',\n'Epoch 37: training_loss = 1.6093, CODS = 0.4962', '\\n', 'Epoch 38:\ntraining_loss = 1.6098, CODS = 0.4851', '\\n', 'Epoch 39: training_loss = 1.6094,\nCODS = 0.4906', '\\n', 'Epoch 40: training_loss = 1.6095, CODS = 0.4625', '\\n',\n'Epoch 41: training_loss = 1.6093, CODS = 0.5072', '\\n', 'Epoch 42:\ntraining_loss = 1.6092, CODS = 0.5284', '\\n', 'Epoch 43: training_loss = 1.6097,\nCODS = 0.5057', '\\n', 'Epoch 44: training_loss = 1.6092, CODS = 0.5183', '\\n',\n'Epoch 45: training_loss = 1.6095, CODS = 0.5775', '\\n', 'Epoch 46:\ntraining_loss = 1.6095, CODS = 0.5215', '\\n', 'Epoch 47: training_loss = 1.6093,\nCODS = 0.5257', '\\n', 'Epoch 48: training_loss = 1.6093, CODS = 0.5227', '\\n',\n'Epoch 49: training_loss = 1.6095, CODS = 0.5354', '\\n', 'Epoch 50:\ntraining_loss = 1.6095, CODS = 0.5307', '\\n', 'Execution time: 27 seconds\nseconds (time limit is an hour).']", "['Using device: cuda', '\\n', 'Epoch 1: validation_loss = 1962.0442', '\\n',\n'Traceback (most recent call last):\\n  File \"runfile.py\", line 98, in <module>\\n\nmodel(dataset.data[:10].to(device)).cpu().numpy()\\n\n^^^^^^^^^^^^^^^^^^^^\\nAttributeError: \\'numpy.ndarray\\' object has no attribute\n\\'to\\'\\n', 'Execution time: 13 seconds seconds (time limit is an hour).']", "['Using device: cuda', '\\n', 'Epoch 1: training_loss = 1.6147, CODS = 0.4889',\n'\\n', 'Epoch 2: training_loss = 1.6103, CODS = 0.9009', '\\n', 'Epoch 3:\ntraining_loss = 1.6100, CODS = 0.9005', '\\n', 'Epoch 4: training_loss = 1.6102,\nCODS = 0.8877', '\\n', 'Epoch 5: training_loss = 1.6100, CODS = 0.8174', '\\n',\n'Epoch 6: training_loss = 1.6096, CODS = 0.6803', '\\n', 'Epoch 7: training_loss\n= 1.6101, CODS = 0.7124', '\\n', 'Epoch 8: training_loss = 1.6101, CODS =\n0.7880', '\\n', 'Epoch 9: training_loss = 1.6099, CODS = 0.6626', '\\n', 'Epoch\n10: training_loss = 1.6096, CODS = 0.5677', '\\n', 'Epoch 11: training_loss =\n1.6094, CODS = 0.5239', '\\n', 'Epoch 12: training_loss = 1.6096, CODS = 0.6203',\n'\\n', 'Epoch 13: training_loss = 1.6102, CODS = 0.5104', '\\n', 'Epoch 14:\ntraining_loss = 1.6097, CODS = 0.5954', '\\n', 'Epoch 15: training_loss = 1.6095,\nCODS = 0.5626', '\\n', 'Epoch 16: training_loss = 1.6091, CODS = 0.5833', '\\n',\n'Epoch 17: training_loss = 1.6098, CODS = 0.6086', '\\n', 'Epoch 18:\ntraining_loss = 1.6091, CODS = 0.6114', '\\n', 'Epoch 19: training_loss = 1.6098,\nCODS = 0.6015', '\\n', 'Epoch 20: training_loss = 1.6096, CODS = 0.5472', '\\n',\n'Epoch 21: training_loss = 1.6097, CODS = 0.4718', '\\n', 'Epoch 22:\ntraining_loss = 1.6094, CODS = 0.5531', '\\n', 'Epoch 23: training_loss = 1.6094,\nCODS = 0.5711', '\\n', 'Epoch 24: training_loss = 1.6097, CODS = 0.5652', '\\n',\n'Epoch 25: training_loss = 1.6091, CODS = 0.5029', '\\n', 'Epoch 26:\ntraining_loss = 1.6099, CODS = 0.5249', '\\n', 'Epoch 27: training_loss = 1.6093,\nCODS = 0.4740', '\\n', 'Epoch 28: training_loss = 1.6093, CODS = 0.5292', '\\n',\n'Epoch 29: training_loss = 1.6097, CODS = 0.4984', '\\n', 'Epoch 30:\ntraining_loss = 1.6092, CODS = 0.5097', '\\n', 'Epoch 31: training_loss = 1.6096,\nCODS = 0.4977', '\\n', 'Epoch 32: training_loss = 1.6091, CODS = 0.4897', '\\n',\n'Epoch 33: training_loss = 1.6094, CODS = 0.5144', '\\n', 'Epoch 34:\ntraining_loss = 1.6094, CODS = 0.4873', '\\n', 'Epoch 35: training_loss = 1.6095,\nCODS = 0.4549', '\\n', 'Epoch 36: training_loss = 1.6096, CODS = 0.4794', '\\n',\n'Epoch 37: training_loss = 1.6093, CODS = 0.4962', '\\n', 'Epoch 38:\ntraining_loss = 1.6098, CODS = 0.4851', '\\n', 'Epoch 39: training_loss = 1.6094,\nCODS = 0.4906', '\\n', 'Epoch 40: training_loss = 1.6095, CODS = 0.4625', '\\n',\n'Epoch 41: training_loss = 1.6093, CODS = 0.5072', '\\n', 'Epoch 42:\ntraining_loss = 1.6092, CODS = 0.5284', '\\n', 'Epoch 43: training_loss = 1.6097,\nCODS = 0.5057', '\\n', 'Epoch 44: training_loss = 1.6092, CODS = 0.5183', '\\n',\n'Epoch 45: training_loss = 1.6095, CODS = 0.5775', '\\n', 'Epoch 46:\ntraining_loss = 1.6095, CODS = 0.5215', '\\n', 'Epoch 47: training_loss = 1.6093,\nCODS = 0.5257', '\\n', 'Epoch 48: training_loss = 1.6093, CODS = 0.5227', '\\n',\n'Epoch 49: training_loss = 1.6095, CODS = 0.5354', '\\n', 'Epoch 50:\ntraining_loss = 1.6095, CODS = 0.5307', '\\n', 'Execution time: 25 seconds\nseconds (time limit is an hour).']", "['Using device: cuda', '\\n', 'Traceback (most recent call last):\\n  File\n\"runfile.py\", line 101, in <module>\\n    train_model(model, train_loader,\nnum_epochs=10)\\n  File \"runfile.py\", line 75, in train_model\\n    outputs[:,\n:-1, :].reshape(-1, 100), labels.view(-1).to(device)\\n\n^^^^^^^^^^^^^^^\\nRuntimeError: view size is not compatible with input tensor\\'s\nsize and stride (at least one dimension spans across two contiguous subspaces).\nUse .reshape(...) instead.\\n', 'Execution time: 12 seconds seconds (time limit\nis an hour).']", "['Using device: cuda', '\\n', 'Epoch 1: training_loss = 1.6102, CODS = 0.1511',\n'\\n', 'Epoch 2: training_loss = 1.6092, CODS = 0.1385', '\\n', 'Epoch 3:\ntraining_loss = 1.6098, CODS = 0.0810', '\\n', 'Epoch 4: training_loss = 1.6092,\nCODS = 0.0718', '\\n', 'Epoch 5: training_loss = 1.6092, CODS = 0.0589', '\\n',\n'Epoch 6: training_loss = 1.6092, CODS = 0.0620', '\\n', 'Epoch 7: training_loss\n= 1.6093, CODS = 0.0565', '\\n', 'Epoch 8: training_loss = 1.6091, CODS =\n0.0624', '\\n', 'Epoch 9: training_loss = 1.6094, CODS = 0.0641', '\\n', 'Epoch\n10: training_loss = 1.6095, CODS = 0.0367', '\\n', 'Epoch 11: training_loss =\n1.6092, CODS = 0.0306', '\\n', 'Epoch 12: training_loss = 1.6091, CODS = 0.0305',\n'\\n', 'Epoch 13: training_loss = 1.6092, CODS = 0.0342', '\\n', 'Epoch 14:\ntraining_loss = 1.6092, CODS = 0.0235', '\\n', 'Epoch 15: training_loss = 1.6088,\nCODS = 0.0286', '\\n', 'Epoch 16: training_loss = 1.6089, CODS = 0.0394', '\\n',\n'Epoch 17: training_loss = 1.6094, CODS = 0.0326', '\\n', 'Epoch 18:\ntraining_loss = 1.6090, CODS = 0.0246', '\\n', 'Epoch 19: training_loss = 1.6091,\nCODS = 0.0273', '\\n', 'Epoch 20: training_loss = 1.6089, CODS = 0.0268', '\\n',\n'Epoch 21: training_loss = 1.6089, CODS = 0.0299', '\\n', 'Epoch 22:\ntraining_loss = 1.6090, CODS = 0.0335', '\\n', 'Epoch 23: training_loss = 1.6088,\nCODS = 0.0377', '\\n', 'Epoch 24: training_loss = 1.6095, CODS = 0.0355', '\\n',\n'Epoch 25: training_loss = 1.6088, CODS = 0.0292', '\\n', 'Epoch 26:\ntraining_loss = 1.6091, CODS = 0.0246', '\\n', 'Epoch 27: training_loss = 1.6087,\nCODS = 0.0284', '\\n', 'Epoch 28: training_loss = 1.6092, CODS = 0.0396', '\\n',\n'Epoch 29: training_loss = 1.6089, CODS = 0.0355', '\\n', 'Epoch 30:\ntraining_loss = 1.6093, CODS = 0.0338', '\\n', 'Epoch 31: training_loss = 1.6088,\nCODS = 0.0320', '\\n', 'Epoch 32: training_loss = 1.6089, CODS = 0.0417', '\\n',\n'Epoch 33: training_loss = 1.6093, CODS = 0.0394', '\\n', 'Epoch 34:\ntraining_loss = 1.6090, CODS = 0.0341', '\\n', 'Epoch 35: training_loss = 1.6090,\nCODS = 0.0348', '\\n', 'Epoch 36: training_loss = 1.6090, CODS = 0.0332', '\\n',\n'Epoch 37: training_loss = 1.6088, CODS = 0.0309', '\\n', 'Epoch 38:\ntraining_loss = 1.6094, CODS = 0.0318', '\\n', 'Epoch 39: training_loss = 1.6092,\nCODS = 0.0262', '\\n', 'Epoch 40: training_loss = 1.6088, CODS = 0.0272', '\\n',\n'Epoch 41: training_loss = 1.6091, CODS = 0.0286', '\\n', 'Epoch 42:\ntraining_loss = 1.6094, CODS = 0.0237', '\\n', 'Epoch 43: training_loss = 1.6088,\nCODS = 0.0227', '\\n', 'Epoch 44: training_loss = 1.6087, CODS = 0.0265', '\\n',\n'Epoch 45: training_loss = 1.6090, CODS = 0.0276', '\\n', 'Epoch 46:\ntraining_loss = 1.6085, CODS = 0.0332', '\\n', 'Epoch 47: training_loss = 1.6090,\nCODS = 0.0480', '\\n', 'Epoch 48: training_loss = 1.6090, CODS = 0.0395', '\\n',\n'Epoch 49: training_loss = 1.6089, CODS = 0.0377', '\\n', 'Epoch 50:\ntraining_loss = 1.6087, CODS = 0.0410', '\\n', 'Execution time: 34 seconds\nseconds (time limit is an hour).']", "['Using device: cuda', '\\n', 'Epoch 1: training_loss = 1.6128, CODS = 0.5454',\n'\\n', 'Epoch 2: training_loss = 1.6103, CODS = 0.8773', '\\n', 'Epoch 3:\ntraining_loss = 1.6101, CODS = 0.7125', '\\n', 'Epoch 4: training_loss = 1.6097,\nCODS = 0.8853', '\\n', 'Epoch 5: training_loss = 1.6100, CODS = 0.8169', '\\n',\n'Epoch 6: training_loss = 1.6101, CODS = 0.9133', '\\n', 'Epoch 7: training_loss\n= 1.6101, CODS = 0.9309', '\\n', 'Epoch 8: training_loss = 1.6093, CODS =\n0.8338', '\\n', 'Epoch 9: training_loss = 1.6102, CODS = 0.9355', '\\n', 'Epoch\n10: training_loss = 1.6097, CODS = 0.7886', '\\n', 'Epoch 11: training_loss =\n1.6095, CODS = 0.9052', '\\n', 'Epoch 12: training_loss = 1.6095, CODS = 0.8753',\n'\\n', 'Epoch 13: training_loss = 1.6096, CODS = 0.8234', '\\n', 'Epoch 14:\ntraining_loss = 1.6097, CODS = 0.7552', '\\n', 'Epoch 15: training_loss = 1.6096,\nCODS = 0.9254', '\\n', 'Epoch 16: training_loss = 1.6097, CODS = 0.9471', '\\n',\n'Epoch 17: training_loss = 1.6096, CODS = 0.9035', '\\n', 'Epoch 18:\ntraining_loss = 1.6094, CODS = 0.9314', '\\n', 'Epoch 19: training_loss = 1.6097,\nCODS = 0.8415', '\\n', 'Epoch 20: training_loss = 1.6094, CODS = 0.9359', '\\n',\n'Epoch 21: training_loss = 1.6097, CODS = 0.9258', '\\n', 'Epoch 22:\ntraining_loss = 1.6095, CODS = 0.9018', '\\n', 'Epoch 23: training_loss = 1.6092,\nCODS = 0.8272', '\\n', 'Epoch 24: training_loss = 1.6095, CODS = 0.9422', '\\n',\n'Epoch 25: training_loss = 1.6097, CODS = 0.8926', '\\n', 'Epoch 26:\ntraining_loss = 1.6097, CODS = 0.8901', '\\n', 'Epoch 27: training_loss = 1.6093,\nCODS = 0.7483', '\\n', 'Epoch 28: training_loss = 1.6089, CODS = 0.8508', '\\n',\n'Epoch 29: training_loss = 1.6097, CODS = 0.9137', '\\n', 'Epoch 30:\ntraining_loss = 1.6095, CODS = 0.8990', '\\n', 'Epoch 31: training_loss = 1.6094,\nCODS = 0.9447', '\\n', 'Epoch 32: training_loss = 1.6097, CODS = 0.9066', '\\n',\n'Epoch 33: training_loss = 1.6092, CODS = 0.8410', '\\n', 'Epoch 34:\ntraining_loss = 1.6096, CODS = 0.6298', '\\n', 'Epoch 35: training_loss = 1.6092,\nCODS = 0.8161', '\\n', 'Epoch 36: training_loss = 1.6093, CODS = 0.7580', '\\n',\n'Epoch 37: training_loss = 1.6092, CODS = 0.8869', '\\n', 'Epoch 38:\ntraining_loss = 1.6097, CODS = 0.7185', '\\n', 'Epoch 39: training_loss = 1.6095,\nCODS = 0.8941', '\\n', 'Epoch 40: training_loss = 1.6093, CODS = 0.7363', '\\n',\n'Epoch 41: training_loss = 1.6094, CODS = 0.7425', '\\n', 'Epoch 42:\ntraining_loss = 1.6091, CODS = 0.9273', '\\n', 'Epoch 43: training_loss = 1.6094,\nCODS = 0.9315', '\\n', 'Epoch 44: training_loss = 1.6092, CODS = 0.9080', '\\n',\n'Epoch 45: training_loss = 1.6095, CODS = 0.8313', '\\n', 'Epoch 46:\ntraining_loss = 1.6094, CODS = 0.8466', '\\n', 'Epoch 47: training_loss = 1.6094,\nCODS = 0.9453', '\\n', 'Epoch 48: training_loss = 1.6088, CODS = 0.8976', '\\n',\n'Epoch 49: training_loss = 1.6092, CODS = 0.9476', '\\n', 'Epoch 50:\ntraining_loss = 1.6091, CODS = 0.9854', '\\n', 'Execution time: 33 seconds\nseconds (time limit is an hour).']", "['Using device: cuda', '\\n', 'Epoch 1: training_loss = 1.6131, CODS = 0.4924',\n'\\n', 'Epoch 2: training_loss = 1.6102, CODS = 0.7915', '\\n', 'Epoch 3:\ntraining_loss = 1.6101, CODS = 0.8608', '\\n', 'Epoch 4: training_loss = 1.6098,\nCODS = 0.6558', '\\n', 'Epoch 5: training_loss = 1.6095, CODS = 0.7349', '\\n',\n'Epoch 6: training_loss = 1.6099, CODS = 0.6586', '\\n', 'Epoch 7: training_loss\n= 1.6096, CODS = 0.7723', '\\n', 'Epoch 8: training_loss = 1.6097, CODS =\n0.8179', '\\n', 'Epoch 9: training_loss = 1.6095, CODS = 0.6345', '\\n', 'Epoch\n10: training_loss = 1.6099, CODS = 0.5737', '\\n', 'Epoch 11: training_loss =\n1.6098, CODS = 0.5977', '\\n', 'Epoch 12: training_loss = 1.6092, CODS = 0.5838',\n'\\n', 'Epoch 13: training_loss = 1.6096, CODS = 0.6907', '\\n', 'Epoch 14:\ntraining_loss = 1.6095, CODS = 0.6076', '\\n', 'Epoch 15: training_loss = 1.6097,\nCODS = 0.6716', '\\n', 'Epoch 16: training_loss = 1.6096, CODS = 0.4752', '\\n',\n'Epoch 17: training_loss = 1.6093, CODS = 0.6842', '\\n', 'Epoch 18:\ntraining_loss = 1.6092, CODS = 0.5758', '\\n', 'Epoch 19: training_loss = 1.6093,\nCODS = 0.6185', '\\n', 'Epoch 20: training_loss = 1.6090, CODS = 0.6317', '\\n',\n'Epoch 21: training_loss = 1.6099, CODS = 0.5105', '\\n', 'Epoch 22:\ntraining_loss = 1.6094, CODS = 0.6793', '\\n', 'Epoch 23: training_loss = 1.6093,\nCODS = 0.6374', '\\n', 'Epoch 24: training_loss = 1.6092, CODS = 0.4816', '\\n',\n'Epoch 25: training_loss = 1.6094, CODS = 0.5107', '\\n', 'Epoch 26:\ntraining_loss = 1.6094, CODS = 0.6517', '\\n', 'Epoch 27: training_loss = 1.6091,\nCODS = 0.6428', '\\n', 'Epoch 28: training_loss = 1.6094, CODS = 0.5400', '\\n',\n'Epoch 29: training_loss = 1.6095, CODS = 0.5319', '\\n', 'Epoch 30:\ntraining_loss = 1.6094, CODS = 0.6063', '\\n', 'Epoch 31: training_loss = 1.6096,\nCODS = 0.3878', '\\n', 'Epoch 32: training_loss = 1.6094, CODS = 0.4427', '\\n',\n'Epoch 33: training_loss = 1.6093, CODS = 0.5005', '\\n', 'Epoch 34:\ntraining_loss = 1.6092, CODS = 0.5805', '\\n', 'Epoch 35: training_loss = 1.6092,\nCODS = 0.6238', '\\n', 'Epoch 36: training_loss = 1.6093, CODS = 0.5438', '\\n',\n'Epoch 37: training_loss = 1.6091, CODS = 0.4769', '\\n', 'Epoch 38:\ntraining_loss = 1.6091, CODS = 0.5863', '\\n', 'Epoch 39: training_loss = 1.6092,\nCODS = 0.5276', '\\n', 'Epoch 40: training_loss = 1.6092, CODS = 0.4868', '\\n',\n'Epoch 41: training_loss = 1.6094, CODS = 0.5250', '\\n', 'Epoch 42:\ntraining_loss = 1.6092, CODS = 0.5908', '\\n', 'Epoch 43: training_loss = 1.6093,\nCODS = 0.5977', '\\n', 'Epoch 44: training_loss = 1.6092, CODS = 0.5312', '\\n',\n'Epoch 45: training_loss = 1.6089, CODS = 0.4992', '\\n', 'Epoch 46:\ntraining_loss = 1.6095, CODS = 0.4368', '\\n', 'Epoch 47: training_loss = 1.6091,\nCODS = 0.5194', '\\n', 'Epoch 48: training_loss = 1.6093, CODS = 0.4459', '\\n',\n'Epoch 49: training_loss = 1.6093, CODS = 0.5587', '\\n', 'Epoch 50:\ntraining_loss = 1.6093, CODS = 0.4877', '\\n', 'Execution time: 33 seconds\nseconds (time limit is an hour).']", ""], "analysis": ["The execution failed due to a RuntimeError in the training loop. Specifically,\nthe issue arises when attempting to reshape the output tensor for the loss\ncomputation. The error message indicates that the 'view' operation is\nincompatible with the input tensor's size and stride, and suggests using the\n'reshape' method instead. Additionally, a warning was raised about tensor\ncopying during the one-hot encoding step.  To fix the RuntimeError, replace\n'view' with 'reshape' in the loss computation line:  Replace: loss =\nloss_fn(outputs[:, :-1, :].view(-1, 100), labels.view(-1).to(device))  With:\nloss = loss_fn(outputs[:, :-1, :].reshape(-1, 100), labels.view(-1).to(device))\nTo address the tensor copying warning, modify the one-hot encoding line to use\n'.detach().clone()' as follows:  Replace:\ntorch.nn.functional.one_hot(torch.tensor(batch),\nnum_classes=100).float().to(device)  With:\ntorch.nn.functional.one_hot(batch.detach().clone(),\nnum_classes=100).float().to(device)", "The execution failed due to a size mismatch in the `cross_entropy` function.\nSpecifically, the target tensor's size ([1, 19]) does not match the expected\nsize ([1, 27]). This issue arises because the `outputs` tensor is sliced with\n`[:, :-1, :]`, reducing its sequence length by 1, while the `target` tensor is\nalready shorter by 1 due to slicing with `[1:]`. To fix this, ensure that the\nsequence lengths of `outputs` and `target` match by either not slicing `outputs`\nor adjusting the slicing of `target`. For example, you can modify the line to\n`loss = F.cross_entropy(outputs[:, :-1, :], target[:, :-1])`.", "The execution failed due to a 'NameError' caused by the variable 'input_seq'\nbeing used before it is defined. Specifically, in the training loop, the line\n'input_seq = train_data[i : i + 1].to(device) +\ntorch.randn(input_seq.shape).to(device)' attempts to use 'input_seq.shape'\nbefore 'input_seq' has been initialized.   To fix this, you should first define\n'input_seq' before attempting to use its shape. For example, you can split the\noperations into two lines:  input_seq = train_data[i : i + 1].to(device)\ninput_seq = input_seq + torch.randn(input_seq.shape).to(device)", "The execution failed due to a CUDA device-side assertion error. This error is\nlikely caused by an out-of-range index being passed to the embedding layer.\nSpecifically, the seed-conditioning step introduces randomness by adding noise\nto the input tensor, but the modulo operation may still result in indices that\nexceed the valid range for the embedding layer (0 to num_classes-1). To fix\nthis, ensure that the indices passed to the embedding layer are within the valid\nrange by applying a modulo operation directly after adding noise, like this:\n`inputs = (inputs + noise) % num_classes`. This guarantees that all indices\nremain within the allowable range for the embedding layer.", "The script encountered a NotImplementedError when attempting to add random noise\nto inputs in the 'seed_conditioning' function. This error occurred because the\ninput tensor is of type 'Long', and the 'torch.randn_like' function is not\nimplemented for this type on CUDA.   To fix this issue, convert the input tensor\nto a floating-point type (e.g., 'torch.float') before applying\n'torch.randn_like'. Modify the 'seed_conditioning' function as follows:\n```python def seed_conditioning(inputs, noise_level=0.1):     inputs =\ninputs.float()  # Convert inputs to float     return inputs +\ntorch.randn_like(inputs) * noise_level ```", "The execution failed due to a RuntimeError in the training script. Specifically,\nthe `labels.view(-1)` operation in the loss computation is incompatible with the\ntensor's size and stride. This issue arises because `view` requires the tensor\nto have contiguous memory layout, which is not guaranteed in this case. To fix\nthis, replace `labels.view(-1)` with `labels.reshape(-1)` to ensure\ncompatibility and avoid the error. Additionally, a warning was issued about\ntensor copying; use `batch.detach().clone()` instead of `torch.tensor(batch)` to\nresolve it.", "The code execution failed due to a mismatch in the target size expected by the\n`F.cross_entropy` function. Specifically, the target tensor has a size of [1,\n19], but the function expects a size of [1, 27]. This discrepancy arises because\nthe output tensor from the model has the shape [1, 20, vocab_size], and slicing\nit as `outputs[:, :-1, :]` results in a shape of [1, 19, vocab_size]. This does\nnot align with the target tensor's expected shape.  To fix this issue, ensure\nthat the slicing of the `outputs` tensor matches the target shape. Adjust the\nslicing to `outputs[:, 1:, :]` so that both the outputs and target tensors have\nthe same sequence length of 19. This ensures compatibility with the\n`F.cross_entropy` function.", "The execution failed due to a RuntimeError caused by the use of .view() on\ntensors that are not contiguous. Specifically, the line 'loss =\ncriterion(outputs.view(-1, vocab_size), targets.view(-1))' attempted to reshape\ntensors, but this operation failed because the tensors' memory layout was not\ncompatible with .view().  To fix this issue, replace .view() with .reshape(),\nwhich does not rely on the memory layout of the tensor. Update the problematic\nline as follows:  loss = criterion(outputs.reshape(-1, vocab_size),\ntargets.reshape(-1))", "The output of the training script indicates that the implementation ran\nsuccessfully without any explicit errors or crashes. The training loss and the\nCODS metric were logged for all epochs, showing consistent behavior across the\ntraining process. The training loss stabilized around 1.609, which is expected\ngiven the synthetic dataset and the CrossEntropyLoss function used. The CODS\nmetric fluctuated but showed no anomalies, indicating that the evaluation metric\nwas computed correctly. Overall, the implementation appears functionally correct\nfor this preliminary stage.", "The execution failed due to an AttributeError. Specifically, the line\n`model(dataset.data[:10].to(device)).cpu().numpy()` attempts to call\n`.to(device)` on `dataset.data[:10]`, which is a NumPy array. NumPy arrays do\nnot have a `.to()` method, as this is specific to PyTorch tensors.  To fix this,\nconvert the NumPy array to a PyTorch tensor before calling `.to(device)`. Update\nthe line to:  ``` predictions = model(torch.tensor(dataset.data[:10],\ndtype=torch.float32).to(device)).cpu().numpy() ```  This ensures the data is in\nthe correct format for processing by the PyTorch model.", "The training loss remains almost constant at around 1.609 throughout the 50\nepochs, which is the expected value for a random guess in a classification\nproblem with 5 classes (log(5) \u2248 1.609). This indicates that the model is not\nlearning effectively. Potential reasons include: (1) The seed-conditioning\ntechnique might be introducing too much noise, disrupting the learning process.\n(2) The targets are identical to the inputs, which may not provide a meaningful\nlearning signal. (3) The learning rate might be too low to allow significant\nupdates to the model parameters. Proposed fixes: (1) Reduce the intensity of the\nseed-conditioning noise or remove it temporarily to test its impact. (2) Modify\nthe dataset to introduce meaningful target sequences that differ from the\ninputs. (3) Experiment with a higher learning rate or use a learning rate\nscheduler to adjust it dynamically during training.", "The execution failed due to an issue with the usage of the `view` function in\nthe line where the loss is computed. Specifically, `labels.view(-1)` caused a\nRuntimeError because the view size is incompatible with the input tensor's size\nand stride. This issue arises because `view` requires the tensor to be\ncontiguous in memory, which is not guaranteed here. To fix this, replace\n`labels.view(-1)` with `labels.reshape(-1)`, as `reshape` handles non-contiguous\ntensors correctly by creating a new tensor if needed.", "The training script does not appear to be learning effectively. The training\nloss remains stagnant around 1.609, which is close to the value for random\nguessing in a 5-class classification problem. This suggests that the model is\nnot improving over epochs. Additionally, the CODS metric fluctuates but does not\nshow a clear trend of improvement. The issue likely stems from the synthetic\ndataset and the way the targets are defined as identical to the inputs, which\nmay not provide meaningful learning signals. To address this, consider revising\nthe dataset to include a meaningful mapping between inputs and targets.\nFurthermore, verify the model architecture and training parameters to ensure\nthey are appropriate for the task.", "", "The training script has a bug related to the loss function used. The\nCrossEntropyLoss expects the target tensor to have class indices (not one-hot\nencoded) for each entry. However, in the SyntheticDataset, the target tensor is\nidentical to the input tensor, which is a sequence of indices. During training,\nthe 'outputs' tensor has a shape of (batch_size, seq_length, num_classes), while\nthe 'targets' tensor has a shape of (batch_size, seq_length). This mismatch\nleads to incorrect loss computation and prevents the model from learning\neffectively. This is evident from the training loss remaining stagnant around\n1.609 (approximately -log(1/num_classes), suggesting random predictions). To fix\nthis, ensure that the target tensor is properly formatted as class indices, and\nverify that the SyntheticDataset is generating the correct target values.", ""], "exc_type": ["RuntimeError", "RuntimeError", "NameError", "AcceleratorError", "NotImplementedError", "RuntimeError", "RuntimeError", "RuntimeError", null, "AttributeError", null, "RuntimeError", null, null, null, null], "exc_info": [{"args": ["view size is not compatible with input tensor's size and stride (at least one dimension spans across two contiguous subspaces). Use .reshape(...) instead."]}, {"args": ["Expected target size [1, 27], got [1, 19]"]}, {"args": ["name 'input_seq' is not defined"], "name": "input_seq"}, {"args": ["CUDA error: device-side assert triggered\nSearch for `cudaErrorAssert' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n"]}, {"args": ["\"normal_kernel_cuda\" not implemented for 'Long'"]}, {"args": ["view size is not compatible with input tensor's size and stride (at least one dimension spans across two contiguous subspaces). Use .reshape(...) instead."]}, {"args": ["Expected target size [1, 27], got [1, 19]"]}, {"args": ["view size is not compatible with input tensor's size and stride (at least one dimension spans across two contiguous subspaces). Use .reshape(...) instead."]}, null, {"args": ["'numpy.ndarray' object has no attribute 'to'"], "name": "to", "obj": "[[71  0 69 42 93]\n [43 32 24 54 52]\n [22 20 16 98 35]\n [37  1 73 57 66]\n [ 4 18 12 26 25]\n [93 87 81 23  0]\n [69 73 35 33  0]\n [20 23 66 88 64]\n [96 79 83 84  0]\n [91 34 71 88 62]]"}, null, {"args": ["view size is not compatible with input tensor's size and stride (at least one dimension spans across two contiguous subspaces). Use .reshape(...) instead."]}, null, null, null, null], "exc_stack": [[["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 100, "<module>", "train_model(model, train_loader, num_epochs=10)"], ["runfile.py", 75, "train_model", "loss = loss_fn(outputs[:, :-1, :].view(-1, 100), labels.view(-1).to(device))"]], [["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 79, "<module>", "loss = F.cross_entropy(outputs[:, :-1, :], target)"], ["/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-packages/torch/nn/functional.py", 3458, "cross_entropy", "return torch._C._nn.cross_entropy_loss("]], [["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 59, "<module>", "input_seq = train_data[i : i + 1].to(device) + torch.randn(input_seq.shape).to("]], [["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 90, "<module>", "outputs = model(inputs)"], ["/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-packages/torch/nn/modules/module.py", 1775, "_wrapped_call_impl", "return self._call_impl(*args, **kwargs)"], ["/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-packages/torch/nn/modules/module.py", 1786, "_call_impl", "return forward_call(*args, **kwargs)"], ["runfile.py", 46, "forward", "out, _ = self.lstm(x)"], ["/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-packages/torch/nn/modules/module.py", 1775, "_wrapped_call_impl", "return self._call_impl(*args, **kwargs)"], ["/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-packages/torch/nn/modules/module.py", 1786, "_call_impl", "return forward_call(*args, **kwargs)"], ["/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-packages/torch/nn/modules/rnn.py", 1127, "forward", "result = _VF.lstm("]], [["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 78, "<module>", "inputs = seed_conditioning(batch[\"input\"])"], ["runfile.py", 48, "seed_conditioning", "return inputs + torch.randn_like(inputs) * noise_level"]], [["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 100, "<module>", "train_model(model, train_loader, num_epochs=10)"], ["runfile.py", 74, "train_model", "outputs[:, :-1, :].reshape(-1, 100), labels.view(-1).to(device)"]], [["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 82, "<module>", "loss = F.cross_entropy("], ["/nfs/home/<Username>/miniconda3/envs/ai_scientist/lib/python3.11/site-packages/torch/nn/functional.py", 3458, "cross_entropy", "return torch._C._nn.cross_entropy_loss("]], [["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 91, "<module>", "loss = criterion(outputs.view(-1, vocab_size), targets.view(-1))"]], null, [["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 98, "<module>", "model(dataset.data[:10].to(device)).cpu().numpy()"]], null, [["/nfs/home/<Username>/AI_Scientist_v2/AI-Scientist-v2/ai_scientist/treesearch/interpreter.py", 144, "_run_session", "exec(compile(code, self.agent_file_name, \"exec\"), global_scope)"], ["runfile.py", 101, "<module>", "train_model(model, train_loader, num_epochs=10)"], ["runfile.py", 75, "train_model", "outputs[:, :-1, :].reshape(-1, 100), labels.view(-1).to(device)"]], null, null, null, null], "exp_name": "0-run", "metrics": [{"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "training CODS", "lower_is_better": false, "description": "The CODS (Coefficient of Determination) metric for the training dataset, measuring the model's predictive accuracy.", "data": [{"dataset_name": "synthetic_dataset", "final_value": 0.5307, "best_value": 0.5307}]}, {"metric_name": "training loss", "lower_is_better": true, "description": "The loss value for the training dataset, indicating how well the model fits the data.", "data": [{"dataset_name": "synthetic_dataset", "final_value": 1.6095, "best_value": 1.6095}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "train value", "lower_is_better": false, "description": "The final and best training value recorded during execution.", "data": [{"dataset_name": "synthetic_dataset", "final_value": 1.6095, "best_value": 1.6095}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}, {"metric_names": [{"metric_name": "training CODS", "lower_is_better": true, "description": "A metric to measure training performance.", "data": [{"dataset_name": "synthetic_dataset", "final_value": 0.041, "best_value": 0.041}]}, {"metric_name": "training loss", "lower_is_better": true, "description": "A metric to measure the loss during training.", "data": [{"dataset_name": "synthetic_dataset", "final_value": 1.6087, "best_value": 1.6087}]}]}, {"metric_names": [{"metric_name": "CODS", "lower_is_better": false, "description": "Coefficient of Determination Score, a metric used to evaluate the quality of predictions.", "data": [{"dataset_name": "synthetic_dataset", "final_value": 0.9854, "best_value": 0.9854}]}, {"metric_name": "loss", "lower_is_better": true, "description": "A measure of the error in the model's predictions, used as a training objective.", "data": [{"dataset_name": "synthetic_dataset", "final_value": 1.6091, "best_value": 1.6091}]}]}, {"metric_names": [{"metric_name": "CODS", "lower_is_better": false, "description": "Coefficient of Determination Score, a measure of how well the model predicts the data.", "data": [{"dataset_name": "synthetic_dataset", "final_value": 0.4877, "best_value": 0.4877}]}, {"metric_name": "loss", "lower_is_better": true, "description": "A measure of the model's error during training.", "data": [{"dataset_name": "synthetic_dataset", "final_value": 1.6093, "best_value": 1.6093}]}]}, {"metric_names": [{"metric_name": "value", "lower_is_better": true, "description": "", "data": [{"dataset_name": "default", "final_value": null, "best_value": null}]}]}], "is_best_node": [false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false], "plots": [[], [], [], [], [], [], [], [], ["../../logs/0-run/experiment_results/experiment_d929f2e2d8034a3984d3f89559462bdc_proc_2535972/synthetic_dataset_train_cods.png", "../../logs/0-run/experiment_results/experiment_d929f2e2d8034a3984d3f89559462bdc_proc_2535972/synthetic_dataset_training_loss.png"], [], [], [], [], ["../../logs/0-run/experiment_results/experiment_5bd1cba427a4496fba760031bf6f375b_proc_2535971/synthetic_dataset_train_cods.png", "../../logs/0-run/experiment_results/experiment_5bd1cba427a4496fba760031bf6f375b_proc_2535971/synthetic_dataset_training_loss.png"], [], []], "plot_paths": [[], [], [], [], [], [], [], [], ["experiments/2025-10-26_19-10-36_creative_limits_lms_attempt_0/logs/0-run/experiment_results/experiment_d929f2e2d8034a3984d3f89559462bdc_proc_2535972/synthetic_dataset_train_cods.png", "experiments/2025-10-26_19-10-36_creative_limits_lms_attempt_0/logs/0-run/experiment_results/experiment_d929f2e2d8034a3984d3f89559462bdc_proc_2535972/synthetic_dataset_training_loss.png"], [], [], [], [], ["experiments/2025-10-26_19-10-36_creative_limits_lms_attempt_0/logs/0-run/experiment_results/experiment_5bd1cba427a4496fba760031bf6f375b_proc_2535971/synthetic_dataset_train_cods.png", "experiments/2025-10-26_19-10-36_creative_limits_lms_attempt_0/logs/0-run/experiment_results/experiment_5bd1cba427a4496fba760031bf6f375b_proc_2535971/synthetic_dataset_training_loss.png"], [], []], "plot_analyses": [[], [], [], [], [], [], [], [], [{"analysis": "The plot shows the CODS metric (a potential creativity or diversity score) over training epochs. Initially, there is a sharp drop in CODS, followed by oscillations, and then a gradual stabilization. This pattern suggests that the model undergoes significant adjustments early in training, likely due to large updates in weights. The oscillations could indicate that the model is exploring various internal configurations to optimize creativity or diversity. The eventual stabilization implies that the model has reached a state where further epochs cause only minor changes. The relatively high initial CODS score might indicate that the model starts with a random initialization that inherently exhibits diversity.", "plot_path": "experiments/2025-10-26_19-10-36_creative_limits_lms_attempt_0/logs/0-run/experiment_results/experiment_d929f2e2d8034a3984d3f89559462bdc_proc_2535972/synthetic_dataset_train_cods.png"}, {"analysis": "The plot displays the training loss over epochs. The sharp decline in the first few epochs indicates rapid learning, as the model quickly adjusts to minimize the loss. After this initial phase, the loss stabilizes with minor fluctuations, suggesting that the model has converged to a local minimum. The low variance in loss after stabilization points to consistent training dynamics. However, the final loss value appears to plateau, which could mean that the model's capacity or the dataset's complexity limits further improvement.", "plot_path": "experiments/2025-10-26_19-10-36_creative_limits_lms_attempt_0/logs/0-run/experiment_results/experiment_d929f2e2d8034a3984d3f89559462bdc_proc_2535972/synthetic_dataset_training_loss.png"}], [], [], [], [], [{"analysis": "The plot shows the progression of the Train CODS metric over 50 epochs. While the metric starts at a relatively low value, it quickly rises and fluctuates around a high level, consistently staying above 0.7 after the initial epochs. This indicates that the model is able to achieve a high level of coherence or diversity (as measured by CODS) early in training. However, the significant fluctuations suggest instability or sensitivity in the training process, which might need to be addressed to ensure consistent performance.", "plot_path": "experiments/2025-10-26_19-10-36_creative_limits_lms_attempt_0/logs/0-run/experiment_results/experiment_5bd1cba427a4496fba760031bf6f375b_proc_2535971/synthetic_dataset_train_cods.png"}, {"analysis": "The plot depicts the training loss over 50 epochs. The loss starts at a relatively high value and decreases steadily during the initial epochs before stabilizing around 1.609. This trend indicates that the model is learning and converging, but the stabilization of the loss value suggests that it might be hitting a plateau. The low variance in the latter part of training shows that the optimization process is stable, but the final loss value indicates there might still be room for improvement in the model's performance or the dataset complexity.", "plot_path": "experiments/2025-10-26_19-10-36_creative_limits_lms_attempt_0/logs/0-run/experiment_results/experiment_5bd1cba427a4496fba760031bf6f375b_proc_2535971/synthetic_dataset_training_loss.png"}], [], []], "vlm_feedback_summary": ["[]", "[]", "[]", "[]", "[]", "[]", "[]", "[]", "The plots provide insights into the training dynamics of the model. The CODS\nmetric highlights the model's journey in optimizing creativity or diversity,\nshowing initial instability followed by stabilization. Meanwhile, the training\nloss plot indicates effective convergence, with rapid early learning and\neventual stabilization. Together, these results suggest that the model is\nfunctioning as expected during the preliminary implementation stage.", "[]", "[]", "[]", "[]", "The results indicate that the model is learning and converging, as seen in the\nsteady decrease in loss and high CODS values. However, fluctuations in CODS\nsuggest potential instability in training, which could be addressed to achieve\nmore consistent performance. The final loss value plateau suggests a stable but\npotentially suboptimal convergence.", "[]", "[]"], "exec_time": [10.721043586730957, 7.5420286655426025, 10.87019968032837, 10.195132732391357, 13.072538375854492, 9.746403455734253, 8.09958815574646, 11.4736967086792, 27.552791595458984, 13.995060205459595, 25.484466314315796, 12.72532057762146, 34.33087730407715, 33.83157992362976, 33.93364763259888, null], "exec_time_feedback": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""], "datasets_successfully_tested": [[], [], [], [], [], [], [], [], ["['synthetic_dataset']"], [], [], [], [], ["[\"synthetic_dataset\"]"], [], []], "plot_code": [null, null, null, null, null, null, null, null, "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\ntry:\n    experiment_data = np.load(\n        os.path.join(working_dir, \"experiment_data.npy\"), allow_pickle=True\n    ).item()\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\ntry:\n    # Training Loss Plot\n    plt.figure()\n    plt.plot(\n        experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"], label=\"Training Loss\"\n    )\n    plt.title(\"Training Loss Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_training_loss.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Training Loss plot: {e}\")\n    plt.close()\n\ntry:\n    # CODS Metric Plot\n    plt.figure()\n    plt.plot(\n        experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"], label=\"Train CODS\"\n    )\n    plt.title(\"Train CODS Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"CODS\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_train_cods.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Train CODS plot: {e}\")\n    plt.close()\n", null, null, null, "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\ntry:\n    experiment_data = np.load(\n        os.path.join(working_dir, \"experiment_data.npy\"), allow_pickle=True\n    ).item()\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\ntry:\n    # Training Loss Plot\n    plt.figure()\n    plt.plot(\n        experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"], label=\"Training Loss\"\n    )\n    plt.title(\"Training Loss Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_training_loss.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Training Loss plot: {e}\")\n    plt.close()\n\ntry:\n    # CODS Metric Plot\n    plt.figure()\n    plt.plot(\n        experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"], label=\"Train CODS\"\n    )\n    plt.title(\"Train CODS Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"CODS\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_train_cods.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Train CODS plot: {e}\")\n    plt.close()\n", "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\ntry:\n    experiment_data = np.load(\n        os.path.join(working_dir, \"experiment_data.npy\"), allow_pickle=True\n    ).item()\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\ntry:\n    # Training Loss Plot\n    plt.figure()\n    plt.plot(\n        experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"], label=\"Training Loss\"\n    )\n    plt.title(\"Training Loss Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_training_loss.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Training Loss plot: {e}\")\n    plt.close()\n\ntry:\n    # CODS Metric Plot\n    plt.figure()\n    plt.plot(\n        experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"], label=\"Train CODS\"\n    )\n    plt.title(\"Train CODS Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"CODS\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_train_cods.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Train CODS plot: {e}\")\n    plt.close()\n", "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\ntry:\n    experiment_data = np.load(\n        os.path.join(working_dir, \"experiment_data.npy\"), allow_pickle=True\n    ).item()\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\ntry:\n    # Training Loss Plot\n    plt.figure()\n    plt.plot(\n        experiment_data[\"synthetic_dataset\"][\"losses\"][\"train\"], label=\"Training Loss\"\n    )\n    plt.title(\"Training Loss Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_training_loss.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Training Loss plot: {e}\")\n    plt.close()\n\ntry:\n    # CODS Metric Plot\n    plt.figure()\n    plt.plot(\n        experiment_data[\"synthetic_dataset\"][\"metrics\"][\"train\"], label=\"Train CODS\"\n    )\n    plt.title(\"Train CODS Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"CODS\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_train_cods.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Train CODS plot: {e}\")\n    plt.close()\n", "import matplotlib.pyplot as plt\nimport numpy as np\nimport os\n\nworking_dir = os.path.join(os.getcwd(), \"working\")\nos.makedirs(working_dir, exist_ok=True)\n\ntry:\n    experiment_data_path = (\n        \"/path/to/experiment_data.npy\"  # adjust your path accordingly\n    )\n    all_experiment_data = np.load(experiment_data_path, allow_pickle=True).item()\nexcept Exception as e:\n    print(f\"Error loading experiment data: {e}\")\n\n# Aggregate results\ntry:\n    losses = []\n    cods_metrics = []\n    for data in all_experiment_data:\n        losses.append(data[\"synthetic_dataset\"][\"losses\"][\"train\"])\n        cods_metrics.append(data[\"synthetic_dataset\"][\"metrics\"][\"train\"])\n\n    # Convert lists to arrays for mean and std calculation\n    losses = np.array(losses)\n    cods_metrics = np.array(cods_metrics)\n\n    mean_losses = np.mean(losses, axis=0)\n    std_losses = np.std(losses, axis=0) / np.sqrt(losses.shape[0])\n\n    mean_cods = np.mean(cods_metrics, axis=0)\n    std_cods = np.std(cods_metrics, axis=0) / np.sqrt(cods_metrics.shape[0])\n\n    # Plot mean training loss with standard error\n    plt.figure()\n    epochs = np.arange(len(mean_losses))\n    plt.plot(epochs, mean_losses, label=\"Mean Training Loss\")\n    plt.fill_between(\n        epochs,\n        mean_losses - std_losses,\n        mean_losses + std_losses,\n        alpha=0.2,\n        label=\"Standard Error\",\n    )\n    plt.title(\"Mean Training Loss Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"Loss\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_mean_training_loss.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Mean Training Loss plot: {e}\")\n    plt.close()\n\n# Plot mean CODS metric with standard error\ntry:\n    plt.figure()\n    plt.plot(epochs, mean_cods, label=\"Mean Train CODS\")\n    plt.fill_between(\n        epochs,\n        mean_cods - std_cods,\n        mean_cods + std_cods,\n        alpha=0.2,\n        label=\"Standard Error\",\n    )\n    plt.title(\"Mean Train CODS Over Epochs\")\n    plt.xlabel(\"Epochs\")\n    plt.ylabel(\"CODS\")\n    plt.legend()\n    plt.savefig(os.path.join(working_dir, \"synthetic_dataset_mean_train_cods.png\"))\n    plt.close()\nexcept Exception as e:\n    print(f\"Error creating Mean Train CODS plot: {e}\")\n    plt.close()\n"], "plot_plan": [null, null, null, null, null, null, null, null, "To visualize the results of the experiment stored in `experiment_data.npy`, we will first load the data and then create several plots including training loss and the metrics for both the training and validation datasets. Each plot will be placed in a try-except block to handle any potential errors gracefully. The titles and subtitles will clearly describe what is being displayed, and the plots will be saved in the specified working directory. In the case of metrics and losses, we will ensure that any trends are visible by plotting a maximum of 5 figures spaced accordingly.", null, null, null, null, null, null, null], "ablation_name": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "hyperparam_name": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "is_seed_node": [false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true], "is_seed_agg_node": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true], "parse_metrics_plan": ["", "", "", "", "", "", "", "", "The solution involves loading the `experiment_data.npy` file from the working\ndirectory and extracting the metrics for the synthetic dataset. The metrics\ninclude training loss and CODS. These values are printed with clear labels\nspecifying which metric is being displayed. The final values for each metric\nwill be printed without any additional plots or execution checks.", "", "I will load the `experiment_data.npy` file from the working directory and\nextract metrics from the stored data. For each dataset in the experiment data, I\nwill print the dataset name followed by the best or final values for each\nmetric, ensuring to use precise names for clarity.", "", "The solution involves loading the `experiment_data.npy` file from the working\ndirectory and extracting the metrics for the synthetic dataset. The metrics\ninclude training loss and CODS. These values are printed with clear labels\nspecifying which metric is being displayed. The final values for each metric\nwill be printed without any additional plots or execution checks.", "The solution involves loading the `experiment_data.npy` file from the working\ndirectory and extracting the metrics for the synthetic dataset. The metrics\ninclude training loss and CODS. These values are printed with clear labels\nspecifying which metric is being displayed. The final values for each metric\nwill be printed without any additional plots or execution checks.", "The solution involves loading the `experiment_data.npy` file from the working\ndirectory and extracting the metrics for the synthetic dataset. The metrics\ninclude training loss and CODS. These values are printed with clear labels\nspecifying which metric is being displayed. The final values for each metric\nwill be printed without any additional plots or execution checks.", ""], "parse_metrics_code": ["", "", "", "", "", "", "", "", "import os\nimport numpy as np\n\n# Load experiment data\nexperiment_data = np.load(\n    os.path.join(os.getcwd(), \"working\", \"experiment_data.npy\"), allow_pickle=True\n).item()\n\n# Extract metrics for the synthetic dataset\ndataset_name = \"synthetic_dataset\"\nmetrics = experiment_data[dataset_name][\"metrics\"]\nlosses = experiment_data[dataset_name][\"losses\"]\n\n# Print metrics\nprint(f\"{dataset_name} metrics:\")\nprint(f\"Final training CODS: {metrics['train'][-1]:.4f}\")\nprint(f\"Final training loss: {losses['train'][-1]:.4f}\")\n", "", "import os\nimport numpy as np\n\n# Load experiment data\nexperiment_data = np.load(\n    os.path.join(os.getcwd(), \"working\", \"experiment_data.npy\"), allow_pickle=True\n).item()\n\n# Extract and print metrics\nfor dataset_name, dataset_info in experiment_data.items():\n    print(f\"Dataset: {dataset_name}\")\n    for metric, values in dataset_info[\"metrics\"].items():\n        final_value = values[-1] if values else None\n        print(\n            f\"Final {metric} value: {final_value:.4f}\"\n            if final_value is not None\n            else f\"No {metric} values available.\"\n        )\n    for loss, values in dataset_info[\"losses\"].items():\n        final_loss = values[-1] if values else None\n        print(\n            f\"Final {loss} value: {final_loss:.4f}\"\n            if final_loss is not None\n            else f\"No {loss} values available.\"\n        )\n", "", "import os\nimport numpy as np\n\n# Load experiment data\nexperiment_data = np.load(\n    os.path.join(os.getcwd(), \"working\", \"experiment_data.npy\"), allow_pickle=True\n).item()\n\n# Extract metrics for the synthetic dataset\ndataset_name = \"synthetic_dataset\"\nmetrics = experiment_data[dataset_name][\"metrics\"]\nlosses = experiment_data[dataset_name][\"losses\"]\n\n# Print metrics\nprint(f\"{dataset_name} metrics:\")\nprint(f\"Final training CODS: {metrics['train'][-1]:.4f}\")\nprint(f\"Final training loss: {losses['train'][-1]:.4f}\")\n", "import os\nimport numpy as np\n\n# Load experiment data\nexperiment_data = np.load(\n    os.path.join(os.getcwd(), \"working\", \"experiment_data.npy\"), allow_pickle=True\n).item()\n\n# Extract metrics for the synthetic dataset\ndataset_name = \"synthetic_dataset\"\nmetrics = experiment_data[dataset_name][\"metrics\"]\nlosses = experiment_data[dataset_name][\"losses\"]\n\n# Print metrics\nprint(f\"{dataset_name} metrics:\")\nprint(f\"Final training CODS: {metrics['train'][-1]:.4f}\")\nprint(f\"Final training loss: {losses['train'][-1]:.4f}\")\n", "import os\nimport numpy as np\n\n# Load experiment data\nexperiment_data = np.load(\n    os.path.join(os.getcwd(), \"working\", \"experiment_data.npy\"), allow_pickle=True\n).item()\n\n# Extract metrics for the synthetic dataset\ndataset_name = \"synthetic_dataset\"\nmetrics = experiment_data[dataset_name][\"metrics\"]\nlosses = experiment_data[dataset_name][\"losses\"]\n\n# Print metrics\nprint(f\"{dataset_name} metrics:\")\nprint(f\"Final training CODS: {metrics['train'][-1]:.4f}\")\nprint(f\"Final training loss: {losses['train'][-1]:.4f}\")\n", ""], "parse_term_out": ["", "", "", "", "", "", "", "", "['synthetic_dataset metrics:', '\\n', 'Final training CODS: 0.5307', '\\n', 'Final\ntraining loss: 1.6095', '\\n', 'Execution time: a moment seconds (time limit is\nan hour).']", "", "['Dataset: synthetic_dataset', '\\n', 'Final train value: 0.5307', '\\n', 'No val\nvalues available.', '\\n', 'Final train value: 1.6095', '\\n', 'No val values\navailable.', '\\n', 'Execution time: a moment seconds (time limit is an hour).']", "", "['synthetic_dataset metrics:', '\\n', 'Final training CODS: 0.0410', '\\n', 'Final\ntraining loss: 1.6087', '\\n', 'Execution time: a moment seconds (time limit is\nan hour).']", "['synthetic_dataset metrics:', '\\n', 'Final training CODS: 0.9854', '\\n', 'Final\ntraining loss: 1.6091', '\\n', 'Execution time: a moment seconds (time limit is\nan hour).']", "['synthetic_dataset metrics:', '\\n', 'Final training CODS: 0.4877', '\\n', 'Final\ntraining loss: 1.6093', '\\n', 'Execution time: a moment seconds (time limit is\nan hour).']", ""], "parse_exc_type": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "parse_exc_info": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "parse_exc_stack": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], "completed_stages": ["Stage_1"]};
+
+// Add log directory path and stage info to the tree data
+treeStructData.log_dir_path = window.location.pathname.split('/').slice(0, -1).join('/');
+treeStructData.current_stage = window.location.pathname.includes('stage_')
+  ? window.location.pathname.split('stage_')[1].split('/')[0]
+  : 'Stage_1';
+
+// Initialize background color
+window.bgColCurrent = bgCol;
+
+// Function to set background color that can be called from the console
+function setBackgroundColor(color) {
+  // Update the global color
+  updateBackgroundColor(color);
+
+  // Refresh the current sketch to apply the new background color
+  if (currentStage) {
+    startSketch(currentStage);
+  }
+}
+
+// Load all stage data and initialize the visualization
+loadAllStageData(treeStructData);
+
+    </script>
+    <title>AI Scientist-v2 Visualization</title>
+    <style>
+      body,
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background-color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+      #canvas-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 40vw;
+        height: 100vh;
+        background-color: inherit;
+        padding-top: 40px;
+      }
+      canvas {
+        float: left;
+        height: 100vh;
+        width: 100vw;
+      }
+      #text-container {
+        float: right;
+        height: 100vh;
+        width: 50vw;
+        background-color: #282c34;
+        overflow: auto;
+      }
+      #plan {
+        /* border-left: 2px solid #282c34; */
+        background-color: #282c34;
+        color: #f2f0e7;
+        min-height: 5rem;
+        padding: 1em 0 1em 1em;
+      }
+      #plot_plan {
+        background-color: #282c34;
+        color: #f2f0e7;
+        min-height: 5rem;
+        padding: 1em 0 1em 1em;
+        white-space: pre-wrap;
+      }
+      #exec_time_feedback {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #282c34;
+        border-left: 3px solid #ff5555;
+        color: #f2f0e7;
+      }
+      #exec_time {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #282c34;
+        border-left: 3px solid #ff5555;
+        color: #f2f0e7;
+      }
+      #exc_info {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #2c1f1f;
+        border-left: 3px solid #ff5555;
+        color: #f2f0e7;
+      }
+      #metrics {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #282c34;
+        color: #f2f0e7;
+      }
+      #vlm_feedback {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #1f2c2f;
+        color: #f2f0e7;
+        border-left: 3px solid #55ff55;
+      }
+      #vlm_feedback p {
+        margin: 0.5em 0;
+        white-space: pre-wrap;
+      }
+      .datasets_successfully_tested {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #282c34;
+        color: #f2f0e7;
+        border-left: 3px solid #55ff55;
+      }
+      .plots-container {
+        float: right;
+        width: 50vw;
+        padding: 1rem;
+        background-color: #282c34;
+        margin-top: 1rem;
+      }
+
+      .plot-item {
+        flex: 1 1 300px;
+        max-width: 100%;
+        margin-bottom: 1rem;
+        white-space: pre-wrap;
+      }
+
+      .plot-item img {
+        width: 100%;
+        height: auto;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: block;
+      }
+
+      .metric-group {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .metric-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      .metric-table th,
+      .metric-table td {
+        padding: 8px;
+        text-align: left;
+        border: 1px solid #ddd;
+      }
+
+      .metric-table th {
+        background-color: #363b44;
+      }
+
+      /* Styles for tabs */
+      .tabs-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 49vw;
+        background-color: #000000;
+        z-index: 10;
+        display: flex;
+        padding: 0;
+      }
+
+      .tab {
+        cursor: pointer;
+        padding: 10px 15px;
+        background-color: #333;
+        color: #f2f0e7;
+        border: none;
+        outline: none;
+        transition: background-color 0.3s;
+        flex: 1;
+        text-align: center;
+      }
+
+      .tab:hover {
+        background-color: #444;
+      }
+
+      .tab.active {
+        background-color: #4c76af;
+        font-weight: bold;
+      }
+
+      .tab.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: #282c34;
+      }
+
+      .tab-content {
+        display: none;
+        padding-top: 40px; /* Space for tabs */
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .stage-info {
+        padding: 10px;
+        background-color: #282c34;
+        color: #f2f0e7;
+        margin-bottom: 10px;
+        font-size: 0.9em;
+      }
+
+      .stage-status {
+        display: inline-block;
+        padding: 3px 6px;
+        border-radius: 3px;
+        margin-left: 8px;
+        font-size: 0.8em;
+      }
+
+      .stage-status.completed {
+        background-color: #4caf50;
+      }
+
+      .stage-status.in-progress {
+        background-color: #2196f3;
+      }
+
+      .stage-status.not-started {
+        background-color: #9e9e9e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tabs-container" id="stage-tabs">
+      <button class="tab" data-stage="Stage_1" onclick="selectStage('Stage_1')">Stage 1</button>
+      <button class="tab" data-stage="Stage_2" onclick="selectStage('Stage_2')">Stage 2</button>
+      <button class="tab" data-stage="Stage_3" onclick="selectStage('Stage_3')">Stage 3</button>
+      <button class="tab" data-stage="Stage_4" onclick="selectStage('Stage_4')">Stage 4</button>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <pre id="text-container">
+        <div id="stage-info" class="stage-info"></div>
+        <div id="plan"></div>
+        <hr>
+        <div id="exc_info"></div>
+        <hr>
+        <div id="exec_time"></div>
+        <hr>
+        <div id="exec_time_feedback"></div>
+        <hr>
+        <div id="metrics"></div>
+        <hr>
+        <div id="plot_plan"></div>
+        <hr>
+        <div class="plots-container" id="plots"></div>
+        <hr>
+        <div id="vlm_feedback"></div>
+        <hr>
+        <div id="datasets_successfully_tested"></div>
+        <hr>
+        <code id="code" class="language-python"></code>
+        <hr>
+        <code id="plot_code" class="language-python"></code>
+    </pre>
+  </body>
+</html>

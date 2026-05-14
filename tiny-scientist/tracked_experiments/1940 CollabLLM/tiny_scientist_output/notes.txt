@@ -1,0 +1,11 @@
+Figure 1 - "scatter_plot.png": This figure presents a scatter plot illustrating the relationship between variable X and variable Y. Each point on the plot represents an individual data sample. The distribution and trend of the points suggest a positive correlation, where an increase in variable X generally corresponds to an increase in variable Y. This visual is crucial for identifying patterns and potential anomalies within the dataset.
+
+Figure 2 - "bar_chart.png": This bar chart displays the frequency distribution of categories within variable Z. Each bar represents a distinct category, with the height corresponding to the number of observations in that category. The chart effectively highlights the dominant categories and provides insights into the categorical data distribution, aiding in comparative analysis.
+
+Figure 3 - "line_graph.png": The line graph depicts the trend of variable W over a specified time period. The x-axis represents the time intervals, while the y-axis indicates the values of variable W. This figure is instrumental in observing temporal changes and identifying any cyclic patterns or trends in the data, facilitating time series analysis.
+
+Figure 4 - "histogram.png": This histogram illustrates the distribution of variable Q. The x-axis represents the bins or ranges of variable Q, and the y-axis shows the frequency of data points within each bin. The shape of the histogram helps in assessing the normality of the data distribution and the presence of skewness or kurtosis.
+
+Figure 5 - "heat_map.png": The heat map provides a visual representation of the correlation matrix between multiple variables. Each cell within the heat map shows the correlation coefficient between two variables, with color intensity indicating the strength of the correlation. This figure is essential for identifying strong relationships or dependencies among the variables, which can guide further statistical analysis.
+
+Figure 6 - "pie_chart.png": This pie chart displays the proportion of different segments within variable M. Each slice of the pie represents a category, and its size is proportional to the percentage of observations in that category. This figure is useful for visualizing the composition and relative sizes of categories within a dataset, offering a clear overview of the categorical distribution.

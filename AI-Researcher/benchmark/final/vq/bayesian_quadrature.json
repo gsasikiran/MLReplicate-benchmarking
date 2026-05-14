@@ -1,0 +1,154 @@
+{
+  "target": "Conformal Prediction as Bayesian Quadrature",
+  "source_papers": [
+    {
+      "reference": "Aitchison, J. and Dunsmore, I. R. Statistical Prediction Analysis.",
+      "rank": 1,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper provides the foundational framework for statistical prediction analysis, which is critical to the Bayesian interpretation of conformal prediction. Its techniques directly influence the methodology of the proposed model.",
+      "usage": "Methods from statistical prediction analysis were integrated to enhance the Bayesian framework for quantifying uncertainty."
+    },
+    {
+      "reference": "Vovk, V., Gammerman, A., and Shafer, G. Algorithmic Learning in a Random World.",
+      "rank": 2,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This seminal work introduced conformal prediction methods, which are pivotal to grounding the proposed model in the current research. These methods serve as a technical basis for developing splitting techniques.",
+      "usage": "The authors revisited these methods and showed how their proposed approach can extend existing conformal prediction frameworks."
+    },
+    {
+      "reference": "Angelopoulos, A. N. and Bates, S. Conformal prediction: A gentle introduction.",
+      "rank": 3,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This reference offers a comprehensive review of existing conformal prediction methods and contextualizes the current developments within that landscape.",
+      "usage": "It was used to highlight existing techniques and ground the proposed approach in established research, enhancing its reliability."
+    },
+    {
+      "reference": "Cockayne, J., Oates, C. J., Sullivan, T. J., and Girolami, M. Bayesian probabilistic numerical methods.",
+      "rank": 4,
+      "type": [
+        "component"
+      ],
+      "justification": "This paper connects Bayesian probability concepts with numerical methods critical for the framework's statistical underpinnings.",
+      "usage": "It informed the probabilistic aspects of the proposed model techniques applied to conformal prediction."
+    },
+    {
+      "reference": "Diaconis, P. Bayesian numerical analysis.",
+      "rank": 5,
+      "type": [
+        "methodological"
+      ],
+      "justification": "As a foundational text on the proposed model, this paper outlines the analytical techniques essential for integration.",
+      "usage": "The authors adapted these methods for modeling uncertainty in the context of predicting black-box model performance."
+    },
+    {
+      "reference": "Hennig, P., Osborne, M. A., and Kersting, H. P. Probabilistic Numerics: Computation as Machine Learning.",
+      "rank": 6,
+      "type": [
+        "component"
+      ],
+      "justification": "The concepts laid out in this paper about probabilistic numerics directly enrich the proposed model methods utilized in this study.",
+      "usage": "These ideas helped establish a connection between Bayesian inference and the computational aspects of the study, enhancing clarity on integration techniques."
+    },
+    {
+      "reference": "Angelopoulos, A. N., Bates, S., Fisch, A., Lei, L., and Schuster, T. Conformal risk control.",
+      "rank": 7,
+      "type": [
+        "component"
+      ],
+      "justification": "This work further develops conformal prediction and risk control, directly informing the techniques that this paper synthesizes.",
+      "usage": "The methods from this paper were used to illustrate how existing work can be recast in a Bayesian context."
+    },
+    {
+      "reference": "Papadopoulos, H., Proedrou, K., Vovk, V., and Gammerman, A. Inductive confidence machines for regression.",
+      "rank": 8,
+      "type": [
+        "component"
+      ],
+      "justification": "Identifying a bridge between inductive confidence machines and conformal prediction, this study supports methodological integration in losses evaluation.",
+      "usage": "It was referenced to create connections between prior methods and the proposed techniques in their implementation."
+    },
+    {
+      "reference": "O'Hagan, A. Bayes-Hermite quadrature.",
+      "rank": 9,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This provides insights on applying Bayes rule to numeric computations, forming a basis for the integration techniques used.",
+      "usage": "Crucial for framing the Bayesian interpretation of integrals that underpin the proposed model."
+    },
+    {
+      "reference": "Lin, T.-Y., Maire, M., Belongie, S., Hays, J., Perona, P., Ramanan, D., Doll\u00b4 ar, P., and Zitnick, C. L. Microsoft COCO: Common objects in context.",
+      "rank": 10,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "As a comprehensive dataset, it was key to validating experimental results which underscore the applicability of proposed methods.",
+      "usage": "Used in the experiments to benchmark the effectiveness of the proposed model techniques."
+    },
+    {
+      "reference": "Shafer, G. and Vovk, V. A tutorial on conformal prediction.",
+      "rank": 11,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This tutorial outlines the foundational principles of conformal prediction methods, providing a deeper understanding of their application.",
+      "usage": "Served as a foundational reference to explain the core ideas behind conformal prediction and its relevance in the present work."
+    },
+    {
+      "reference": "Barber, R. F., Cand` es, E. J., Ramdas, A., and Tibshirani, R. J. The limits of distribution-free conditional predictive inference.",
+      "rank": 12,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This work addresses the limitations of existing methods, thus shaping the research direction to explore better alternatives.",
+      "usage": "Influenced the discussion on the need for improved methods for confidence interval estimation."
+    },
+    {
+      "reference": "Gibbs, I., Cherian, J. J., and Cand` es, E. J. Conformal Prediction With Conditional Guarantees.",
+      "rank": 13,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "Shaping the understanding of conditional guarantees, this paper pointed to avenues for refining the methods and understanding their constraints.",
+      "usage": "Directed focus to conditional guarantees in predictive modeling, influencing method selection for empirical evaluation."
+    },
+    {
+      "reference": "Ng, K. W., Tian, G.-L., and Tang, M.-L. Dirichlet and Related Distributions: Theory, Methods and Applications.",
+      "rank": 14,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper discusses the Dirichlet distribution, which is fundamental for understanding the random quantile spacings used in the study.",
+      "usage": "Provided insights that informed the selection of probabilistic methods for uncertainty quantification."
+    },
+    {
+      "reference": "Tukey, J. W. Nonparametric estimation II. Statistically equivalent blocks and tolerance regions-the continuous case.",
+      "rank": 15,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This work discusses concepts of tolerance regions essential to understand the broader context of the current paper's objectives.",
+      "usage": "Guided the application of tolerance concepts in developing Bayesian techniques for uncertainty quantification."
+    }
+  ],
+  "authors": [
+    "Jake C. Snell",
+    "Thomas L. Griffiths"
+  ],
+  "year": 2025,
+  "url": "http://arxiv.org/abs/2502.13228v2",
+  "abstract": "As machine learning-based prediction systems are increasingly used in\nhigh-stakes situations, it is important to understand how such predictive\nmodels will perform upon deployment. Distribution-free uncertainty\nquantification techniques such as conformal prediction provide guarantees about\nthe loss black-box models will incur even when the details of the models are\nhidden. However, such methods are based on frequentist probability, which\nunduly limits their applicability. We revisit the central aspects of conformal\nprediction from a Bayesian perspective and thereby illuminate the shortcomings\nof frequentist guarantees. We propose a practical alternative based on Bayesian\nquadrature that provides interpretable guarantees and offers a richer\nrepresentation of the likely range of losses to be observed at test time.",
+  "venue": "Probabilistic Numerics",
+  "venue_source": "Crossref",
+  "venue_lookup_time": "2025-10-20T16:29:17.346350",
+  "citations": 2,
+  "task1": "To implement the methodology presented in this paper, follow these instructions:\n\n1. **Task:** The proposed model aims to enhance uncertainty quantification in machine learning predictions through a Bayesian approach, specifically adapting conformal prediction techniques to provide reliable performance guarantees.\n\n2. **Core Techniques/Algorithms:** \n   - Utilize the proposed model to evaluate uncertainties.\n   - Implement split conformal prediction and conformal risk control as special cases. \n   - Define a score function for the proposed model's predictions to measure the discrepancy between predicted and actual outcomes.\n\n3. **Purpose and Function of Major Components:**\n   - **The Proposed Model:** This is used to compute integrals of the quantile function over the loss distribution, encapsulating uncertainty in prediction.\n   - **Score Function:** It serves as a measure of nonconformity that quantifies how much the predicted output deviates from the observed value, guiding the prediction interval's construction.\n\n4. **Implementation Details:**\n   - **The Proposed Model:** \n     - Key parameters include the prior distribution over functions and the observed loss values.\n     - Input: A set of calibration data pairs (Xi, Yi).\n     - Output: A posterior distribution on the expected loss that informs predictions.\n     - Constraints: Ensure that your calibration set is representative of real deployment conditions.\n   - **Score Function Definition:** \n     - Define a function s(x, y) that calculates the discrepancy. For instance, using s(x, y) = |y - f(x)| where f is the prediction function.\n     - Important variables: Tuning parameter \u03bb to control prediction set size.\n \n5. **Step-by-Step Interaction of Components:**\n   - Begin with a calibration dataset consisting of input-output pairs, which you will use to calculate empirical risks.\n   - Compute the score for each calibration example using the score function.\n   - Use the calculated scores to establish quantiles, which serve as critical thresholds for constructing prediction sets.\n   - Apply the proposed model to integrate over the possible values of the quantile function, allowing for uncertainty in the estimates.\n   - Formulate prediction intervals by evaluating the posterior distribution derived from the proposed model, using appropriate critical values from quantiles.\n\n6. **Critical Implementation Details for Performance:**\n   - The accuracy of your predictions heavily relies on the quality of the calibration dataset; use a diverse representation to maximize generalizability.\n   - Careful selection of the control parameter \u03bb is crucial. Monitor how different choices affect prediction set sizes and coverage guarantees.\n   - Validate the robustness of the proposed model approximation by testing various prior distributions to ensure stable results.\n   - Consider utilizing Monte Carlo simulations to refine estimates while exploring variability in quantile placement, which can significantly enhance the reliability of your uncertainty measures.",
+  "task2": "1. The primary task tackled by this study is the effective quantification of uncertainty in the performance of machine learning models when they are deployed in high-stakes environments. This includes providing reliable guarantees about model outcomes without requiring extensive prior information about the data or model.\n\n2. Current limitations in existing approaches stem from their reliance on frequentist probability, which restricts their adaptability to varied data distributions and contexts. These traditional methods struggle to incorporate prior knowledge about potential data distributions that could inform a more accurate assessment of model performance.\n\n3. The core challenges the researchers aim to overcome include the need to integrate relevant prior information into the uncertainty quantification process while maintaining the distribution-free nature of performance guarantees. Furthermore, there is a challenge in developing methods that can better reflect the actual distribution of losses as opposed to relying on average performance metrics.\n\n4. Key objectives and intended contributions include establishing a Bayesian framework for uncertainty quantification that can incorporate prior information effectively and provide a clearer characterization of potential model outcomes. The researchers aim to extend existing conformal prediction methods to produce more interpretable and richer guarantees regarding model performance, ultimately facilitating safer deployment of machine learning systems in critical applications.",
+  "instance_id": "bayesian_quadrature"
+}

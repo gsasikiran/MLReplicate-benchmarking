@@ -1,0 +1,54 @@
+﻿{
+    "paper_filename": "paper1.md",
+    "idea_generation_command": "python -u ai_scientist/perform_ideation_temp_free.py --workshop-file ai_scientist/modified_datasets/paper1.md --model gpt-4o-mini --max-num-generations 20 --num-reflections 5",
+    "idea_generation_wall_time_sec": 356.43,
+    "generated_ideas": [
+    {
+        "Name": "peer_review_reform",
+        "Title": "Transforming the Peer Review Process: A Bi-Directional Feedback Loop and Reviewer Rewards System",
+        "Short Hypothesis": "Enhancing the peer review process through a bi-directional feedback system and a systematic rewards framework will improve review quality, accountability, and author satisfaction.",
+        "Related Work": "Existing literature has explored AI-assisted reviews and the need for improved reviewer accountability. However, few have proposed a systematic integration of author feedback on reviews along with a structured incentive system for reviewers, which this proposal aims to address.",
+        "Abstract": "The peer review process in AI conferences is increasingly strained by a surge in submissions, leading to declining review quality and growing dissatisfaction among authors. This proposal advocates for a transformative approach that integrates a bi-directional feedback loop into the review process, allowing authors to evaluate reviewer performance while minimizing retaliation risks. Additionally, we propose a systematic reviewer reward system that includes digital badges and impact scores to incentivize high-quality reviews. By implementing these changes, we aim to create an accountability framework that not only recognizes the efforts of reviewers but also enhances the overall quality of the peer review system, fostering a culture of constructive feedback and professional growth. This proposal seeks to engage the AI research community in discussions about these necessary reforms for a sustainable and effective peer review process.",
+"Experiments": [
+            "Design a pilot program in collaboration with an AI conference to implement the bi-directional feedback loop.",
+            "Collect data on reviewer performance before and after implementing the feedback system, analyzing changes in review quality and author satisfaction.",
+            "Implement a rewards system for reviewers based on their performance metrics and feedback received, measuring the impact on reviewer engagement and quality of reviews.",
+            "Evaluate the effectiveness of the changes through surveys and quantitative analysis of review quality metrics."
+        ],
+        "Risk Factors and Limitations": "Potential backlash from reviewers regarding feedback quality; difficulties in creating a fair and unbiased reward system; risk of retaliatory feedback from authors; logistical challenges in implementing these changes within existing conference structures."
+    },
+    {
+        "Name": "peer_review_reform_2",
+        "Title": "Revolutionizing Peer Review: A Bi-Directional Feedback Loop and Accountability Framework",
+        "Short Hypothesis": "Implementing a bi-directional feedback system coupled with a reviewer rewards framework will significantly enhance peer review quality and accountability in AI conferences.",
+        "Related Work": "While previous studies have examined the need for improved reviewer accountability and AI-assisted reviews, few have proposed a structured system that integrates author feedback on reviews with a systematic rewards system for reviewers. This proposal aims to fill that gap by fostering a collaborative review environment.",
+        "Abstract": "The peer review process in AI conferences is increasingly strained due to an overwhelming number of submissions, leading to declining review quality and author dissatisfaction. This position paper proposes a transformative approach that introduces a bi-directional feedback loop, allowing authors to evaluate the quality of reviews while minimizing risks of retaliation through anonymized feedback. Additionally, we advocate for a systematic reviewer reward system, consisting of digital badges and impact scores, aimed at incentivizing high-quality reviews. By implementing these changes, we seek to establish an accountability framework that not only recognizes reviewers' efforts but also enhances the overall integrity of the peer review system. This proposal invites the AI research community to engage in discussions about these critical reforms necessary for a sustainable and effective peer review process.",
+        "Experiments": [
+            "Design and implement a pilot program at a selected AI conference to test the bi-directional feedback mechanism with anonymized author evaluations of reviews.",
+            "Collect and analyze data on reviewer performance and author satisfaction before and after implementing the feedback system, focusing on quality metrics.",
+            "Develop and implement a rewards system for reviewers based on performance metrics and feedback received, assessing its impact on reviewer engagement and review quality through surveys.",
+            "Evaluate the effectiveness of the proposed changes using both qualitative and quantitative analysis of review quality metrics and overall author satisfaction."
+        ],
+"Risk Factors and Limitations": "Potential challenges include resistance from reviewers regarding the feedback process, difficulties in creating an impartial rewards system, risks of retaliatory feedback from authors, and logistical hurdles in integrating these changes into existing conference structures."
+    }
+]
+,
+    "paper_generation_command": "python -u launch_scientist_bfts.py --load_ideas ai_scientist/modified_datasets/paper1.json --load_code --add_dataset_ref --model_writeup gpt-4o-mini --model_citation gpt-4o-2024-11-20 --model_review gpt-4o-2024-11-20 --model_agg_plots o3-mini-2025-01-31 --num_cite_rounds 20",
+    "paper_generation_wall_time_sec": 2534.46,
+    "generated_paper_content_summary": "Paper generation command executed. Output: Set AI_SCIENTIST_ROOT to /nfs/home/keyaf/research/ScAiBench/AI-Scientist-v2\nUsing GPUs: [0, 1, 2, 3]\n",
+    "cost_analysis": {
+        "wall_time_sec": 2890.89,
+        "total_tokens": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "tokens_per_sec": 0.0,
+        "tokens_per_sec_per_gpu": 0.0,
+        "active_gpus": 1,
+        "energy_cost_usd": 0.06589,
+        "hardware_cost_usd": 0.45091,
+        "total_cost_usd": 0.50679,
+        "cost_per_1k_tokens_usd": 0
+    },
+    "note": "Token counts are placeholders as direct token tracking from external scripts is not available. Cost is primarily based on wall time.",
+    "timestamp": "2026-04-28T15-54-22.165981"
+}

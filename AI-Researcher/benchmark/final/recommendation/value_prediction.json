@@ -1,0 +1,155 @@
+{
+  "target": "The Value of Prediction in Identifying the Worst-Off",
+  "source_papers": [
+    {
+      "reference": "The impact of modeling decisions in statistical profiling",
+      "rank": 1,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper presents essential methodological foundations for profiling and statistical modeling, which form the backbone of the techniques utilized in our study for analyzing the welfare impacts of prediction in public policy contexts.",
+      "usage": "Used as a methodological guide to inform the evaluation of how various modeling decisions directly affect welfare outcomes."
+    },
+    {
+      "reference": "Policy Learning with Observational Data",
+      "rank": 2,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This foundational work introduced various methodologies using observational data that have been crucial in analyzing social allocation policies, forming the theoretical basis for our predictive framework.",
+      "usage": "Adapted to support the analysis of the prediction-access ratio in the context of identifying vulnerable populations."
+    },
+    {
+      "reference": "Statistical Profiling in Public Employment Services: An International Comparison",
+      "rank": 3,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This reference provides a structural framework for comparing predictive methods used in public employment services, which was essential for our comparative analysis of prediction systems.",
+      "usage": "Informed the comparative frameworks applied to our study's specific context of unemployment assistance."
+    },
+    {
+      "reference": "Fighting Poverty with Data",
+      "rank": 4,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This paper's insights into utilizing data to tackle poverty inspired our application of machine learning techniques to identify individuals at risk of long-term unemployment.",
+      "usage": "Provided conceptual guidance in aligning prediction techniques with welfare aims in the unemployment domain."
+    },
+    {
+      "reference": "Against Predictive Optimization: On the Legitimacy of Decision-making Algorithms That Optimize Predictive Accuracy",
+      "rank": 5,
+      "type": [
+        "critical component"
+      ],
+      "justification": "It highlights challenges related to predictive optimization in decision-making, which shaped our understanding of potential limitations in prediction systems within the welfare context.",
+      "usage": "Informed our critique of optimizing predictive accuracy at the expense of equity considerations in welfare systems."
+    },
+    {
+      "reference": "Estimating counterfactual effects for policy optimization",
+      "rank": 6,
+      "type": [
+        "component"
+      ],
+      "justification": "This paper contributed to our development of the prediction-access ratio (PAR), a key metric utilized in evaluating the efficacy of different predictive approaches in our analysis.",
+      "usage": "Used to support the derivation of methodology for evaluating the impacts of various design components in our study."
+    },
+    {
+      "reference": "Fairness and Machine Learning: Limitations and Opportunities",
+      "rank": 7,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This work established fairness principles critical to shaping how algorithmic predictions in our study should be evaluated within social policies, particularly regarding equitable outcomes.",
+      "usage": "Helped frame our discussion on fairness and equity's role in predictive effectiveness within public allocation systems."
+    },
+    {
+      "reference": "A case study of algorithm-assisted decision making in child maltreatment hotline screening decisions",
+      "rank": 8,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This study provided an applied context demonstrating the implications of algorithm-assisted decision-making, which parallels the discussions about welfare systems in our research.",
+      "usage": "Cited for insights on practical ramifications of algorithmic profiling and predictive methods."
+    },
+    {
+      "reference": "Who Should Be Treated? Empirical Welfare Maximization Methods for Treatment Choice",
+      "rank": 9,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This foundational work on empirical welfare maximization has been essential for crafting our treatment policies and the decision rules related to screening the worst-off populations.",
+      "usage": "Formulated the analytical foundation for optimizing welfare outcomes based on predictive insights in our analysis."
+    },
+    {
+      "reference": "Dynamic allocation of outcomes in resource allocation problems",
+      "rank": 10,
+      "type": [
+        "methodological"
+      ],
+      "justification": "Provided advanced methodologies for dynamic allocation problems, anchoring many of the algorithms we employed in evaluating predictive systems.",
+      "usage": "Served as a methodological benchmark for assessing our proposed prediction and screening strategies."
+    },
+    {
+      "reference": "Profiling the unemployed: a review of OECD experiences and implications for emerging economies",
+      "rank": 11,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "This review highlights global trends and implications of profiling in employment services, enriching our context on international best practices.",
+      "usage": "Informed the comparative aspects of our study concerning international employment profiling practices."
+    },
+    {
+      "reference": "Moving targets: When does a poverty prediction model need to be updated?",
+      "rank": 12,
+      "type": [
+        "component"
+      ],
+      "justification": "Contributed insights on model updating and relevance, which were vital for understanding when and how to adapt predictive models to changing socioeconomic conditions.",
+      "usage": "Informed operational considerations regarding model maintenance for effective poverty targeting."
+    },
+    {
+      "reference": "What is the Bureaucratic Counterfactual? Categorical versus Algorithmic Prioritization in U.S. Social Policy",
+      "rank": 13,
+      "type": [
+        "component"
+      ],
+      "justification": "This study offered perspective on categorical versus algorithmic decision-making in public policy, shaping our inquiry into decision processes in welfare systems.",
+      "usage": "Guided our analysis of different prioritization strategies in predictive systems."
+    },
+    {
+      "reference": "Statistical Treatment Rules for Heterogeneous Populations",
+      "rank": 14,
+      "type": [
+        "methodological"
+      ],
+      "justification": "Stipulated treatment rules that address heterogeneous populations, thereby contributing to our understanding of differential impacts within welfare assessment frameworks.",
+      "usage": "Influenced the design of our screening policies focusing on varied population segments."
+    },
+    {
+      "reference": "Counterfactual Prediction Under Outcome Measurement Error",
+      "rank": 15,
+      "type": [
+        "component"
+      ],
+      "justification": "Offered methodologies for addressing prediction under outcome measurement error, which were crucial for enhancing the robustness of our empirical analysis.",
+      "usage": "Utilized to ensure our predictive models accurately accounted for biases in outcome assessments."
+    }
+  ],
+  "authors": [
+    "Unai Fischer-Abaigar",
+    "Christoph Kern",
+    "Juan Carlos Perdomo"
+  ],
+  "year": 2025,
+  "url": "http://arxiv.org/abs/2501.19334v3",
+  "abstract": "Machine learning is increasingly used in government programs to identify and\nsupport the most vulnerable individuals, prioritizing assistance for those at\ngreatest risk over optimizing aggregate outcomes. This paper examines the\nwelfare impacts of prediction in equity-driven contexts, and how they compare\nto other policy levers, such as expanding bureaucratic capacity. Through\nmathematical models and a real-world case study on long-term unemployment\namongst German residents, we develop a comprehensive understanding of the\nrelative effectiveness of prediction in surfacing the worst-off. Our findings\nprovide clear analytical frameworks and practical, data-driven tools that\nempower policymakers to make principled decisions when designing these systems.",
+  "venue": "Journal of Applied Philosophy",
+  "venue_source": "Crossref",
+  "venue_lookup_time": "2025-10-21T16:30:31.164935",
+  "citations": 0,
+  "task1": "1. **Task**: The model is designed to identify the worst-off individuals within a population based on their welfare outcomes, specifically focusing on applications such as unemployment assistance and poverty targeting. \n\n2. **Core Techniques/Algorithms**: The methodology incorporates a predictive model, which can be based on regression techniques, specifically regression algorithms such as gradient boosting (e.g., CatBoost). The framework also employs statistical modeling to calculate the prediction-access ratio (PAR) and quantify the value of prediction relative to screening capacity.\n\n3. **Purpose and Function of Each Major Technical Component**:\n   - **Predictive Model (e.g., CatBoost)**: This model predicts the welfare outcomes (Y) based on input features (X). Its performance can be evaluated using R^2, capturing how well the predictions explain the variance in outcomes.\n   - **Prediction-Access Ratio (PAR)**: This metric quantifies the relative impacts of improving prediction versus expanding screening capacity (\u03b1). It guides decision-makers in resource allocation.\n   - **Screening Policy**: This defines the threshold of outcomes (Y) below which individuals are flagged for further support, utilizing the predicted values from the model.\n\n4. **Implementation Details**:\n   - **Predictive Model (CatBoost)**:\n     - **Key Parameters**: Train using `max_iterations=5000`, `early_stopping_rounds=20`, and default settings for other hyperparameters.\n     - **Input/Output Specifications**: Inputs consist of demographic and labor market history features (X), while the output is a continuous welfare metric (e.g., unemployment duration, Y).\n     - **Constraints**: Requires clean data and consideration of overfitting; early stopping is essential to maintain generalization.\n   \n   - **Prediction-Access Ratio (PAR)**:\n     - **Calculation**: Calculate PAR using the formula that captures how much the marginal benefits of improved predictions change relative to changes in screening capacity, factoring in the costs involved.\n     - **Input Variants**: Use hypothetical increases in R^2 (for better predictions) and \u0394\u03b1 (for expanded screening capacity) to assess relative importance.\n\n   - **Screening Policy**:\n     - **Key Parameters**: Define the quantile parameter, \u03b2, to determine the level of population to screen; threshold for screening defined by the relationship between predicted outcomes and actual outcomes.\n     - **Function**: Implement a binary decision based on the predicted outcomes, where \u03c0 is 1 if Y \u2264 t(\u03b2) and 0 otherwise.\n\n5. **Step-by-step Interaction**:\n   - Collect and preprocess data to form the input features (X) and outcomes (Y).\n   - Train the predictive model (e.g., CatBoost) using features from historical data.\n   - Compute R^2 to evaluate model performance.\n   - Define screening capacity (\u03b1) for the population based on resource constraints.\n   - Calculate the PAR to determine which aspect\u2014improving predictions or expanding screening capacity\u2014yields a better overall benefit for identifying the worst-off.\n   - Implement the screening policy based on predicted outcomes and defined thresholds to flag individuals for assistance.\n\n6. **Critical Implementation Details**:\n   - Training the predictive model should involve cross-validation to prevent overfitting and maintain generalizability across unseen data.\n   - The choice of feature set can significantly impact model accuracy; thus, thorough feature engineering and selection are essential.\n   - Regular updates to the model may be necessary to account for changing populations or welfare distributions, which would involve dynamic data collection strategies.\n   - Careful consideration of costs associated with model improvements versus additional screening capacity must guide the decision-making process, as this impacts long-term efficacy and resource allocation strategies.",
+  "task2": "1. The primary task of this research is to explore the effectiveness of prediction as a tool for identifying the most vulnerable individuals in social welfare contexts. Specifically, it examines the welfare impacts of such prediction systems when prioritizing assistance for those at greatest risk in scenarios like long-term unemployment.\n\n2. Current approaches in utilizing prediction systems face limitations due to the lack of a systematic framework that assesses the relative impacts of different design decisions. Many existing systems focus primarily on improving predictive accuracy without considering how these improvements compare to other strategies, like expanding screening capacity, thus hindering comprehensive evaluations of their true benefits in real-world contexts.\n\n3. The core challenges the researchers aim to overcome include the complexity of evaluating risk prediction tools against broader social contexts and understanding the comparative effectiveness of prediction accuracy versus structural investments in outreach or capacity expansion. Additionally, they seek to clarify when and how much more effective prediction systems can be when identifying those most in need compared to merely increasing access to screening.\n\n4. The key objectives and intended contributions of this research are to provide analytical frameworks that clarify the relationship between prediction systems and their impacts on social welfare, specifically for at-risk populations. The work aspires to equip policymakers with practical, data-driven tools that facilitate informed decision-making regarding investments in prediction versus other forms of intervention. Ultimately, it aims to enhance understanding of how to tactically allocate resources in ways that optimize the identification and support of vulnerable individuals within payment assistance programs.",
+  "instance_id": "value_prediction"
+}

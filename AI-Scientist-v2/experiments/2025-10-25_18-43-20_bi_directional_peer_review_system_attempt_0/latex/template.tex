@@ -1,0 +1,296 @@
+\documentclass{article} % For LaTeX2e
+\usepackage{iclr2025,times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs}
+
+% For theorems and such
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+
+% Custom
+\usepackage{multirow}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage[capitalize,noabbrev]{cleveref}
+\usepackage{xspace}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\graphicspath{{../figures/}} % To reference your generated figures, name the PNGs directly. DO NOT CHANGE THIS.
+
+\begin{filecontents}{references.bib}
+@book{goodfellow2016deep,
+  title={Deep learning},
+  author={Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron and Bengio, Yoshua},
+  volume={1},
+  year={2016},
+  publisher={MIT Press}
+}
+
+
+% This paper discusses the challenges in AI conference peer review systems, including reviewer accountability and review quality, and proposes a bi-directional feedback loop and systematic reviewer rewards—key concepts also explored in our manuscript. It is highly relevant for the 'Related Work' section, as it provides foundational context and highlights the need for reform in the peer review process.
+@article{kim2025positionta,
+ author = {Jaeho Kim and Yunseok Lee and Seulki Lee},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Position: The AI Conference Peer Review Crisis Demands Author Feedback and Reviewer Rewards},
+ volume = {abs/2505.04966},
+ year = {2025}
+}
+
+% This paper explores how blockchain technology enhances transparency and accountability in financial systems. It is relevant to our proposed blockchain-enabled reviewer rewards system as it demonstrates the application of blockchain for creating transparent and immutable systems, which aligns with our goal of ensuring accountability in the peer review process. This will be cited in the section discussing the technological implementation of the rewards system.
+@article{rerung2024theio,
+ author = {Ahadi Rerung and Ekayana Sangkasari Paranita and R. Agung Ay and Fitri Salamah and Elia Madatu Tandililing},
+ booktitle = {The Journal of Academic Science},
+ journal = {The Journal of Academic Science},
+ title = {The Influence of Fintech Innovations, ESG Reporting, and Blockchain Technology on Financial Transparency and Accountability},
+ year = {2024}
+}
+
+% This article discusses the balance between transparency and anonymity in peer review processes, addressing risks such as bias and retaliation. It is relevant to our manuscript's discussion on anonymity in the bi-directional feedback system, emphasizing its role in ensuring unbiased evaluations and preventing retaliatory behavior. This will be cited in the section on risk factors and limitations of the proposed system.
+@article{buchenau2009notesft,
+ author = {J. Buchenau and G. Crider},
+ booktitle = {American Political Science Review},
+ journal = {American Political Science Review},
+ pages = {v - vii},
+ title = {Notes from the Editors},
+ volume = {114},
+ year = {2009}
+}
+
+% This paper provides a game-theoretical and reinforcement learning-based analysis of reviewer reward systems, identifying biases in existing approaches and proposing an alternative framework for promoting comprehensive reviews. It is relevant to our proposed blockchain-enabled reviewer rewards system, as it offers insights into designing effective and fair reward mechanisms. This work will be cited in the section discussing the methodology and theoretical underpinnings of the reward system.
+@article{lee2023gametheoreticalao,
+ author = {Minhyeok Lee},
+ booktitle = {arXiv.org},
+ journal = {ArXiv},
+ title = {Game-Theoretical Analysis of Reviewer Rewards in Peer-Review Journal Systems: Analysis and Experimental Evaluation using Deep Reinforcement Learning},
+ volume = {abs/2305.12088},
+ year = {2023}
+}
+
+% This paper evaluates the effectiveness of a scenario-based learning module by measuring academic achievement, in-class engagement, and learner/teacher satisfaction through surveys. It is directly relevant to designing and analyzing surveys for evaluating perceived review quality, author satisfaction, and reviewer engagement in our study. This citation will be referenced in the experiments section to justify and inform the survey methodology.
+@article{mamakli2023scenariobasedlp,
+ author = {Sumer Mamakli and M. Alimoğlu and Mustafa Daloğlu},
+ booktitle = {Advances in Physiology Education},
+ journal = {Advances in physiology education},
+ title = {Scenario-based learning: preliminary evaluation of the method in terms of students' academic achievement, in-class engagement and learner/teacher satisfaction.},
+ year = {2023}
+}
+
+% This paper investigates blockchain's core security mechanisms, including decentralization, cryptography, consensus methods, and immutability, which ensure tamper-proof and secure data storage. It is relevant to the discussion of leveraging blockchain for the reviewer rewards system, as it provides a detailed understanding of the technology's robustness and scalability. This citation will be included in the section discussing the technological implementation of the rewards system to strengthen the argument for its reliability and effectiveness.
+@conference{thilakavathy2023investigatingbs,
+ author = {P. Thilakavathy and S. Jayachitra and Anurag Aeron and Narendra Kumar and Syed Sumera Ali and M. Malathy},
+ booktitle = {2023 International Conference on Communication, Security and Artificial Intelligence (ICCSAI)},
+ journal = {2023 International Conference on Communication, Security and Artificial Intelligence (ICCSAI)},
+ pages = {926-930},
+ title = {Investigating Blockchain Security Mechanisms for Tamper-Proof Data Storage},
+ year = {2023}
+}
+
+% This paper discusses the implementation of peer feedback mechanisms in an academic setting and evaluates their effectiveness in improving session quality. It is relevant to the discussion on implementing bi-directional feedback in the peer review system, providing empirical evidence and practical insights that can inform the methodology and experiments sections of the manuscript.
+@article{rahman2024impactop,
+ author = {Emranur Rahman and Sareh Karimi and Mansoor Husain},
+ booktitle = {Saudi Journal of Emergency Medicine},
+ journal = {Saudi Journal of Emergency Medicine},
+ title = {Impact of Peer Feedback on the Quality of Academic Sessions in an Emergency Medicine Training Program: A Quality Improvement Project.},
+ year = {2024}
+}
+
+% This paper discusses the use of blockchain in philanthropic systems to enhance transparency, accountability, and trust, which aligns with our proposed blockchain-enabled reviewer rewards system. It provides insights into leveraging blockchain in non-financial contexts, demonstrating its potential to improve transparency and accountability in complex systems. This citation will be included in the section discussing the technological implementation of the rewards system.
+@article{singh2023roleob,
+ author = {Monika Singh and Gaurav Pratap Singh Khati and Deepanshi Tyagi and Kapil Sharma and Deepak Gupta and Deeksha Singh},
+ booktitle = {International Journal for Research in Applied Science and Engineering Technology},
+ journal = {International Journal for Research in Applied Science and Engineering Technology},
+ title = {Role of Blockchain Technology in Philanthrophy},
+ year = {2023}
+}
+
+% This paper discusses the integration of blockchain technology with feedback mechanisms in educational settings, focusing on transparency, security, and efficiency. It outlines the design and implementation of a blockchain-based feedback system utilizing features like smart contracts. This is directly relevant to the manuscript's proposed bi-directional feedback and blockchain-enabled rewards system, providing support for the technological implementation and demonstrating the feasibility of combining blockchain with feedback systems. This citation will be included in the section discussing the technological implementation of the rewards system.
+@conference{naik2024blockchainpoweredsf,
+ author = {Girish R. Naik and P. Naik},
+ booktitle = {2024 International Conference on Innovations and Challenges in Emerging Technologies (ICICET)},
+ journal = {2024 International Conference on Innovations and Challenges in Emerging Technologies (ICICET)},
+ pages = {1-7},
+ title = {Blockchain-Powered Student Feedback for Enhanced Learning Experiences},
+ year = {2024}
+}
+
+% This paper discusses change management, stakeholder engagement, and strategies for ensuring user acceptance of new systems, specifically in the context of ERP implementations. It is relevant to the discussion of risk factors and limitations in the proposed peer review system, providing insights into overcoming resistance and fostering stakeholder buy-in when introducing novel frameworks in academic settings.
+@article{santos2023streamliningei,
+ author = {Mario Martinelli dos Santos},
+ booktitle = {International Journal of Scientific Research and Management},
+ journal = {International Journal of Scientific Research and Management (IJSRM)},
+ title = {Streamlining ERP Implementations: A Consultant’s Guide to Success},
+ year = {2023}
+}
+
+% This systematic review explores key trends, challenges, and opportunities in scientific journal management, focusing on editorial processes, transparency, and accountability. It is highly relevant to the broader context of failures and trends in peer review systems, providing essential background for the introduction or related work sections to justify the need for proposed reforms in peer review processes.
+@article{wahyudi2025keytc,
+ author = {Muhamad Nur Azmi Wahyudi and Ida Nugroho Saputro and Alhaura Nabighatul Ula and Cahyo Widodo},
+ booktitle = {Science Editing},
+ journal = {Science Editing},
+ title = {Key trends, challenges, and opportunities in scientific journal management between 2013 and 2023: a systematic review},
+ year = {2025}
+}
+
+% This paper evaluates the long-term effectiveness of adaptive learning systems in K-12 education, focusing on personalized learning experiences and sustained engagement. Its findings on best practices, challenges, and sustainability are relevant to the manuscript's discussion on the feasibility and durability of the proposed bi-directional feedback mechanism. It will be cited in the section discussing the long-term effectiveness and sustainability of the feedback system.
+@article{jose2024assessingte,
+ author = {Boby Chellanthara Jose and M. Ashok Kumar and T. UdayaBanu and M. Nagalakshmi},
+ booktitle = {International Journal of Advanced IT Research and Development},
+ journal = {International Journal of Advanced IT Research and Development},
+ title = {Assessing the Effectiveness of Adaptive Learning Systems in K-12 Education},
+ year = {2024}
+}
+
+% This paper highlights gaps in the peer review system, such as the challenges of maintaining research integrity amidst high submission volumes and the need for balancing human expertise with AI-enabled accountability mechanisms. It is relevant for the 'Highlighting Research Gaps' section, providing foundational insights into the systemic issues our proposed feedback and rewards system aims to address.
+@article{calamur2024adaptingpr,
+ author = {Harini Calamur and Roohi Ghosh},
+ booktitle = {Learned Publishing},
+ journal = {Learned Publishing},
+ title = {Adapting peer review for the future: Digital disruptions and trust in peer review},
+ volume = {37},
+ year = {2024}
+}
+
+% This paper presents the Blockchain-based Anonymous Reviewer Incentive Token (BARIT) system, which incentivizes peer reviewers through flexible reward schemes while preserving anonymity. It is highly relevant to the manuscript's discussion of the blockchain-enabled reviewer rewards system, offering established methods and practical insights for implementation. This citation will be included in the section discussing the technological implementation of the rewards system.
+@article{shrestha2024acs,
+ author = {Pratiksha Shrestha and S. Bhunia and Arthur Carvalho and Chad Anderson and Gabe Lee},
+ booktitle = {IEEE International Conference on Systems, Man and Cybernetics},
+ journal = {2024 IEEE International Conference on Systems, Man, and Cybernetics (SMC)},
+ pages = {1564-1571},
+ title = {A Case Study on Blockchain-based Anonymous Reviewer Incentive Token (BARIT)},
+ year = {2024}
+}
+
+% This paper evaluates the effectiveness and efficiency of generative AI tools in the peer review process, comparing them against human reviewers in providing feedback and recommendations. It offers empirical insights into the benefits and challenges of integrating AI into peer review workflows, such as improving speed and accuracy while ensuring content validity. This citation will be included in the section discussing future research directions and supporting arguments for incorporating AI-assisted mechanisms in the proposed peer review system.
+@article{lim2025generativeai,
+ author = {G. H. Lim and M. L. Tan and V. Hoe and D. Koh},
+ booktitle = {Occupational Medicine},
+ journal = {Occupational Medicine (Oxford, England)},
+ pages = {242 - 249},
+ title = {Generative AI in peer review process for occupational health},
+ volume = {75},
+ year = {2025}
+}
+\end{filecontents}
+
+\title{
+%%%%%%%%%TITLE%%%%%%%%%
+TITLE HERE
+%%%%%%%%%TITLE%%%%%%%%%
+}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the \iclrfinalcopy macro remains commented out below.
+% Non-anonymous submissions will be rejected without review.
+
+\author{Anonymous}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+%\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+\begin{document}
+
+
+\maketitle
+
+\begin{abstract}
+%%%%%%%%%ABSTRACT%%%%%%%%%
+ABSTRACT HERE
+%%%%%%%%%ABSTRACT%%%%%%%%%
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+%%%%%%%%%INTRODUCTION%%%%%%%%%
+INTRO HERE
+%%%%%%%%%INTRODUCTION%%%%%%%%%
+
+\section{Related Work}
+\label{sec:related}
+%%%%%%%%%RELATED WORK%%%%%%%%%
+RELATED WORK HERE
+%%%%%%%%%RELATED WORK%%%%%%%%%
+
+\section{Background}
+\label{sec:background}
+%%%%%%%%%BACKGROUND%%%%%%%%%
+BACKGROUND HERE
+%%%%%%%%%BACKGROUND%%%%%%%%%
+
+\section{Method}
+\label{sec:method}
+%%%%%%%%%METHOD%%%%%%%%%
+METHOD HERE
+%%%%%%%%%METHOD%%%%%%%%%
+
+\section{Experimental Setup}
+\label{sec:experimental_setup}
+%%%%%%%%%EXPERIMENTAL SETUP%%%%%%%%%
+EXPERIMENTAL SETUP HERE
+%%%%%%%%%EXPERIMENTAL SETUP%%%%%%%%%
+
+\section{Experiments}
+\label{sec:experiments}
+%%%%%%%%%EXPERIMENTS%%%%%%%%%
+RESULTS HERE
+
+% EXAMPLE FIGURE: REPLACE AND ADD YOUR OWN FIGURES / CAPTIONS
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth]{example-image-a}
+\caption{PLEASE FILL IN CAPTION HERE}
+\label{fig:first_figure}
+\end{figure}
+%%%%%%%%%EXPERIMENTS%%%%%%%%%
+
+\section{Conclusion}
+\label{sec:conclusion}
+%%%%%%%%%CONCLUSION%%%%%%%%%
+CONCLUSIONS HERE
+%%%%%%%%%CONCLUSION%%%%%%%%%
+
+\bibliography{iclr2025}
+\bibliographystyle{iclr2025}
+
+\appendix
+
+\section*{\LARGE Supplementary Material}
+\label{sec:appendix}
+
+%%%%%%%%%APPENDIX%%%%%%%%%
+\section{Appendix Section}
+APPENDIX TEXT
+%%%%%%%%%APPENDIX%%%%%%%%%
+
+\end{document}

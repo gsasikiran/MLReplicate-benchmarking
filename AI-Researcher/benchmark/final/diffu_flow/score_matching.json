@@ -1,0 +1,155 @@
+{
+  "target": "Score Matching With Missing Data",
+  "source_papers": [
+    {
+      "reference": "Estimation of non-normalized statistical models by score matching (Hyv\u00e4rinen, 2005)",
+      "rank": 1,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This foundational paper introduced the concept of score matching, a method crucial for learning the distribution of data without the need for normalization constants, which is essential for flexible modeling of high-dimensional distributions.",
+      "usage": "Provided the core methodological framework upon which the current research builds."
+    },
+    {
+      "reference": "Some extensions of score matching (Hyv\u00e4rinen, 2007)",
+      "rank": 2,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper discusses various adaptations to the original score matching technique, which have enhanced its performance and flexibility, particularly in more complex scenarios and new applications.",
+      "usage": "Influenced the adaptation of score matching techniques within the scope of missing data."
+    },
+    {
+      "reference": "Denoising score matching (Vincent, 2011)",
+      "rank": 3,
+      "type": [
+        "component"
+      ],
+      "justification": "Introduced the concept of denoising score matching, which is crucial for extending score matching methods to more complex modeling approaches, thus directly applicable in the context of this research.",
+      "usage": "The concepts behind denoising in the context of missing data helped shape methodologies used in the current work."
+    },
+    {
+      "reference": "Learning energy-based models in high-dimensional spaces with multi-scale denoising score matching (Li et al., 2019b)",
+      "rank": 4,
+      "type": [
+        "component"
+      ],
+      "justification": "This paper's focus on using denoising methods in high-dimensional energy-based settings directly relates to the higher dimensional settings explored in this research, providing empirical benchmarks.",
+      "usage": "Served as a reference for demonstrating strong performance across different dimensionalities."
+    },
+    {
+      "reference": "Variational (gradient) estimate of the score function in energy-based latent variable models (Bao et al., 2021)",
+      "rank": 5,
+      "type": [
+        "component"
+      ],
+      "justification": "Introduced variational approaches in the score matching context, essential for the research work that applies variational techniques to estimate score functions under missing data.",
+      "usage": "Provided insights and methods that were adapted and improved for handling missing data in this study."
+    },
+    {
+      "reference": "Generative Modeling by Estimating Gradients of the Data Distribution (Song & Ermon, 2019)",
+      "rank": 6,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "Shaped the approach of generative modeling in the context of score functions and diffusion processes, influencing the research direction towards graphical model estimation.",
+      "usage": "The conceptual framework informed the research direction and application of score matching techniques."
+    },
+    {
+      "reference": "Estimating density models with truncation boundaries using score matching (Liu et al., 2022)",
+      "rank": 7,
+      "type": [
+        "component"
+      ],
+      "justification": "Provided methods for working with truncated score matching scenarios, which directly complement this paper's exploration of missing data.",
+      "usage": "Served as a methodological basis for handling truncated data in this research."
+    },
+    {
+      "reference": "Imputation estimators for unnormalized models with missing data (Uehara et al., 2020)",
+      "rank": 8,
+      "type": [
+        "methodological"
+      ],
+      "justification": "This paper presents an initial adaptation of score matching to scenarios with missing data, laying groundwork that this research builds upon substantially.",
+      "usage": "Acted as a direct methodological precursor for adapting and implementing score matching in the context of missing data."
+    },
+    {
+      "reference": "Generative adversarial networks with missing data (Li et al., 2019a)",
+      "rank": 9,
+      "type": [
+        "component"
+      ],
+      "justification": "Addresses the challenges associated with generative modeling in the presence of missing data, contributing specific techniques vital for methodological development.",
+      "usage": "Provided a foundational perspective that influenced the evaluation of generative models under incomplete datasets."
+    },
+    {
+      "reference": "MCFlow: Monte Carlo Flow Models for Data Imputation (Richardson et al., 2020)",
+      "rank": 10,
+      "type": [
+        "component"
+      ],
+      "justification": "Introduced a model for data imputation that shares foundational ideas relevant to the circumstances of missing data in this research.",
+      "usage": "Contributed alternative perspectives on handling missing data, supporting comparative analysis."
+    },
+    {
+      "reference": "Estimating density models using graphical models with score matching (Yu et al., 2018)",
+      "rank": 11,
+      "type": [
+        "component"
+      ],
+      "justification": "Offers methodologies for applying score matching to graphical models, directly relevant to the applications of graphical estimation explored in this study.",
+      "usage": "Enriched the methodological context in which score matching techniques are validated in graphical models."
+    },
+    {
+      "reference": "Variational approximation in latent variable models (V\u00e9rtes & Sahani, 2016)",
+      "rank": 12,
+      "type": [
+        "conceptual"
+      ],
+      "justification": "Provided a conceptual framework for variational methods in latent variables, inspiring similar extensions in the score matching domain of this work.",
+      "usage": "Provided insights into complex modeling that influenced methodological adaptations for missing data."
+    },
+    {
+      "reference": "Maximum likelihood training of score-based diffusion models (Song et al., 2021a)",
+      "rank": 13,
+      "type": [
+        "component"
+      ],
+      "justification": "Explores maximum likelihood approaches in score-based models, presenting methods that complement the focus on efficient parameter estimation.",
+      "usage": "Served as a basis for understanding alternative estimation strategies within score-based frameworks."
+    },
+    {
+      "reference": "Conditional score-based diffusion models for probabilistic time series imputation (Tashiro et al., 2021)",
+      "rank": 14,
+      "type": [
+        "component"
+      ],
+      "justification": "Provided a framework that integrates score-based modeling with imputation methods, lending insights into sophisticated interactions between variables in missing data scenarios.",
+      "usage": "Informed methods applied to complex data structures observed in time series analyses."
+    },
+    {
+      "reference": "Graphical lasso and thresholding: Equivalence and closed-form solutions (Fattahi & Sojoudi, 2019)",
+      "rank": 15,
+      "type": [
+        "component"
+      ],
+      "justification": "Discusses robust modeling within graphical frameworks that enhances approaches to structural estimation in the presence of missing dimensions.",
+      "usage": "Informed comparative methods for regression contexts present in graphical model evaluations."
+    }
+  ],
+  "authors": [
+    "Josh Givens",
+    "Song Liu",
+    "Henry W J Reeve"
+  ],
+  "year": 2025,
+  "url": "http://arxiv.org/abs/2506.00557v1",
+  "abstract": "Score matching is a vital tool for learning the distribution of data with\napplications across many areas including diffusion processes, energy based\nmodelling, and graphical model estimation. Despite all these applications,\nlittle work explores its use when data is incomplete. We address this by\nadapting score matching (and its major extensions) to work with missing data in\na flexible setting where data can be partially missing over any subset of the\ncoordinates. We provide two separate score matching variations for general use,\nan importance weighting (IW) approach, and a variational approach. We provide\nfinite sample bounds for our IW approach in finite domain settings and show it\nto have especially strong performance in small sample lower dimensional cases.\nComplementing this, we show our variational approach to be strongest in more\ncomplex high-dimensional settings which we demonstrate on graphical model\nestimation tasks on both real and simulated data.",
+  "venue": "arXiv.org",
+  "venue_source": "Semantic Scholar",
+  "venue_lookup_time": "2025-10-12T18:02:41.163961",
+  "citations": 0,
+  "task1": "To implement the core methodology of this paper on score matching with missing data, follow these technical instructions:\n\n1. **Task**: The proposed model addresses the task of learning the score function (gradient of the log-density) of a probability distribution from incomplete or partially missing data samples.\n\n2. **Core Techniques**:\n   - **Score Matching**: A method for learning distributions without requiring normalization constants.\n   - **Importance Weighting (IW)**: An approach to adapt score matching to missing data by adjusting the objective to account for the samples that are observed.\n   - **Variational Approach**: A more sophisticated method that uses variational inference to estimate the score function by modeling the conditional distributions of the missing data.\n\n3. **Purpose of Technical Components**:\n   - **Score Matching Objective**: Allows for estimating the unnormalized density without needing a compact support assumption.\n   - **Importance Weighting**: Adjusts the likelihood contributions based on the completion of missing data, enhancing learning from incomplete datasets.\n   - **Variational Inference**: Provides flexibility in estimating high-dimensional conditional distributions, especially when data is missing across multiple features.\n\n4. **Implementation Details**:\n   - **For Score Matching**:\n     - Choose a parameterized score function \\(s_\\theta\\).\n     - Define the Fisher divergence objective that relates to the proposed model score and true data score.\n     - Key parameter: Ensure that the chosen model for \\(s_\\theta\\) can be differentiated, and the parameter space is compact.\n   - **For Importance Weighting**:\n     - Define a density function \\(p'\\) from which you can generate samples that complement the partially missing data.\n     - Input: Corrupted samples \\(\\tilde{X}\\) with certain coordinates omitted based on a masking variable \\(M\\).\n     - Output: Estimate the marginal score using samples drawn from \\(p'\\).\n     - Key constraint: Ensure that the number of importance samples \\(r\\) for each observed sample is adequately large to mitigate variance while being computationally feasible (e.g., \\(r \\approx 10\\)).\n   - **For Variational Approach**:\n     - Construct a variational model \\(p'_\\phi\\) that learns the conditional distribution given the observed data.\n     - Input: Original incomplete dataset, the parameterization of the score function, and the initial values for \\(\\theta\\) and \\(\\phi\\).\n     - Output: Continuously update the parameters based on gradients computed from the variational objective.\n     - Important: Run several gradient updates for \\(\\phi\\) (e.g., 10 updates) for each update to \\(\\theta\\).\n\n5. **Step-by-Step Interaction**:\n   - Start by gathering all incomplete samples and defining your score function with the required parameterization.\n   - Use the observed data to optimize the score matching objective through numerical methods, computing the gradients based on the Monte Carlo estimates of the Fisher divergence.\n   - Apply the importance weighting technique during optimization where for each sample with missing dimensions, complementary samples drawn from \\(p'\\) contribute to estimating the marginal score.\n   - Incorporate variational methods by concurrently estimating the necessary conditional distributions and updating both the score and variational parameters until convergence criteria are met (e.g., max iterations reached).\n\n6. **Critical Implementation Notes**:\n   - Ensure that your score function remains a valid score function throughout training (requires integrability).\n   - Monitor for convergence of your estimates, especially when using the variational method; ensure that calculations of moments or expectations leverage efficient sampling techniques to avoid computational overhead.\n   - Regularize your parameters to avoid overfitting to corrupted samples. This can include setting bounds on variances or incorporating prior knowledge if available.\n\nBy carefully following these steps, you will be able to reproduce the core methods proposed in this study without needing access to its full content.",
+  "task2": "1. The primary task or problem domain the research tackles:\nThe research focuses on the adaptation of score matching techniques to handle scenarios where the input data is incomplete or partially missing. This is a critical problem across various applications in machine learning, as real-world datasets often contain missing values that can hinder effective modeling and inference.\n\n2. Current limitations in existing approaches that motivated this work:\nExisting approaches primarily address missing data either through rigid frameworks that require specific modeling assumptions or through techniques that do not preserve the integrity of parameter estimation in score matching. For example, prior methods limited to specific architectures or models do not generalize well to broader contexts, especially when leveraging flexible parameterizations like energy-based models or graphical models.\n\n3. Core challenges the researchers aim to overcome:\nThe researchers seek to tackle several challenges, including how to accurately learn the score function of a distribution with incomplete data. They aim to develop methodologies that can operate flexibly across different missingness patterns without losing essential structural information present in multi-dimensional datasets. Additionally, they aspire to generate effective parameter estimates in scenarios where direct score matching is impractical due to missing data.\n\n4. Key objectives and intended contributions:\nThe key objectives are to introduce two novel approaches for adapting score matching to missing data, which include techniques for importance weighting and variational inference. The intended contributions are to provide a flexible framework capable of accommodating different types of missingness, offer performance guarantees in specific contexts, and demonstrate the applicability of these methods in various downstream tasks, such as graphical model estimation. Ultimately, the work aims to enhance data modeling capabilities in machine learning by providing robust mechanisms to infer relationships and dependencies even in the presence of incomplete data.",
+  "instance_id": "score_matching"
+}

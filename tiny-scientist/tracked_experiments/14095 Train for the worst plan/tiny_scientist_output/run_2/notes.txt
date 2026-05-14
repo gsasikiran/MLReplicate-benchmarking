@@ -1,0 +1,6 @@
+Run 1:
+Experiment Description: Training a simple CNN on MNIST dataset with 3 convolutional layers and using 5 epochs.
+Results: {'accuracy': 0.9630555555555556, 'inference_time': 7.351920127868652}
+Training dataset size: 5000
+Validation dataset size: 1000
+Test dataset size: 1000

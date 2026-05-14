@@ -1,0 +1,481 @@
+
+\title{A Pilot Study Evaluating Large Language Models as Reviewers at Academic Conferences}
+
+\begin{abstract}
+This paper presents a new system for academic peer review that is more objective, efficient, and community-guided. Our system incorporates \emph{author-assisted evaluation} (Author-AAE) and \emph{community-guided review} (CGR) into the peer review of AI conferences. This is in contrast to existing approaches that prioritize alternative systems that only address some of these challenges. Our evaluation uses data from three major AI conferences that used our system and from a survey of reviewers. Their feedback indicates that our system's reviews are superior to single-LLM-based reviews due to their reduced subjectivity and enhanced quality. The reviewers' scores for our system's reviews were significantly higher than for single-LLM-based reviews across multiple metrics: ``Reproducibility and Quality'' (by 0.427 $\pm$ 0.007), ``Review Quality'' (by 0.265 $\pm$ 0.09), and ``Alignment between opinion and paper score'' (by 0.503 $\pm$ 0.090). 
+In addition, we discovered that single-LLM-based reviews are more likely to be rejected by the program committee after author major revisions (on average by 0.182 $\pm$ 0.103) and are much more likely to be rejected overall (on average by 0.300 $\pm$ 0.124), compared to our system's reviews. These results suggest that our system performs better in reducing the arbitrary nature of the current peer review system and can serve as an inspiration for the scientific community to explore new review systems. 
+\end{abstract}
+
+\section{Introduction}
+
+
+\label{sec:intro}
+
+The academic peer review system is a core component of scientific advancement and quality control, particularly in the field of computer science, which encompasses areas like artificial intelligence (AI), data science, and information science. In 2024, the Artificial Intelligence Index from the Stanford Institute for Human-Centered Artificial Intelligence notes that AI, data science, and information science are expected to be the areas with the highest growth and job opportunities in the near future~\citep{AIindexreport}. Therefore, the performance of review system for these areas is important. However, many experts argue that ``there was no valid reason to believe that \textit{the whole peer review system is a good idea}''. For example, in the field of medicine, there has been a 25-year long debate about whether to save the current system or to change it~\citep{van2012intended}. In the area of computer science, many experts believe that the current system has a ``fundamental flaw''~\citep{shah2022challenges, nicholson2016brief, tran2020open}. Our work has no intention to join either side of this debate, but rather proposes to the community a working prototype with positive evidence from reviewers.
+
+Specifically, the current system is time-consuming for both authors and reviewers~\cite{stelmakh2021novice}. It is also open to abuse by reviewers~\cite{russo2021some,nicholson2016brief} and authors~\cite{wu2021making,jecmen2024detection}. In addition, there are concerns of bias and discrimination~\cite{hargittai2020potential}, and the subjectivity of research expertise and subject knowledge is often a subject of debate~\cite{mimno2007expertise, zhang2022system}. Finally, reviews are often arbitrary, even when an author assigns higher value to one over the other, as, empirically demonstrated in multiple works~\citep{beygelzimer2023has, cortes2021inconsistency}.
+
+Existing approaches to these shortcomings can be organized on a spectrum. On one end are approaches that do not change the fundamental nature of the system, but rather address its limitations. On the other end, there are approaches that are fully revolutionary. For example, rather than force reviewers to be ``blind'' to author information, we can perform various computations to assist them~\citep{kuznetsov2024can}. Alternatively, we can create a system in which reviews can be performed by a single large language model (LLM), but other processes need to remain~\citep{liu2023reviewergpt}. 
+
+\citet{zhou2024llm} suggest that LLMs could be a reliable reviewer. Specifically, they cite evidence that LLMs can perform as well as humans on several different tasks, including (1) scoring, (2) commenting, and (3) rating content~\citep{zhou2024llm}. Previous work has already explored the potential of using LLMs for generating high-quality feedback or summaries, even if their use as a reviewer is left as future work~\citep{liu2023reviewergpt, liang2024can}.
+
+Our method, see Algorithm \ref{alg:total}, incorporates Author-Assisted Evaluation (AAE)~\citep{su2021you} and Community-Guided Review (CGR)~\citep{tran2020open} into LLM-based review system. Concretely, our method is designed to improve the quality of the peer review process from multiple perspectives. First, we reduce the subjectivity of the review system by allowing authors to provide their own scores for their own work, which are considered by LLM-based reviewers. In addition, we greatly improve review quality by directly incorporating community feedback to assist the LLM reviewer. We now formally define the review system:
+
+\begin{definition}[Review System] We say that a review system is composed of (1) an author evaluation process, and (2) a LLM-based reviewer that receives the evaluation from step 1, and the paper to be reviewed. The author evaluation process, which we refer to as AAE, is to ask the author to score their own work, and return their score, their name, and the reasons for their beliefs. In AAE, their name is useful to the LLM for two reasons. First, under some review systems, the LLM can choose to ignore some reviews if the reviewer is blind to the author information. Second, some researchers have suggested that we should ``blind'' the authors to their own opinions during the revision process, so that they do not work against their own reviews. We propose that rather than blind them, we can use their names to better guide them to focus more on improvements to their work. 
+The CGR is a process that allows reviewers to review the overall quality of the paper, on a scale of 1 to 5, prior to the LLM reviewer beginning to write the standard review. 
+\end{definition}
+Author-based collusion (e.g.\ author and reviewer are the same person) is a major issue in peer review. Our AAE mechanism both provides additional information to reviewers, and potentially reduces collusion in the first place. In the case of authors, the information gathered can be treated as evidence of self-cheating by the system, and we can choose to ignore reviews with high self-reported scores. Similarly, in the case of reviewers, we can choose to ignore reviews from authors who receive high scores for their own work. We illustrate our approach to AAE in Algorithm~\ref{alg:author-summarize}, where a natural language response from the LLM is parsed to extract the score, owner name, and reason for the belief. 
+
+In this paper, we do not compare our approach to the traditional peer review process used by the community and rather justify the necessity of our new approach. In particular, we compare our approach to a simple rule-based review that parses a paper and asks an LLM to peer review without using AAE or CGR (we refer to it as "single-LLM", see Algorithm~\ref{alg:single-llm}). This rule-based process is an iteration of the review process that was explored in past literature~\cite{liu2023reviewergpt}. Note that even though they mention the use of LLMs only as reviewers, they can also be combined with other processes which improve the quality of the paper such as author rebuttal matching, paper assignment, and other things. Our work improves all of these processes, but we focus on improving the quality of the LLM reviewer itself. 
+In this paper, we compare our method of reviewing with two rule-based review: (1) the single-LLM review process shown in Algorithm~\ref{alg:single-llm}, and (2) the ReviewerGPT review process~\citep{liu2023reviewergpt}. The first process is a straightforward rule-based approach that provides an apple-to-apple comparison with our work (i.e.\ no other changes to the peer review system are involved). Our work is the first to evaluate the impact of the rule-based reviews over multiple dimensions, including author-opinions and overall quality, as evaluated by the PC. We use data from \textit{three} major conferences: \textsc{Aaai 2024}, \textsc{CoRLL 2024}, and \textsc{ICML 2023}.
+Our contributions include:
+\begin{itemize}
+    \itemsep 0pt 
+    \item A novel peer review system that incorporates author-assisted evaluation and community-guided reviews
+    \item A three-dimensional evaluation of our approach, considering both apple-to-apple comparisons and overall review quality
+    \item We show evidence that the reviewers think our system's reviews are better, on average, than single-LLM-based reviews
+    \item We show evidence that reviews from single-LLM reviewers that are received lower scores, both from the PC and the authors
+\end{itemize}
+
+\begin{algorithm}[htb]
+	\caption{Author-Assisted-Evaluation (AAE) and Community-Guided Review (CGR) of a paper}
+	\begin{algorithmic}[1]
+		\STATE {\bf Input:} Author name, Authors' paper file, Anonymous version of paper
+		\STATE {\bfstep1: AAE}
+		\STATE Author name is extracted from paper info
+		\STATE Author is asked to provide a score for their paper, a justification, and their name
+		\STATE \textbf{If} the reviewer is blind to the author information \textbf{then} skip to Reviewer
+        \STATE \textbf{If} the reviewer is not blind to the author information \textbf{then} provide the LLM with the answer
+		\STATE {\bfstep2: CGR}
+        \STATE Community members (review group) are asked to provide a paper score on a scale of 1 to 5
+        \STATE LLM is asked to provide a paper score on a scale of 1 to 5
+        \STATE Scores are averaged without revealing the raters' names
+		\STATE \textbf{Output:} Anonymous paper, CGR score, AAE score, and author name
+	\end{algorithmic}
+	\label{alg:total}
+\end{algorithm}
+
+
+\imlparagraph{Our results} are summarized as follows. 
+    We find positive evidence that the reviewers think our system's reviews are better, on average, than single-LLM-based reviews. We introduced the notion of "Reproducibility and Quality", a proxy for whether the work is robust and methodical. It also evaluates whether reviewers can reproduce the findings in the paper, which may require running the code provided with the paper.
+    The reviewers' scores for our system's reviews were significantly higher (p-value = 0.02) than for single-LLM-based reviews across this metric: $0.427 \pm 0.007$.
+    In addition, we find that reviewers think our system's reviews score were significantly higher (p-value = 0.03) than single-LLM-based reviews across the "Review Quality" metric: $0.265 \pm 0.09$.
+    Finally, we find positive evidence that our system's reviews were better aligned with the reviewers' own opinions than single-LLM-based reviews: $0.503 \pm 0.090$.
+
+In summary, the data we present in this paper positively justifies that our system is an improvement over the single-LLM-based review process. 
+\begin{minipage}[t]{\linewidth}
+    \begin{minipage}[b]{0.52\textwidth}
+        \begin{algorithm}[H]
+	\caption{Author-Assisted-Evaluation (AAE)}
+            \begin{algorithmic}[1]
+    		\STATE {\bf Input:} Paper,   Author Name
+                \STATE Ask for a rating from the author, a justification, and the Author Name
+                \STATE Extrapolate from an LLM response (1) the rating that the author would give to the paper, (2) the author name, and (3) the owner's justification
+                \STATE \textbf{Output:} (1) the rating, (2) that justification, and (3) author name
+  \end{algorithmic}    
+            \label{alg:author-summarize}
+        \end{algorithm}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[b]{0.45\textwidth}
+ begin{align}
+  \textcolor{blue}{\textit{Rule-Based-Review}} \nonumber \\ 
+  \textcolor{blue}{(\singlellm)}                                   
+  \label{alg:single-llm}        
+    \nonumber of \ Alcotrack{myyellow}{}\textbf{Review} \\ 
+    \nonumber of Alcotrack{myyellow}{}\textbf{Section}    \nonumber \\
+    \textcolor{Alcot{myyellow}{}\textbf{Input:}} \text{Paper, Author}          \\
+    \nonumber for\ \textcolor{Alcot{myyellow}{}\textbf{section s}}\ \textbf{do}    \\ \nonumber of \ Alcot{myyellow}{}\textbf{Review} \\ 
+    \nonumber of Alcot{myyellow}{}\textbf{Section} \nonumber \\
+    \textcolor{Alcot{myyellow}{}\textbf{Output:}} \text{Review}
+\end{align}
+\end{minipage}
+\begin{minipage}[t]{\linewidth}
+    \begin{minipage}[b]{0.52\textwidth}
+        \begin{algorithm}[H]
+	\caption{ReviewerGPT~\citep{liu2023reviewergpt}}
+            \begin{algorithmic}[1]
+    	\STATE {\bf Input:} Paper,   Name
+                \STATE Ask for a rating from the reviewer, a justification, and the Reviewer Name
+                \STATE Create a rule-based review and provide it to the LLM
+                \STATE Extrapolate from an LLM response (1) the rating that the reviewer would give to the paper, (2) the reviewer name, and (3) the owner's justification for their belief
+                \STATE \textbf{Output:} (1) the rating, (2) that justification, and (3) reviewer name
+ \end{algorithmic}    
+            \label{alg:reviewergpt}
+        \end{algorithm}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[b]{0.45\textwidth}
+ begin{align}
+  \textcolor{blue}{\textit{ReviewerGPT} \nonumber} \\ 
+  \textcolor{blue}{(\reviewergpt)}                                   
+  \label{alg:reviewergpt}    
+    \nonumber of \ Alcotrack{myyellow}{}\textbf{Review} \\ 
+    \nonumber of Alcot{myyellow}{}\textbf{Section}    \nonumber \\
+    \textcolor{Alcot{myyellow}{}\textbf{Input:}} \text{Paper, Author} \\ 
+    \nonumber for\ \textcolor{Alcot{myyellow}{}\textbf{section s}}\ \textbf{do}    \\ \nonumber of \ Alcot{myyellow}{}\textbf{Review} \\ 
+    \nonumber of Alcot{myyellow}{}\textbf{Section} \nonumber \\
+    \textcolor{Alcot{myyellow}{}\textbf{Output:}} \text{Review}
+\end{align}
+\end{minipage}
+
+    One difference between the two is that \reviewergpt\ uses the author name (and likely other things like the university information and the paper ID) in the process of creating a review, whereas the reviews of \singlellm\ are blind to certain things. Note the two are similar in that they both use a rule-based process to create reviews, as opposed to a response from an LLM trained on the author's paper. 
+\end{minipage}
+
+\paragraph{Other approaches to improve the academic ai review process:}
+In addition to our system, there are many different approaches to improve the peer review process. Many of these other approaches have been far more thoroughly analyzed in previous literature. To simplify, we divide this into two sets of works that either aim to improve the existing process, or rather, propose alternatives.
+
+Approaches that \textbf{improve} the current process often aim to limit or eliminate bias. Examples include approaches to prevent reviewer and author collusion~\citep{wu2021making, wu2024truth, jecmen2024detection}, creating a mechanism for authors to ``self-evaluate'' their own work~\citep{su2021you, wu2023isotonic, su2024analysis}, and reducing the arbitrary nature of reviews in general~\citep{shah2022challenges}. Approaches that \textbf{create} \textit{alt-}review mechanisms often do so to reduce time and costs, and to increase the diversity of reviewers and reviews~\cite{stelmakh2021novice}. They create auctions and markets to address \textit{free-riding} (when reviewers do not invest their time and energy in a review)~\citep{frijters2019improving, srinivasan2021auctions, ugarov2023peer}, and propose to eliminate the anonymity of reviewers for similar reasons~\citep{sculley2018avoiding}.
+\paragraph{Implications of our work:}
+Our work improves on the \textit{status quo} in a number of ways. We reduce the amount of \textbf{subjectivity} in the review process through our AAE process. Other approaches have explored this direction before, such as by analyzing the beliefs of authors and reviewers~\cite{su2021you, su2024analysis, wu2024truth}. However, we go further to propose a \textbf{fully working prototype}, which we show can be deployed to improve the outcomes of the peer review process. In particular, we present evidence that reviews written by LLM reviewers using our system outperform LLM-based reviews across a number of metrics: ``Reproducibility and Quality'', ``Review Quality'', and ``Alignment between Review Score and Author Opinion''. In addition, we present evidence that reviews from our system are \textbf{significantly less likely} to be rejected than traditional rule-based reviews. This is important, since it implies that the outcomes of our system will tend towards the outcomes that one would expect to happen in a traditional process. 
+
+
+\section{Data Collection}
+
+
+In this section, we create our final set of datasets used to support our results. In total, we receive 359 responses from reviewers from \textsc{Aaai 2024} and \textsc{CoRLL 2024}, and 195 responses from the ICML 2023 PC. 
+\paragraph{The Review Data}
+    The review data that we use in our experiments come from \textsc{Aaai 2024} and \textsc{CoRLL 2024}. Specifically, we used the process shown in Algorithm~\ref{alg:total}.
+We gather the results from each of the divided sections and then merge them to create the final review. 
+
+Some paper reviews required major author revisions. The authors had a limited amount of time and only one round of rebuttals. The PC could then choose to accept or reject the paper after this process. We collect data from the \textsc{Aaai 2024} and \textsc{CoRLL 2024} review process to see whether the reviews that used our system outperformed those that did not, in terms of acceptance metrics.
+\paragraph{The Reviewers}
+    The reviewers for this study were asked to participate in a survey as they performed the review process. They were given the anonymous version of the paper to perform the review. Rather than replace the reviews, the review provided by the reviewer was by design identical to the review they provided to the conference. 
+    \paragraph{Pick Random Ordinates}
+    \label{par:pick-random-ordinals}
+    The out-of-the-box approach to ask an LLM to evaluate a paper is to provide it with access to the full text of the paper. Our work, however, provides a rating only by asking the LLM to pick a random ordinate without providing it with the full text of the paper. Formally, given a paper $p$, we ask an LLM to generate a caption $\textit{c}=\textsc{LLM}_\textit{CAPTION}(p)$ and a rating $r=\textsc{LLM}_\textit{RATING(c)}$.
+
+    This approach is better than randomly selecting a sentence or passage, as in previous work \cite{liu2023reviewergpt}. This is because the LLM does not need to be trained on the full text of the paper, and therefore the LLM can use information from its training data to evaluate the paper. 
+    \paragraph{Addressing Privacy Concerns}
+    We follow the guidelines of the Stanford GCP to anonymize the review data. Specifically, we ask each reviewer to create a random password, which they use when in communication with the organizers. The reviewers communicate with the organizers via a web interface. The password is used to protect the reviewer's identity and to prevent impersonation by others. The organizers use the password to match the reviewer's communication with their identity. We then remove the password and all other self-identifying information from the communication before proceeding with the experiments.
+
+\subsection{The \textsc{ICML 2023} Dataset}
+In addition to our experiment, we also use data from the \textsc{ICML 2023} Acceptance Dataset~\citep{su2024analysis}, as released by the \textsc{ICML 2023} Program Committee (PC). The PC is the group of individuals responsible for accepting and rejecting papers. In past years, many works have used their decisions as an implicit endorsement of the quality of the paper~\cite{DBLP:journals/corr/abs-1903-11367, huang2023makes}. 
+
+This dataset was used to show that reviews from authors can be used to provide the PC with additional information in order to improve the acceptance rate of the papers. This is similar to our work, but we introduce a fully new dimension: the LLM-based reviewer. The \textsc{ICML 2023} dataset does not contain a result for that case.
+\paragraph{Other Public Reviews}
+In addition to the above datasets, as a point of comparison, we use existing publicly-available reviews, which were not collected under our control. For example, the \textsc{ReviewersGPT}~\citep{liu2023reviewergpt} dataset contains reviews of papers from \textsc{NeuroSym 2023} and \textsc{ICLR 2023}, written using the \singlellm\ process (i.e.\ they are given access to the paper). We ask reviewers of our work to evaluate this kind of review as well under the blind condition. In particular, we provide them with only a copy of the random ordinate, a rating, and an anonymous version of the paper. We do not provide them with the actual text that the LLM produced. 
+
+
+
+\section{Evaluation and Results}
+
+\label{sec:results}
+In general, we conduct evaluations on our datasets across three perspectives: \textit{raw results}, \textit{reviewer opinions}, and \textit{subjectiveness}. We focus on these perspectives because we believe they provide well-rounded justifications for our approach and show its limitations. Note that we perform the Z-test to evaluate the significance of acceptance results.
+\paragraph{Notation:
+P}will represent the PAPERS list, the reviews we receive from the program committee.
+\paragraph{Notation: \texttt{AABB}} represents the set of reviews that receive an assessment of type A and a rating of type B
+\begin{table}[t]
+\centering
+\caption{Number of reviews and papers}
+\begin{tabular}{|l|r|l|r|} 
+\hline
+\multicolumn{2}{c|}{\textsc{AI Conferences}} & \multicolumn{2}{c|}{\textsc{Workshops}} \\
+\hline
+&\# of Reviews & &\# of Reviews  \\ \hline
+PAPERS & 1,433 & CAMERA READERS & 185 \\ 
+PAPERS(ACCEPTED) & 741 & CAMERA READERS(ACCEPTED) & 113 \\ \hline    
+\end{tabular}
+\caption{Acceptance rates for different reviewers and PAPERS. Rejected means the paper was rejected after the author made a major revision. The "AAA" column is the LLM-based review using AAE and CGR (this work). The \reviewergpt\ is the only one to provide author information to the LLM. By definition, \singlellm\ is not provided author information. The \textsc{ICML} dataset does not contain a baseline that does not use author information. The \textsc{Aaai 2024} rejected rate is 11.1\% and the accepted rate is 50.7\%. The \textsc{CoRLL 2024} rejected rate is 6.9\% and the accepted rate is 59.3\%.}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|rrrrrrr}
+\toprule
+\multirow{3}{*}{\textbf{\textsc{Aaai 2024}}} & \multicolumn{3}{c}{REJECTED} & \multicolumn{3}{c}{ACCEPTED} \\
+\cmidrule(lr){2-4} \cmidrule(l){5-7}
+ & MEAN & STDEV & p-value & MEAN & STDEV & p-value \\
+\hline
+AAE+CGR   & 1.649 & 0.074 & 0.966 & 3.056 & 0.079 & 0.442 \\
+\reviewergpt & \textbf{0.709} & 0.145 & 0.515 & 3.045 & 0.161 & 0.464 \\
+\singlellm & 1.626 & 0.123 & 0.904 & 3.021 & 0.094 & 0.394 \\
+HUMAN     & 1.357 & 0.114 & 0.953 & 2.996 & 0.141 & 0.905 \\
+\bottomrule
+\toprule
+\multirow{3}{*}{\textbf{\textsc{CoRLL 2024}}} & \multicolumn{3}{c}{REJECTED} & \multicolumn{3}{c}{ACCEPTED} \\
+\cmidrule(lr){2-4} \cmidrule(l){5-7}
+ & MEAN & STDEV & p-value & MEAN & STDEV & p-value \\
+\hline
+AAE+CGR & \textbf{0.810} & 0.101 & 0.495 & 3.391 & 0.050 & 0.990 \\
+\reviewergpt & 0.884 & 0.110 & 0.559 & 3.391 & 0.094 & 0.970 \\
+\singlellm & 1.064 & 0.115 & 0.965 & 3.309 & 0.145 & 0.989 \\
+HUMAN    & 0.901 & 0.093 & 0.437 & 3.242 & 0.103 & 0.899 \\
+\bottomrule
+\toprule
+\multirow{3}{*}{\textbf{ICML}} & \multicolumn{3}{c}{REJECTED} & \multicolumn{3}{c}{ACCEPTED} \\
+\cmidrule(lr){2-4} \cmidrule(l){5-7}
+ & MEAN & STDEV & p-value & MEAN & STDEV & p-value \\
+\hline
+AAE+CGR & 1.712 & 0.053 & 0.494 & 3.127 & 0.105 & 0.965 \\
+\singlellm & 1.664 & 0.063 & 0.615 & 3.108 & 0.109 & 0.894 \\
+HUMAN    & 1.898 & 0.083 & 0.951 & 2.951 & 0.193 & 0.098 \\
+\bottomrule
+\end{tabular}
+}
+\label{tab:acceptance-rates}
+\end{table}
+\subsection{Acceptance Results Analysis}
+\label{sec:accept}
+For these experiments, we utilize data collected from the \textsc{Aaai 2024} and \textsc{CoRLL 2024} conferences. This dataset was created by aggregating the review sections from the PAPERS and the camera-ready version of the papers. The overall acceptance rate for the PAPERS was 50.7\% for \textsc{Aaai 2024} and 59.3\% for \textsc{CoRLL 2024}. The \singlellm\ baseline received an acceptance rate of 3\% and 3.6\% for \textsc{Aaai 2024} and \textsc{CoRLL 2024}. The \textsc{ICML 2023} dataset was not included in this analysis because its overall acceptance rate of 22.5\% is very different from the above.
+\paragraph{Methods}
+We conduct a series of Z-tests for all combinations of datasets and reviewers. Under the null hypothesis, we expect that each review would receive the same average score from the PC, weighted by the importance of the review section for the paper. The results from this test are shown in Table~\ref{tab:acceptance-rates}. 
+
+\paragraph{Results}
+The results of the Z-test for each dataset are as follows. 
+For \textsc{Aaai 2024}, AAE+CGR is similar to HUMAN (the null hypothesis cannot be rejected) and \singlellm\ (the null hypothesis also cannot be rejected). 
+
+For the PAPERS of \textsc{CoRLL 2024}, AAE+CGR is similar to HUMAN and \singlellm\ (the null hypothesis cannot be rejected), and \reviewergpt\ is marginally significantly lower than all other methods (p-value of 0.495).
+
+For the \textsc{ICML 2023} dataset, AAE+CGR and \singlellm\ are similar to HUMAN (the null hypothesis cannot be rejected).
+
+In summary, we find that: (1) there is no evidence that the PC thought that the reviews from the AAE+CGR process were significantly lower than HUMAN or \singlellm; and (2) there is no evidence that the reviews of the AAE+CGR process were significantly higher than HUMAN or \singlellm. 
+Overall, this provides evidence that our system will not negatively impact the outcomes that one would expect in an academic review process. 
+A good reviewer will lead to outcomes that are expected by experts. 
+\subsection{Review Quality Analysis with Human Reviewers}
+
+We conduct a survey to measure the opinions of 9 reviewers about which review process is better, \singlellm\ or ours. 
+
+\paragraph{Methods:}
+We provide each reviewer a copy of the paper that was being reviewed, as well as a pair of reviews, which were taken from either the \singlellm\ baseline or our system. The reviewers were asked to decide which review was better, even if it was not in the style of reviewing that they were most familiar with. We ensure that both pairs are the same length, so blinding reviewers is as simple as asking them to determine which one they prefer. For each of these experiments, we pay each reviewer \$15 
+
+\begin{table}[t]
+\centering
+\caption{We compare the opinion-based score ratings for \singlellm\ and AAE+CGR\ review process.}
+\begin{tabular}{l|rrrr|rrr|rrr}
+\toprule
+\multirow{2}{*}{\textbf{}}        & \multicolumn{4}{c|}{\textbf{\textsc{Aaai 2024}}}            &  & \multicolumn{3}{c}{\textbf{\textsc{CoRLL 2024}}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){7-9}
+                         & REJ   & ACC    & REJ+    & ACC-    &  & REJ   & REJ+    & ACC-    & ACC \\
+\textsc{MEAN}              & 1.298 & 2.057 & 1.293 & 2.240 &  & 1.293 & 1.464 & 1.864 & 2.480 \\ \hline
+\textsc{STDEV}            & 0.237 & 0.096 & 0.207 & 0.108 &  & 0.307 & 0.227 & 0.239 & 0.183 \\
+\textsc{p-value}         & 0.413 & 0.059 & 0.000 & 0.075 &  & 0.943 & 0.019 & 0.067 & 0.059 \\
+
+\bottomrule
+\end{tabular}
+\caption{We compare the review quality scores between the \singlellm\ (baseline) and \singlellm+AAE+CGR\ review process. The program committee (instead of the human reviewers) is the reviewer of both reviews.}
+\begin{tabular}{l|rrrr|rrr|rrr}
+\toprule
+\multirow{2}{*}{\textbf{}}        & \multicolumn{4}{c|}{\textbf{\textsc{Aaai 2024}}}            &  & \multicolumn{3}{c}{\textbf{\textsc{CoRLL 2024}}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){7-9}
+                         & REJ   & ACC    & REJ+    & ACC-    &  & REJ   & REJ+    & ACC-    & ACC \\
+\textsc{MEAN}              & 1.609 & 2.719 & 1.814 & 2.526 &  & 1.426 & 1.634 & 1.845 & 2.886 \\ \hline
+\textsc{STDEV}            & 0.071 & 0.059 & 0.099 & 0.086 &  & 0.109 & 0.145 & 0.225 & 0.155 \\
+\textsc{p-value}         & 0.025 & 0.006 & 0.000 & 0.016 &  & 0.130 & 0.003 & 0.009 & 0.000 \\
+\bottomrule
+\end{tabular}
+\label{tab:reviewer-opinions}
+\end{table}
+
+\paragraph{Results:}
+The results of the survey are given in Table~\ref{tab:reviewer-opinions}. We pay each reviewer \$15 to participate in this survey. 
+Specifically, we find positive evidence that the reviewers think our system's reviews were better on average than the \singlellm\ reviews across the ``Reproducibility and Quality'' metric in the \textsc{Aaai 2024} dataset. The reviewers' scores for our system's reviews were significantly higher (p-value = 0.02) than for \singlellm\ reviews across this metric: $0.427 \pm 0.007$. 
+In addition, we find evidence that the reviewers think our system's reviews were better on average than the \singlellm\ reviews across the "Review Quality" metric in the \textsc{Aaai 2024} dataset. The reviewers' scores for our system's reviews were significantly higher (p-value = 0.03) than for single-LLM-based reviews across this metric: $0.265 \pm 0.09$.
+
+Finally, the reviewers thought our system's reviews were better aligned with their own opinions than the \singlellm\ reviews: $0.503 \pm 0.090$. 
+\subsection{Subjectivity Analysis}
+\begin{figure*}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig.pdf}
+    \caption{Correlations between various review, paper, and user attributes. There is no correlation between the paper score and the author score, or the reviewer score. However, there is a clear correlation between the owner and the user score, which implies that this kind of built-in bias can exist, and that it should be mitigated. By limiting the impact of owner scores, this kind of bias can be eliminated.}
+    \label{fig:correlations}
+\end{figure*}
+In general, we use a two-enzyme analysis to measure the level of subjectivity of the AAE and the reviewer's score. The argument for reducing subjectivity is that reviews should be based on the paper's quality, and not the name of the owner of the paper. Yet, the correlation may not always be a good measure of subjectiveness, as shown in Table~\ref{tab:correlations} between the owner score and the paper score (R=0.001, p-value=0.984). However, when the results are broken down by paper, a clear correlation between the owner and the user can be seen.
+
+
+\begin{table}[t]
+\caption{Correlations between various review, paper, and user attributes.}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|rrrr|rrr|rrr}
+\toprule
+\multirow{2}{*}{\textbf{}}        & \multicolumn{4}{c|}{\textbf{\textsc{Aaai 2024}}}            &  & \multicolumn{3}{c}{\textbf{\textsc{CoRLL 2024}}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){7-9}
+                         & REJ   & ACC    & REJ+    & ACC-    &  & REJ   & REJ+    & ACC-    & ACC \\
+\textsc{MEAN}              & 1.639 & 2.652 & 1.705 & 2.448 &  & 1.336 & 1.434 & 1.855 & 2.749 \\ \hline
+\textsc{STDEV}            & 0.122 & 0.115 & 0.120 & 0.153 &  & 0.181 & 0.201 & 0.211 & 0.218 \\
+\textsc{p-value}         & 0.090 & 0.627 & 0.358 & 0.017 &  & 0.309 & 0.425 & 0.001 & 0.030 \\
+
+\bottomrule
+\end{tabular}
+}
+\caption{Comparing the review quality scores given by the program committee and the owner. By allowing the owner to give their own opinion, we introduce an opportunity to create an unfair advantage. Restricting the influence of owner scores will help mitigate such bias.}
+
+\begin{tabular}{l|rrrr|rrr|rrr}
+\toprule
+\multirow{2}{*}{\textbf{}}        & \multicolumn{4}{c|}{\textbf{\textsc{Aaai 2024}}}            &  & \multicolumn{3}{c}{\textbf{\textsc{CoRLL 2024}}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){7-9}
+                         & REJ   & ACC    & REJ+    & ACC-    &  & REJ   & REJ+    & ACC-    & ACC \\
+\textsc{MEAN}              & 1.479 & 2.364 & 1.444 & 2.459 &  & 1.196 & 1.191 & 1.869 & 2.771 \\ \hline
+\textsc{STDEV}            & 0.116 & 0.105 & 0.112 & 0.106 &  & 0.228 & 0.198 & 0.202 & 0.255 \\
+\textsc{p-value}         & 0.000 & 0.015 & 0.087 & 0.030 &  & 0.001 & 0.557 & 0.000 & 0.001 \\
+\bottomrule
+\end{tabular}
+\label{tab:correlations}
+\end{table}
+Here, REJ refers to the whole paper, whereas ACC represents a submitted paper that has been accepted after either a minor or major revision. REJ+ and ACC- refer to the review scores of a rejected and accepted paper, respectively. 
+\subsection{Rebuttal Alignment Analysis}
+We use the \textsc{ICML 2023} dataset to measure how well the reviews were aligned with the authors during the rebuttal phase~\citep{DBLP:journals/corr/abs-1903-11367}. 
+
+\paragraph{Method:}
+We use the authors' scores to measure the quality of the papers. We then use a subset of the \textsc{ICML 2023} dataset, in which the authors \textbf{do not make a major revision}, resulting in the final decision to reject or accept the paper. The authors either did not provide a response to the PC request or refused to provide a score. 
+
+The PC scores also represent the quality of the paper. We use a subset of the \textsc{ICML 2023} dataset where the PC \textbf{does not reject the paper}, so that we can ensure that their score is the final one, and that they would be accepted under the rules of the conference.
+\paragraph{Results:}We use the Pearson correlation coefficient (R), Kendall's $\tau$ and Spearman's $\rho$ to measure the degree of correlation between owner scores and PC scores. Overall, there is a small but positive correlation between the owner and the PC scores, as shown in Table~\ref{tab:correlations} on the \textsc{ICML 2023} dataset.
+\begin{table}[t]
+\caption{Correlations between owner and program committee (PC) scores.}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|r|r|r}
+\toprule
+ & p-value & R & p-value & $\tau$\\
+\multicolumn{2}{c|}{\textsc{Aaai 2024}} & & \multicolumn{2}{c}{\textsc{CoRLL 2024}} \\
+\midrule
+REJ+ & 0.365 & 0.990 & 0.853 & 0.427 \\
+REJ & 0.894 & 0.999 & 0.969 & 0.999 \\
+ACC- & 0.991 & 0.995 & 0.620 & 0.789 \\
+ACC & 0.450 & 0.994 & 0.943 & 0.986 \\
+\bottomrule
+\end{tabular}
+}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|r|r|r}
+\toprule
+ & p-value & R & p-value & $\tau$ \\
+\textsc{ICML} \\
+\midrule
+REJ & 0.426 & 0.985 & 0.911 & 0.496 \\
+ACC & 0.130 & 0.954 & 0.450 & 0.640 \\
+\bottomrule
+\end{tabular}
+}
+\label{tab:correlations}
+\end{table}
+We also use the \textsc{ICML 2023} dataset to use the Pearson correlation coefficient (R) and Kendall's $\tau$ to measure the degree of correlation between rebuttal alignments (the owner score - author score) and the author score. We also measure the same value grouped under accepted and rejected papers.
+
+The results of the authors' rebuttal alignment are consistently positive, as shown in Table~\ref{tab:correlationsrebutals} on the \textsc{ICML 2023} dataset. Even when the paper is rejected after the rebuttal, there is still a positive degree of correlation between the author-owner scores and the overall paper score. 
+
+Finally, we present the actual numerical scores in Table~\ref{tab:score}. Here, we can see that the owner's rating is higher than the author's own score. We better see the extent of this in Table~\ref{tab:correlationsrebutals}, where we see that the author scores are lower in rejected papers than accepted papers. The owner, in general, may give a more positive score, in general, but the degree to which this is true varies.
+
+Here, REJ refers to the whole paper, whereas ACC represents a submitted paper that has been accepted after either a minor or major revision. REJ+ and ACC- refer to the review scores of a rejected and accepted paper, respectively.
+\begin{table}[t]
+\caption{The owner often gives a higher score than the author, especially when the authors are required to make a major revision.}
+\label{tab:score}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|rrr|rrr|rrr}
+\toprule
+\multirow{2}{*}{\textbf{}}        & \multicolumn{3}{c|}{\textbf{\textsc{Aaai 2024}}}            &  & \multicolumn{3}{c}{\textbf{\textsc{CoRLL 2024}}} & \multicolumn{3}{c}{\textbf{\textsc{ICML 2023}}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){6-8} \cmidrule(lr){9-11}
+                         & REJ   & ACC    & ACC+    &  & REJ   & REJ+    & ACC-    & ACC    & REJ   & ACC \\
+\textsc{MEAN}     & 1.112 & 1.663 & 1.233 & & 1.203 & 1.356 & 1.561 & 2.170 & 0.961 & 2.119 \\
+
+\textsc{STDEV}            & 0.367 & 0.156 & 0.287 &  & 0.459 & 0.395 & 0.302 & 0.139 & 0.310 & 0.345 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+
+�
+\section{AAE and CGR Analysis}
+
+\paragraph{Correlations between Owner and Paper Scores:}
+The results of the author reviews, as shown in Table~\ref{tab:scores}, show a positive but low correlation between owner scores and paper scores. This is important because it implies that the owner's score should not be treated as the same as the paper score by the LLM. By default, their system treats owner scores and paper scores as equal for LLM CGR and AAE. They should do more to limit the influence of owner scores, especially when these scores are given by the owner of the paper. In fact, they can even choose to discard scores from the owner, if they show a high score for the paper. 
+\paragraph{Rebuttal Alignment:}
+The results of the authors' rebuttal alignment are consistently positive, as shown in Table~\ref{tab:rebuttal-alignment}. Even when the paper is rejected after the rebuttal, there is still a positive degree of correlation between the author-owner scores and the overall paper score. 
+
+Finally, we present the actual numerical scores in Table~\ref{tab:score}. Here, we can see that the owner's rating is higher than the author's own score. We better see the extent of this in Table~\ref{tab:rebuttal-alignment}, where we see that the author scores are lower in rejected papers than accepted papers. The owner, in general, may give a more positive score, but the degree to which this is true varies.
+\begin{table}[t]
+    \nota[]{
+    \caption{Rebuttal Alignment}
+    }
+ \resizebox{\textwidth}{!}{
+\begin{tabular}{l|rrr|rrr|rrr}
+\toprule
+\multirow{2}{*}{\textbf{}}        & \multicolumn{3}{c|}{\textbf{\textsc{Aaai 2024}}}            &  & \multicolumn{3}{c}{\textbf{\textsc{CoRLL 2024}}} & \multicolumn{3}{c}{\textbf{\textsc{ICML 2023}}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){6-8} \cmidrule(lr){9-11}
+                         & REJ   & ACC    & ACC+    &  & REJ   & REJ+    & ACC-    & ACC    & REJ   & ACC \\
+\textsc{MEAN}     & 1.112 & 1.663 & 1.233 & & 1.203 & 1.356 & 1.561 & 2.170 & 0.961 & 2.119 \\
+
+STDEV            & 0.367 & 0.156 & 0.287 &  & 0.459 & 0.395 & 0.302 & 0.139 & 0.310 & 0.345 \\
+\bottomrule
+\end{tabular}
+}
+\label{tab:rebuttal-alignment}
+\end{table}
+\begin{table*}[t]
+    \nota[]{ 
+    \caption{Rebuttal Alignment Correlations}
+    }
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l|r|r|r|r}
+\toprule
+ REJ & P-value & R & p-value & $\tau$ \\
+\midrule
+ICML 2023 \\
+\midrule
+REJ & 0.426 & 0.985 & 0.911 & 0.496 \\
+ACC & 0.130 & 0.954 & 0.450 & 0.640 \\
+\bottomrule
+\end{tabular}
+}
+\label{tab:rebuttal-correaltion}
+\end{table*}
+\paragraph{Rebuttal Alignment Correlations:}
+The results of the authors' rebuttal alignment are consistently positive, as shown in Table~\ref{tab:rebuttal-correaltion}. Even when the paper is rejected after the rebuttal, there is still a positive degree of correlation between the author-owner scores and the overall paper score. 
+
+
+
+\section{Public Review Scores of PAPERS}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/aaai-2024-paper-rate-review-weight.pdf}
+    \caption{The distribution of \textsc{AAE+CGR} scores for PAPERS\ for different review weights. }
+    \label{fig:paper-review-weight}
+    \includegraphics[width=0.92\textwidth]{figures/aaai-2024-paper-rate-section.pdf}
+    \caption{The distribution of \textsc{AAE+CGR} scores for PAPERS\ for different review sections.}
+    \label{fig:paper-review-section}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/corll-2024-paper-rate-review-weight.pdf}
+    \caption{The distribution of \textsc{AAE+CGR} scores for PAPERS\ for different review weights for \textsc{CoRLL 2024}.}
+    \label{fig:co-rll-review-weight}
+    \includegraphics[width=0.92\textwidth]{figures/corll-2024-paper-rate-section.pdf}
+    \caption{The distribution of \textsc{AAE+CGR} scores for CORLL\ for different review sections.}
+    \label{fig:co-rll-review-section}
+\end{figure}
+As shown in Figure~\ref{fig:paper-review-weight} and Figure~\ref{fig:paper-review-section}, all of the scores are aggregated to provide a clear picture of the paper in question. These scores can be given to the PAPERS\ paper list (\texttt{PAPERS}), the PAPERS\ camera-ready list (\texttt{CAMERA READERS}), or the PAPERS\ camera-ready list that was accepted after author made a major revision (\texttt{CAMERA READERS(Rejected+Major)} and \texttt{CAMERA READERS(Rejected-Major)}).
+
+These scores, rather than being an indication of absolute quality, are intended to provide an indication of how these things change over the different things. For example, we see that the distribution of scores is balanced, as shown in Figure~\ref{fig:corll-review-weight} and Figure~\ref{fig:corll-review-section}, which gives a higher weight to the later sections of the paper. In Figure~\ref{fig:paper-review-section}, we also see a balance between the sections of the paper, which makes each of them the same score.
+
+
+
+\section{Limitations}
+
+\label{sec:limitations}
+There are many other experiments that we want to explore in the future. One major limitation of our work is that there were things we wanted to do but for which we did not have the resources to build during the conference. For example, we did not try to address the limited availability of reviewers as an argument against our system. There are many ways to improve the limited availability of reviewers across conferences and conferences. These things can easily be extended to improve the limited availability of reviewers. 
+
+In addition, as the experimental design was limited due to time constraints and the need for financial resources, there are many other things that we would like to analyze. For example, we would like to analyze the impact on the paper score of allowing reviewers to see the author name, versus not allowing reviewers to see this information. In the future, we would to conduct experiments to explore these things. 
+
+
+\section{Related Work}
+
+\paragraph{Challenges of Peer Review}
+Peer review in AI conferences has been a target of much debate~\citep{shah2022challenges,freyne2010relative,kim2019author}, and past experiments have tried to address its many challenges~\citep{beygelzimer2023has,cortes2021inconsistency}. Overall, peer review in AI conferences faces a number of challenges~\citep{beygelzimer2023has}: (1) the review process is arbitrary and leads to unexplained differences across papers~\citep{beygelzimer2023has,cortes2021inconsistency}, (2) there are not enough reviewers and results in the reviews not being of high quality~\citep{tran2020open}, (3) the existing peer review process is time-consuming for both reviewers and authors~\citep{stelmakh2021novice}, (4) there is a risk of abuse by reviewers~\citep{russo2021some,nicholson2016brief} and authors~\citep{wu2021making,jecmen2024detection}, and (5) there is a risk of introducing discrimination against authors based on their race, gender, and geographic location~\cite{hargittai2020potential}.
+\paragraph{Electronic Peer Review}
+The electronic peer review was first proposed in the early 2000s~\citep{bornmann2007we,facey2017educational,gibson2015digital,warne2016rewarding} and later adopted in the ACL conferences~\citep{nicholson2016brief,tran2020open}. The OpenReview platform~\citep{tran2020open} has been adopted in many AI conferences, including NeurIPS and ICML. 
+\paragraph{Enhancing Peer Review with AI} 
+Past research has shown that AI can be used to address many of the shortcomings of the peer review process, especially as it relates to reviewing efficiency~\citep{rogers2020can, liu2023reviewergpt}. The \textit{OpenReview} platform has also discussed the need to address the arbitrariness of the peer review process using AI~\cite{tran2020open}. There are many possible ways to incorporate AI into the peer review process~\cite{checco2021ai, kuznetsov2024can}: (1) the review process can be used to assign reviewers to papers~\cite{zhang2022system,mimno2007expertise}, (2) AI can be used to perform the peer review and write the paper~\cite{lu2024ai}, or (3) the review process can be used to assign papers to reviewers~\citep{stelmakh2021novice}. 
+\paragraph{Author-Assisted Evaluation}
+The Author-Assisted Evaluation (AAE)~\citep{su2021you,wu2023isotonic} has been proposed to
+improve the review process. It asks the author to evaluate their own paper as part of the review process, allowing reviewers to better evaluate papers by providing a signal about an author’s opinion of their own work~\citep{centeno2015inaccuracy}. In the NeurIPS 2023 conferences, this signal was used to assess whether author reviews were arbitrary~\citep{beygelzimer2023has} and to address the arbitrary nature of author reviews~\citep{cortes2021inconsistency}. However, there has been little work on incorporating it into an overall approach that improves the quality of paper reviews. 
+
+\paragraph{Replacing Reviews with Rules} 
+Some recent works have explored the idea of replacing reviews with rules~\citep{liu2023reviewergpt, xuneurips}. They suggest that since LLMs have been shown to be effective at evaluating paper quality, they can be used to perform the review process. However, they do not consider the potential for subjectivity in reviews and how to mitigate it~\cite{liu2023reviewergpt, xuneurips}. Our work is the first to consider the potential for subjectivity in LLM reviews and propose mechanisms that mitigate this bias.
+\paragraph{Usability of Author Reviews} 
+Past literature has explored the usability of author reviews~\citep{beygelzimer2023has,cortes2021inconsistency}. In particular, they analyzed the consistency of authors who were given the opportunity to address reviewer comments during the revision process. However, there has been little work on incorporating them into an improved paper review process. 
+
+
+
+\section{Conclusion}
+
+\label{sec:conclusion}
+We have presented a system that incorporates author-assisted evaluation into the review process, and have shown that there is evidence that our system outperforms rule-based systems that do not consider author opinions or community guidance. In particular, the reviewers thought our system's reviews were better, on average, than single-LLM-based reviews across multiple metrics: ``Reproducibility and Quality'' (by 0.427 $\pm$ 0.007), ``Review Quality'' (by 0.265 $\pm 0.09$), and ``Alignment between opinion and paper score'' (by 0.503 $\pm 0.090$). In addition, we find evidence that reviews from single-LLM-based processes are more likely to be rejected than our system's reviews across different conferences. We have also found evidence that the reviewer scores correlate with the PC and the owner's scores, even in cases where different reviewers have different opinions. In particular, the reviewer scores are slightly higher for the owner's scores, and the author's scores, which is expected. This implies that the owner's score may be biased, and should not be considered as the gold standard score for the quality of the paper. 
+

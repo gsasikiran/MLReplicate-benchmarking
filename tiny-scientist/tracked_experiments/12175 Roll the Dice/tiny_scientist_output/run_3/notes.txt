@@ -1,0 +1,8 @@
+{
+    "experiment_description": "Run 2: Evaluated model entropy and novelty with altered architecture and training parameters.",
+    "run_number": 2,
+    "metrics": {
+        "avg_entropy": -Infinity,
+        "avg_novelty": 0.22790690690690685
+    }
+}

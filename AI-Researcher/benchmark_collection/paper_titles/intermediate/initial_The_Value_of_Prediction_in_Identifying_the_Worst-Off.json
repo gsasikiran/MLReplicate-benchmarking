@@ -1,0 +1,21 @@
+{
+  "keyword": "The Value of Prediction in Identifying the Worst-Off",
+  "timestamp": "2025-10-21T16:30:34.798342",
+  "papers": [
+    {
+      "title": "The Value of Prediction in Identifying the Worst-Off",
+      "authors": [
+        "Unai Fischer-Abaigar",
+        "Christoph Kern",
+        "Juan Carlos Perdomo"
+      ],
+      "year": 2025,
+      "url": "http://arxiv.org/abs/2501.19334v3",
+      "abstract": "Machine learning is increasingly used in government programs to identify and\nsupport the most vulnerable individuals, prioritizing assistance for those at\ngreatest risk over optimizing aggregate outcomes. This paper examines the\nwelfare impacts of prediction in equity-driven contexts, and how they compare\nto other policy levers, such as expanding bureaucratic capacity. Through\nmathematical models and a real-world case study on long-term unemployment\namongst German residents, we develop a comprehensive understanding of the\nrelative effectiveness of prediction in surfacing the worst-off. Our findings\nprovide clear analytical frameworks and practical, data-driven tools that\nempower policymakers to make principled decisions when designing these systems.",
+      "venue": "Journal of Applied Philosophy",
+      "venue_source": "Crossref",
+      "venue_lookup_time": "2025-10-21T16:30:31.164935",
+      "citations": 0
+    }
+  ]
+}

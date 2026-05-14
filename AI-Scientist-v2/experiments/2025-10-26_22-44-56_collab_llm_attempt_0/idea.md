@@ -1,0 +1,42 @@
+## Name
+
+collab_llm
+
+## Title
+
+COLLAB LLM: Transforming Large Language Models into Active Collaborators in Multi-Turn Interactions
+
+## Short Hypothesis
+
+By employing a collaborative simulation and Multiturn-aware Rewards (MR), LLMs can be trained to transition from passive responders to active collaborators, significantly enhancing user experience in multi-turn interactions.
+
+## Related Work
+
+Current literature primarily focuses on LLMs' capabilities in single-turn tasks or basic multi-agent collaboration without addressing the unique challenges of sustained multi-turn interactions. This proposal distinguishes itself by introducing a collaborative simulation framework to optimize LLM responses based on long-term user intent, an area that remains underexplored.
+
+## Abstract
+
+Large Language Models (LLMs) typically operate as passive responders, limiting their effectiveness in multi-turn interactions where users have complex, evolving intents. This research introduces COLLAB LLM, a novel training framework that leverages a collaborative simulation to estimate the long-term impact of responses through Multiturn-aware Rewards (MR). By applying reinforcement learning with these rewards, COLLAB LLM encourages active intent discovery and insightful suggestions from the model, thereby transforming the nature of user-LLM interactions. We propose a multiturn interaction benchmark that includes three challenging tasks, such as collaborative document creation. Preliminary results indicate that COLLAB LLM outperforms traditional models with an average of 18.5% higher task performance and 46.3% improved interactivity, as rated by LLM judges. Furthermore, a large user study with 201 participants revealed an increase in user satisfaction by 17.6% and a reduction in time spent by 10.4%. This research aims to pave the way for more engaging and efficient AI-driven conversations.
+
+## Experiments
+
+- 1. Develop a collaborative simulation environment where users can interact with the LLM over multiple turns, tracking user intent across conversations.
+- 2. Implement Multiturn-aware Rewards (MR) based on the estimated long-term impact of responses, adjusting the LLM's training process to incorporate these rewards.
+- 3. Evaluate COLLAB LLM against baseline models using three multiturn tasks, measuring task performance, user satisfaction, and conversation efficiency.
+- 4. Conduct user studies to assess the qualitative aspects of interactions, gathering feedback on perceived collaboration and engagement.
+
+## Risk Factors And Limitations
+
+- 1. Potential for increased computational overhead due to the collaborative simulation and reward estimation process.
+- 2. Challenges in accurately modeling user intent and preferences in a dynamic conversation.
+- 3. The need for a diverse dataset to train and validate the proposed framework effectively.
+
+## Code To Potentially Use
+
+Use the following code as context for your experiments:
+
+```python
+# Auto-generated Python file for idea
+
+```
+

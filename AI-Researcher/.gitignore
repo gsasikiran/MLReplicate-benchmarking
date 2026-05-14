@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+
+# Virtual environments
+env/
+venv/
+.venv/
+ENV/
+ai_researcher_v2/
+
+# Results, logs, tmp - keep folders but not contents
+logs/*
+!logs/.gitkeep
+tmp/*
+!tmp/.gitkeep
+
+results/*/research/
+
+# Metrics - exclude all metrics folders and JSON files
+metrics/
+**/metrics/
+*_metrics.json
+
+# Exclude generated benchmark results, but keep the benchmark scripts
+benchmark/process/dataset_candidate/**/evaluation_results/
+
+# Examples folder
+examples/
+
+# Data files
+*.csv
+*.tar.gz
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# Environment files
+.env
+.env.local
+
+# Singularity images
+*.sif
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+slurm-*.out
+logs/
+results/

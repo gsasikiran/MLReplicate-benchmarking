@@ -1,0 +1,1 @@
+This diagram illustrates the pipeline architecture of the Masked Diffusion Models, highlighting the optimization framework for training and the adaptive learning mechanism for inference.

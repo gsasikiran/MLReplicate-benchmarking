@@ -1,0 +1,28 @@
+Experiment Run 1:
+Model: GRU based classifier
+Dataset: Subsampled IMDB (5000 train, 2000 test)
+Preprocessing: TF-IDF with max features = 512
+Results: {'accuracy': 1.0, 'f1_score': 1.0}
+No changes required, as accuracy and F1 score are perfect.
+Plot Descriptions:
+1. Filename: 'confusion_matrix_run1.png'
+   Description: This plot shows the confusion matrix for Experiment Run 1, illustrating the perfect classification results. All positive and negative samples are correctly classified, resulting in no false positives or false negatives.
+2. Filename: 'roc_curve_run1.png'
+   Description: The Receiver Operating Characteristic (ROC) curve for Experiment Run 1, depicting the model's ability to distinguish between classes. The curve reaches the top-left corner, indicating perfect sensitivity and specificity.
+3. Filename: 'loss_accuracy_run1.png'
+   Description: This plot presents the training and validation loss and accuracy over epochs for Experiment Run 1. Both loss and accuracy curves show rapid convergence, reflecting the model's excellent performance on the dataset.
+
+==================================================
+Experiment Run 2:
+Model: GRU based classifier
+Dataset: Subsampled IMDB (5000 train, 2000 test)
+Preprocessing: TF-IDF with max features = 512
+Results: {'accuracy': 1.0, 'f1_score': 1.0}
+No changes required, as accuracy and F1 score are perfect.
+Plot Descriptions:
+1. Filename: 'confusion_matrix_run2.png'
+   Description: The confusion matrix for Experiment Run 2 shows perfect classification with all instances correctly predicted. There are no misclassifications, indicating robust model performance.
+2. Filename: 'roc_curve_run2.png'
+   Description: The ROC curve for Experiment Run 2 demonstrates the model's ability to perfectly differentiate between positive and negative classes, with the curve reaching the upper-left corner, indicative of the perfect model performance.
+3. Filename: 'loss_accuracy_run2.png'
+   Description: This plot illustrates the training and validation loss and accuracy across epochs for Experiment Run 2. The stability in accuracy and decrease in loss further confirm the model's effective learning and high performance.

@@ -1,0 +1,57 @@
+{
+  "config": {
+    "intent": "The main research goal is to develop a Bayesian quadrature-based alternative to conformal prediction that provides interpretable guarantees and a richer representation of expected test-time losses. The main research question is how to overcome the limitations of frequentist probability in distribution-free uncertainty quantification methods for machine learning predictions in high-stakes settings.",
+    "model": "gpt-4o",
+    "budget": 10.0,
+    "timestamp": "20251026_225909",
+    "output_dir": "tracked_experiments/20251026_225909_The_main_research_goal_is_to_develop_a_Bayesian_qu"
+  },
+  "timings": {
+    "total_seconds": 2772.963500022888,
+    "stages": {
+      "think": 218.1219606399536,
+      "code": 520.6166725158691,
+      "write": 1988.674013376236
+    }
+  },
+  "costs": {
+    "final_total": 1.2233,
+    "module_costs": {
+      "Safety Checker": 0.0052,
+      "Thinker": 0.1356,
+      "Coder": 0.1671,
+      "Writer": 0.9154,
+      "Reviewer": 0.0
+    },
+    "scientist_total": 1.2233,
+    "drawer_cost": 0.0
+  },
+  "resources": {
+    "duration_seconds": 2766.921406030655,
+    "num_samples": 459,
+    "cpu": {
+      "avg": 0.21307189542483637,
+      "max": 6.5,
+      "min": 0.0
+    },
+    "memory": {
+      "avg": 8.999128540305012,
+      "max": 9.3,
+      "min": 8.9
+    },
+    "gpu": {
+      "avg_load": 0.017429193899782137,
+      "max_load": 8.0,
+      "min_load": 0.0,
+      "avg_memory_percent": 0.019414232706971762,
+      "max_memory_percent": 1.4567057291666665
+    }
+  },
+  "outputs": {
+    "idea": "tracked_experiments/20251026_225909_The_main_research_goal_is_to_develop_a_Bayesian_qu/research_idea.json",
+    "github_search": null,
+    "experiments": "tracked_experiments/20251026_225909_The_main_research_goal_is_to_develop_a_Bayesian_qu/tiny_scientist_output",
+    "diagrams": "tracked_experiments/20251026_225909_The_main_research_goal_is_to_develop_a_Bayesian_qu/tiny_scientist_output/method_diagram.svg",
+    "terminal_log": "tracked_experiments/20251026_225909_The_main_research_goal_is_to_develop_a_Bayesian_qu/terminal_output.log"
+  }
+}

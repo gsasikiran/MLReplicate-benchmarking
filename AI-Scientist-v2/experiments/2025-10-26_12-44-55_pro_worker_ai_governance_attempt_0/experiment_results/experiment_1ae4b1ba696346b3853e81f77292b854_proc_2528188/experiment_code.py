@@ -1,0 +1,169 @@
+import os
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+from sklearn.model_selection import train_test_split
+
+# Create working directory
+working_dir = os.path.join(os.getcwd(), "working")
+os.makedirs(working_dir, exist_ok=True)
+
+# Set device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
+# Create synthetic dataset
+np.random.seed(42)
+data_size = 1000
+job_displacement = np.random.uniform(0, 1, data_size)
+wage_change = np.random.uniform(-1, 1, data_size)
+retraining_access = np.random.uniform(0, 1, data_size)
+WIS = 0.3 * job_displacement + 0.5 * (1 - wage_change) + 0.2 * retraining_access
+
+X = np.column_stack((job_displacement, wage_change, retraining_access))
+y = WIS
+
+# Train/test split
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+# Dataset class
+class WorkerDataset(Dataset):
+    def __init__(self, features, targets):
+        self.features = torch.tensor(features, dtype=torch.float32)
+        self.targets = torch.tensor(targets, dtype=torch.float32)
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, idx):
+        return self.features[idx], self.targets[idx]
+
+
+# Create DataLoader
+def create_data_loaders(X_train, y_train, X_val, y_val):
+    train_dataset = WorkerDataset(X_train, y_train)
+    val_dataset = WorkerDataset(X_val, y_val)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=32)
+    return train_loader, val_loader
+
+
+# Define the model
+class SimpleNN(nn.Module):
+    def __init__(self):
+        super(SimpleNN, self).__init__()
+        self.fc1 = nn.Linear(3, 10)
+        self.fc2 = nn.Linear(10, 1)
+
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+
+# Prepare experiment data storage
+experiment_data = {
+    "data_noise_impact": {
+        "no_noise": {
+            "metrics": {"train": [], "val": []},
+            "losses": {"train": [], "val": []},
+            "predictions": [],
+            "ground_truth": [],
+        },
+        "low_noise": {
+            "metrics": {"train": [], "val": []},
+            "losses": {"train": [], "val": []},
+            "predictions": [],
+            "ground_truth": [],
+        },
+        "medium_noise": {
+            "metrics": {"train": [], "val": []},
+            "losses": {"train": [], "val": []},
+            "predictions": [],
+            "ground_truth": [],
+        },
+        "high_noise": {
+            "metrics": {"train": [], "val": []},
+            "losses": {"train": [], "val": []},
+            "predictions": [],
+            "ground_truth": [],
+        },
+    }
+}
+
+num_epochs = 50
+noise_levels = [0, 0.1, 0.3, 0.5]  # No noise, low, medium, high
+
+for noise_index, noise in enumerate(noise_levels):
+    noise_type = ["no_noise", "low_noise", "medium_noise", "high_noise"][noise_index]
+
+    # Add Gaussian noise
+    noise_array = np.random.normal(0, noise, X_train.shape)
+    noisy_X_train = X_train + noise_array
+
+    # Create DataLoader
+    train_loader, val_loader = create_data_loaders(noisy_X_train, y_train, X_val, y_val)
+
+    for lr in [0.001, 0.01, 0.0001]:  # Different learning rates
+        model = SimpleNN().to(device)
+        criterion = nn.MSELoss()
+        optimizer = optim.Adam(model.parameters(), lr=lr)
+
+        print(f"Training with learning rate: {lr} and noise type: {noise_type}")
+        for epoch in range(num_epochs):
+            model.train()
+            train_loss = 0
+            for batch in train_loader:
+                features, targets = batch
+                features, targets = features.to(device), targets.to(device)
+
+                optimizer.zero_grad()
+                outputs = model(features)
+                loss = criterion(outputs.squeeze(), targets)
+                loss.backward()
+                optimizer.step()
+                train_loss += loss.item()
+
+            train_loss /= len(train_loader)
+            experiment_data["data_noise_impact"][noise_type]["losses"]["train"].append(
+                train_loss
+            )
+
+            # Validation
+            model.eval()
+            val_loss = 0
+            with torch.no_grad():
+                for batch in val_loader:
+                    features, targets = batch
+                    features, targets = features.to(device), targets.to(device)
+
+                    outputs = model(features)
+                    loss = criterion(outputs.squeeze(), targets)
+                    val_loss += loss.item()
+                    experiment_data["data_noise_impact"][noise_type][
+                        "predictions"
+                    ].extend(outputs.squeeze().cpu().numpy())
+                    experiment_data["data_noise_impact"][noise_type][
+                        "ground_truth"
+                    ].extend(targets.cpu().numpy())
+
+            val_loss /= len(val_loader)
+            experiment_data["data_noise_impact"][noise_type]["losses"]["val"].append(
+                val_loss
+            )
+
+            # Calculate Worker Impact Score (WIS)
+            WIS = 1 - val_loss  # Placeholder for systematic calculation
+            experiment_data["data_noise_impact"][noise_type]["metrics"]["val"].append(
+                WIS
+            )
+
+            print(
+                f"Noise Type = {noise_type}, Learning Rate = {lr}, Epoch {epoch + 1}: training_loss = {train_loss:.4f}, validation_loss = {val_loss:.4f}, WIS = {WIS:.4f}"
+            )
+
+# Save experiment data
+np.save(os.path.join(working_dir, "experiment_data.npy"), experiment_data)
