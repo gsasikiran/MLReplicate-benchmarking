@@ -87,7 +87,7 @@ You should complete the workflow graph in the following way:
     return json.loads(response.choices[0].message.content)
 if __name__ == '__main__':
     import os
-    os.environ['OPENAI_API_KEY'] = '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'
+    os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
     with open('/Users/tangjiabin/Documents/reasoning/metachain/chaingraph/common_ragflow-2024.json', 'r') as f:
         fschema = json.load(f)
     graph_dict = transfer_fschema_to_dict(fschema)
